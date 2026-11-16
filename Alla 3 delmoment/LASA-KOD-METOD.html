@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Läsa kod - metoden</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,sans-serif;padding:24px 16px 70px}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.55rem;margin:0 0 4px}
+h1 span{color:var(--green)}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 22px}
+h2{font-size:1.05rem;margin:26px 0 8px;color:var(--blue)}
+h3{font-size:.9rem;margin:16px 0 6px;color:var(--yellow);text-transform:uppercase;letter-spacing:.6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 16px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 4px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--card2);color:var(--muted);font-size:.72rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+pre{background:#11141a;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;color:#d5dae6}
+.ln{background:#2b2438;color:var(--purple)}
+blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--green);background:#162019;border-radius:0 8px 8px 0}
+ul,ol{margin:8px 0 2px;padding-left:22px}
+li{margin:5px 0}
+details{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:7px 0}
+summary{cursor:pointer}
+details p{margin:8px 0 2px;color:#cfd6e2}
+.small{color:var(--muted);font-size:.85rem}
+.big{font-size:1.05rem;font-weight:600;color:var(--text)}
+footer{margin-top:28px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{body{background:#fff;color:#111}.card,details,table,pre{background:#fff;border-color:#bbb;color:#111}h2,h3{color:#111}code{background:#eee;color:#000}.ln{background:#eee}.sub,footer,.small{color:#444}details{page-break-inside:avoid}}
+</style></head><body><main>
+
+<h1>Läsa kod – <span>metoden</span></h1>
+<p class="sub">Du behöver inte minnas rader. Du behöver en rutin som fungerar på vilken rad som helst, även sådana du aldrig sett.</p>
+
+<div class="card">
+<h3>Hemligheten</h3>
+<p class="big">Kod består av återkommande mönster (idiom) – inte unika rader.</p>
+<p>Det finns ungefär 20 mönster i dina appar. Lär du dig dem kan du läsa vilken rad som helst: du känner igen <code>INSERT INTO</code>, <code>prepare</code>, <code>AddWithValue</code>, <code>foreach</code>, <code>RedirectToAction</code> osv. Läraren pekar på koden – du läser den på plats, du minns den inte.</p>
+</div>
+
+<h2>1. Fyra frågor på varje rad (10 sekunder)</h2>
+<div class="card">
+<ol>
+<li><b>Typ:</b> Vad är det? (läser SQL, skriver SQL, anslutning, loop, villkor, länk, vy)</li>
+<li><b>Mål:</b> Vilken tabell/klass/variabel rör den?</li>
+<li><b>Data:</b> Vad kommer in och vad går ut? (parametrar, retur, ViewBag, HTML)</li>
+<li><b>Flöde:</b> Var i kedjan är vi? (formulär → controller → modell → databas → vy)</li>
+</ol>
+<blockquote>Säg högt: "Det här är en <b>[typ]</b> som <b>[gör X]</b> mot <b>[tabell/objekt]</b> med <b>[värde]</b>. Den ligger i <b>[flöde]</b> och resultatet <b>[sparas/returneras/visas]</b>."</blockquote>
+<p class="small">Exempel: <i>"Det här är en parameterbindning som kopplar värdet %Erik% till @NAME i sökfrågan. Den ligger i sökflödet och gör att namnet behandlas som data, inte som SQL."</i></p>
+</div>
+
+<h2>2. Läs en metod i den här ordningen</h2>
+<div class="card">
+<ol>
+<li><b>Signatur:</b> Vad heter metoden, vad tar den emot, vad returnerar den?</li>
+<li><b>Första raden:</b> anslutning/objekt (Connection, PDO, DataAdapter).</li>
+<li><b>Nyckeloperationen:</b> SELECT/INSERT/UPDATE/DELETE/CALL eller Fill/ExecuteNonQuery.</li>
+<li><b>Retur/output:</b> DataTable, ViewBag, RedirectToAction, echo.</li>
+</ol>
+<p>Hoppa över resten till du har skelettet. Då vet du vad metoden gör innan du läser detaljerna.</p>
+</div>
+
+<h2>3. Idiom-ordboken</h2>
+<div class="card">
+<h3>SQL</h3>
+<table>
+<tr><th>Mönster</th><th>Betyder</th></tr>
+<tr><td><code>SELECT ... FROM ... JOIN ... WHERE</code></td><td>läser och filtrerar</td></tr>
+<tr><td><code>INSERT INTO ... VALUES</code></td><td>skriver ny rad</td></tr>
+<tr><td><code>UPDATE ... SET ... WHERE</code></td><td>ändrar rad</td></tr>
+<tr><td><code>DELETE FROM ... WHERE</code></td><td>tar bort rad</td></tr>
+<tr><td><code>CALL procedur(?)</code></td><td>kör lagrad procedur</td></tr>
+<tr><td><code>NEW.fält</code> (trigger)</td><td>värdet i den nya raden – inte en fråga</td></tr>
+</table>
+
+<h3>PDO (PHP)</h3>
+<table>
+<tr><th>Mönster</th><th>Betyder</th></tr>
+<tr><td><code>new PDO(...)</code></td><td>öppnar anslutning</td></tr>
+<tr><td><code>prepare("... ?")</code></td><td>skickar SQL-mall med platshållare</td></tr>
+<tr><td><code>bindValue(1, $v)</code></td><td>binder värde till första ?</td></tr>
+<tr><td><code>execute()</code> / <code>execute([...])</code></td><td>kör, eventuellt med alla värden</td></tr>
+<tr><td><code>query(...)</code> + <code>foreach</code></td><td>kör SELECT och loopar rader</td></tr>
+<tr><td><code>fetch(...)</code></td><td>hämtar en rad</td></tr>
+<tr><td><code>closeCursor()</code></td><td>stänger resultatet efter CALL</td></tr>
+</table>
+
+<h3>ADO.NET (C#)</h3>
+<table>
+<tr><th>Mönster</th><th>Betyder</th></tr>
+<tr><td><code>new MySqlConnection(cs)</code> + <code>Open()</code></td><td>öppnar anslutning</td></tr>
+<tr><td><code>using var ...</code></td><td>stänger automatiskt när blocket tar slut</td></tr>
+<tr><td><code>new MySqlCommand(sql, con)</code></td><td>skapar kommando</td></tr>
+<tr><td><code>Parameters.AddWithValue("@X", v)</code></td><td>binder värde</td></tr>
+<tr><td><code>ExecuteNonQuery()</code></td><td>kör INSERT/UPDATE/DELETE</td></tr>
+<tr><td><code>new MySqlDataAdapter(sql, con)</code></td><td>läs-adapter för SELECT</td></tr>
+<tr><td><code>Fill(ds, "namn")</code></td><td>kör SELECT och fyller DataSet</td></tr>
+<tr><td><code>ds.Tables["namn"]</code></td><td>hämtar resultatet</td></tr>
+</table>
+
+<h3>MVC / Razor</h3>
+<table>
+<tr><th>Mönster</th><th>Betyder</th></tr>
+<tr><td><code>@</code></td><td>byter till C# i vyn</td></tr>
+<tr><td><code>ViewBag.X</code></td><td>data från controller</td></tr>
+<tr><td><code>@foreach ... Rows</code></td><td>loopar resultatrader</td></tr>
+<tr><td><code>@Url.Action / @Html.ActionLink</code></td><td>bygger URL/länk</td></tr>
+<tr><td><code>&lt;form action=...&gt;</code></td><td>postar till en action</td></tr>
+<tr><td><code>return View()</code></td><td>renderar vy direkt</td></tr>
+<tr><td><code>RedirectToAction("Index")</code></td><td>ny request (Post-Redirect-Get)</td></tr>
+</table>
+
+<h3>PHP-sidan</h3>
+<table>
+<tr><th>Mönster</th><th>Betyder</th></tr>
+<tr><td><code>$_POST[...]</code> / <code>$_GET[...]</code></td><td>formulärdata</td></tr>
+<tr><td><code>isset(...)</code></td><td>har formuläret skickats?</td></tr>
+<tr><td><code>echo</code></td><td>skriver HTML</td></tr>
+<tr><td><code>foreach ($pdo-&gt;query(...) as $row)</code></td><td>loopar resultat</td></tr>
+<tr><td><code>explode("|", ...)</code></td><td>delar sträng i delar</td></tr>
+<tr><td><code>ctype_digit / is_numeric</code></td><td>validerar tal</td></tr>
+<tr><td><code>try/catch (PDOException)</code></td><td>felhantering</td></tr>
+</table>
+</div>
+
+<h2>4. Peka-och-förklara: 15 drillrader</h2>
+<div class="card">
+<p class="small">Täck svaret, läs raden, säg det högt. 15 sekunder per rad.</p>
+<details><summary><code>$pdo = new PDO('mysql:host=mysql;...', 'dbkonstruktion', '<REDACTED>');</code></summary><p>Öppnar en PDO-anslutning till MySQL-databasen a25milha. Nästa rad sätter felmode till exception.</p></details>
+<details><summary><code>$sql = "SELECT PersonId, Namn, Kodnamn FROM Person WHERE Namn LIKE ?";</code></summary><p>SQL-mall som läser personer där namnet matchar; ? är platshållaren som binds senare.</p></details>
+<details><summary><code>$stmt-&gt;bindValue(1, "%" . $soknamn . "%");</code></summary><p>Binder sökordet till första ? med % runt om, så det blir en delmatchning.</p></details>
+<details><summary><code>foreach ($pdo-&gt;query($sql) as $row)</code></summary><p>Kör SELECT och loopar varje rad i resultatet.</p></details>
+<details><summary><code>$ark = $pdo-&gt;prepare("CALL ARKIVERAOBSERVATION(?)");</code></summary><p>Förbereder anrop av lagrad procedur med ett parameteriserat ObsId.</p></details>
+<details><summary><code>using var dbcon = new MySqlConnection(_connectionString);</code></summary><p>Skapar en anslutning; using stänger den automatiskt när metoden tar slut.</p></details>
+<details><summary><code>adapter.Fill(ds, "result");</code></summary><p>Kör adapterns SELECT och fyller DataSet-tabellen "result".</p></details>
+<details><summary><code>sqlCmd.ExecuteNonQuery();</code></summary><p>Kör INSERT/UPDATE/DELETE; returen är antal drabbade rader.</p></details>
+<details><summary><code>adapter.SelectCommand.Parameters.AddWithValue("@NAME", "%" + name + "%");</code></summary><p>Binder sökordet till parametern @NAME på adapterns SELECT-kommando.</p></details>
+<details><summary><code>@foreach (var row in ViewBag.AllPlats.Rows)</code></summary><p>Loopar platsraderna som controllern lagt i ViewBag och bygger option-element.</p></details>
+<details><summary><code>@Html.ActionLink("Arkivera", "ArkiveraObservation", "Observation", new { obsid = ... }, null)</code></summary><p>Skapar en GET-länk till actionen med just den radens ObsId.</p></details>
+<details><summary><code>return RedirectToAction("Index");</code></summary><p>Skickar en ny request till Index så listan laddas om (Post-Redirect-Get).</p></details>
+<details><summary><code>NEW.ObsId</code></summary><p>Värdet på ObsId i den nya raden i en trigger; det är ingen SELECT.</p></details>
+<details><summary><code>if (prev != obsRow["IncidentId"].ToString())</code></summary><p>Kontrollerar om incidenten bytts; då skrivs en ny yttre rad i nästlade tabellen.</p></details>
+<details><summary><code>$prevObs = $row['ObsId'];</code></summary><p>Sparar aktuellt ObsId så nästa varv kan upptäcka när observationen byts.</p></details>
+</div>
+
+<h2>5. Hitta snabbt när läraren säger "visa X"</h2>
+<div class="card">
+<ul>
+<li><b>Tänk alltid:</b> vy → controller → modell → SQL. Formuläret ligger i vyn, mottagandet i controllern, SQL i modellen.</li>
+<li><b>Sök på metodnamn, inte rad:</b> Ctrl+F <code>SearchPersons</code>, <code>InsertObservation</code>, <code>UpdateSakerhet</code>, <code>ArkiveraObservation</code>.</li>
+<li><b>Databasen:</b> Ctrl+F <code>CREATE TABLE</code>, <code>CREATE TRIGGER</code>, <code>CREATE PROCEDURE</code>.</li>
+<li><b>PHP:</b> Ctrl+F <code>registrera</code>, <code>arkivera</code>, <code>uppdatera</code>, <code>soknamn</code>.</li>
+<li><b>Vyn:</b> Ctrl+F <code>&lt;table</code>, <code>&lt;form</code>, <code>foreach</code>.</li>
+</ul>
+</div>
+
+<h2>6. Daglig rutin (20 min)</h2>
+<div class="card">
+<ol>
+<li><b>5 min:</b> 10 slumpade rader från din kod – kör fyra frågorna på varje.</li>
+<li><b>10 min:</b> välj ett element i appen och rita hela kedjan på papper: vy → controller → modell → SQL → svar.</li>
+<li><b>5 min:</b> förklara en metod högt utan att titta, kontrollera sedan.</li>
+</ol>
+<p><b>Progression:</b> vecka 1 idiom → vecka 2 ett flöde per dag → vecka 3 blandade rader + peka-i-git → vecka 4–6 mock-redovisningar med slumpade frågor.</p>
+<p class="small">Regel: säg vad raden <b>är</b> först ("det här är en INSERT..."), då köper du tid och visar metod även om detaljen är svår.</p>
+</div>
+
+<footer>Metoden fungerar på kod du aldrig sett – det är poängen. Träna 20 min/dag fram till december, hellre ofta än länge.</footer>
+</main></body></html>

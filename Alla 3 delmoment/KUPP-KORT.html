@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Kupp-kort Muntlig Redovisning IT429G</title>
+<style>
+  body { font-family: Consolas, 'Courier New', monospace; max-width: 1000px; margin: 20px auto; padding: 20px; background: #1e1e1e; color: #d4d4d4; line-height: 1.5; }
+  h1 { color: #4ec9b0; border-bottom: 2px solid #4ec9b0; padding-bottom: 10px; }
+  h2 { color: #569cd6; margin-top: 30px; border-bottom: 1px solid #3c3c3c; padding-bottom: 5px; }
+  h3 { color: #dcdcaa; margin-top: 20px; }
+  .section { background: #252526; padding: 15px; margin: 15px 0; border-radius: 4px; border-left: 4px solid #4ec9b0; }
+  .file { color: #9cdcfe; font-weight: bold; }
+  .line { color: #b5cea8; }
+  .desc { color: #d4d4d4; }
+  .highlight { background: #3a3d41; padding: 2px 6px; border-radius: 3px; color: #ce9178; }
+  .sql { color: #d69d85; }
+  .comment { color: #6a9955; font-style: italic; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+  th, td { padding: 8px 12px; border: 1px solid #3c3c3c; text-align: left; vertical-align: top; }
+  th { background: #2d2d2d; color: #4ec9b0; }
+  tr:nth-child(even) { background: #252526; }
+  tr:hover { background: #2a2d2e; }
+  .col-file { width: 30%; color: #9cdcfe; }
+  .col-line { width: 10%; color: #b5cea8; text-align: center; }
+  .col-desc { width: 60%; }
+  .chain-row { background: #1e2a2e; }
+  .chain-row td { border-color: #3c4c3c; }
+  .tip { background: #2d2d2d; border-left: 4px solid #dcdcaa; padding: 15px; margin: 20px 0; }
+  .tip strong { color: #dcdcaa; }
+  a { color: #569cd6; }
+  code { background: #3a3d41; padding: 2px 6px; border-radius: 3px; color: #ce9178; }
+  .badge { display: inline-block; background: #4ec9b0; color: #1e1e1e; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-right: 8px; }
+</style>
+</head>
+<body>
+
+<h1>Kupp-kort Muntlig Redovisning — IT429G HT26</h1>
+
+<div class="section">
+<h2>1. DATABASE <span class="file">database.sql</span></h2>
+
+<h3>LOGISK DESIGN</h3>
+<table>
+<tr><th>Krav</th><th class="col-line">Rad</th><th>Vad den gör</th></tr>
+<tr><td>Relationer (10 tabeller)</td><td class="col-line">9–107</td><td>Agent, AgentKommentar, Handlaggare, Plats, GradBeskrivning, Observation, ARKIVERADObservation, Person, Rapporterat, ObservationLog — PK/FK korrekta</td></tr>
+<tr><td>Datyper</td><td class="col-line">9–107</td><td>CHAR, INTEGER, VARCHAR, DATETIME, DECIMAL(5,2) per kolumn</td></tr>
+<tr><td>Constraints</td><td class="col-line">9–107</td><td>PK, FK, CHECK (lön 12–25k, agentnr 1–99, grad 1–4, säkerhet 1–114), NOT NULL, DEFAULT, UNIQUE</td></tr>
+</table>
+
+<h3>DENORMALISERING</h3>
+<table>
+<tr><th>Typ</th><th class="col-line">Rad</th><th>Vad den gör</th></tr>
+<tr><td>Merge</td><td class="col-line">59</td><td>IncidentNamn i Observation (undviker join)</td></tr>
+<tr><td>Kodifiering</td><td class="col-line">39–50, 56, 60</td><td>PlatsKod → Plats, GradKod → GradBeskrivning (kodtabeller för dropdownar)</td></tr>
+<tr><td>Horisontell</td><td class="col-line">22–29</td><td>AgentKommentar utflyttad (stor textkolumn separat)</td></tr>
+<tr><td>Vertikal</td><td class="col-line">73–92</td><td>ARKIVERADObservation separat tabell för arkiv</td></tr>
+</table>
+
+<h3>INDEXERING (2 st)</h3>
+<table>
+<tr><th>Namn</th><th class="col-line">Rad</th><th>Kolumn / Typ</th></tr>
+<tr><td>OBSDATUM</td><td class="col-line">173–174</td><td>Datum DESC, BTREE</td></tr>
+<tr><td>PERSONNAMN</td><td class="col-line">176–177</td><td>Namn ASC, BTREE</td></tr>
+</table>
+
+<h3>RÄTTIGHETER (11 GRANT)</h3>
+<table>
+<tr><th>Objekt</th><th class="col-line">Rad</th><th>Rättighet</th></tr>
+<tr><td>Databas</td><td class="col-line">187</td><td>EXECUTE</td></tr>
+<tr><td>GradBeskrivning, ARKIVERADObservation, Handlaggare, Plats, Rapporterat, Person, ObservationLog, Agent</td><td class="col-line">189–211</td><td>SELECT</td></tr>
+<tr><td>Observation</td><td class="col-line">214</td><td>SELECT, INSERT, UPDATE, DELETE</td></tr>
+</table>
+
+<h3>TRIGGERS (2)</h3>
+<table>
+<tr><th>Namn</th><th class="col-line">Rad</th><th>Typ / Vad den gör</th></tr>
+<tr><td>LOGGOBSERVATION</td><td class="col-line">221–228</td><td>AFTER INSERT → loggar 'INS', USER(), NEW.ObsId, NOW() till ObservationLog</td></tr>
+<tr><td>CHECKOBSGRAD</td><td class="col-line">231–238</td><td>BEFORE INSERT → SIGNAL om GradKod ej 1–4 (dubbelsäkerhet)</td></tr>
+</table>
+
+<h3>PROCEDURER (2)</h3>
+<table>
+<tr><th>Namn</th><th class="col-line">Rad</th><th>Vad den gör</th></tr>
+<tr><td>GETAVGSAKERHET()</td><td class="col-line">241–248</td><td>SELECT AVG(Sakerhet) FROM Observation</td></tr>
+<tr><td>ARKIVERAOBSERVATION(p)</td><td class="col-line">251–259</td><td>DELETE Rapporterat → INSERT ARKIVERAD → DELETE Observation (atomärt)</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>2. PHP <span class="file">PHPApplikation.php</span></h2>
+<table>
+<tr><th>Krav</th><th class="col-line">Rad</th><th>Vad den gör</th></tr>
+<tr><td>Enkel tabell (Person)</td><td class="col-line">115–156</td><td>Sök på namn + dropdown Kodnamn (inkl "Saknar kodnamn")</td></tr>
+<tr><td>Komplex tabell (Radlayout)</td><td class="col-line">168–214</td><td>Observation + vittnen via Rapporterat+Person, $prevObs skapar inre tabell per ObsId</td></tr>
+<tr><td>Sökning / Dropdown / Länkning</td><td class="col-line">122–137, 221–247</td><td>4 dropdownar: Kodnamn-filter, Grad, Plats, Handlaggare (AgentNamn|AgentNr) + sökfält</td></tr>
+<tr><td>INSERT</td><td class="col-line">48–76, 216–249</td><td>Registrera ny observation, validering, prepared INSERT 9 parametrar</td></tr>
+<tr><td>DELETE (via procedur)</td><td class="col-line">78–94, 251–263</td><td>CALL ARKIVERAOBSERVATION(?), bindValue</td></tr>
+<tr><td>UPDATE</td><td class="col-line">96–111, 265–279</td><td>Uppdatera Sakerhet, prepared UPDATE</td></tr>
+<tr><td>Lagrad procedur i vy</td><td class="col-line">158–166</td><td>CALL GETAVGSAKERHET() visar medelsäkerhet</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>3. .NET MVC</h2>
+
+<h3>CONTROLLERS</h3>
+<table>
+<tr><th>Fil / Metod</th><th class="col-line">Rad</th><th>Syfte</th></tr>
+<tr><td><span class="file">ObservationController.cs</span> Index()</td><td class="col-line">18–24</td><td>Hämtar alla observationer + platser + handläggare → View</td></tr>
+<tr><td><span class="file">ObservationController.cs</span> SearchObservations(plats)</td><td class="col-line">26–30</td><td>Filtrerar observationer per plats</td></tr>
+<tr><td><span class="file">ObservationController.cs</span> InsertObservation(8 params)</td><td class="col-line">32–36</td><td>Modell → redirect Index</td></tr>
+<tr><td><span class="file">ObservationController.cs</span> UpdateSakerhet(obsid, sak)</td><td class="col-line">38–42</td><td>Modell → redirect Index</td></tr>
+<tr><td><span class="file">ObservationController.cs</span> ArkiveraObservation(obsid)</td><td class="col-line">44–48</td><td>Modell (CALL) → redirect Index</td></tr>
+<tr><td><span class="file">PersonController.cs</span> Index()</td><td class="col-line">18–23</td><td>Alla personer + medelsäkerhet</td></tr>
+<tr><td><span class="file">PersonController.cs</span> SearchPersons(name)</td><td class="col-line">25–29</td><td>Sökning på namn</td></tr>
+</table>
+
+<h3>MODELS</h3>
+<table>
+<tr><th>Fil / Metod</th><th class="col-line">Rad</th><th>SQL / Syfte</th></tr>
+<tr><td><span class="file">ObservationModel.cs</span> GetObservationsWithDetails()</td><td class="col-line">17–27</td><td>JOIN Observation, Plats, GradBeskrivning, Agent ORDER BY IncidentId, ObsId</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> GetAllPlats()</td><td class="col-line">29–39</td><td>SELECT * FROM Plats</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> GetAllHandlaggare()</td><td class="col-line">41–51</td><td>JOIN Agent+Handlaggare för dropdownar (sammansatt PK)</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> InsertObservation()</td><td class="col-line">53–69</td><td>INSERT 9 parametrar (NOW() för Datum)</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> UpdateSakerhet()</td><td class="col-line">71–81</td><td>UPDATE Sakerhet WHERE ObsId</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> ArkiveraObservation()</td><td class="col-line">83–91</td><td>CALL ARKIVERAOBSERVATION(@OBSID)</td></tr>
+<tr><td><span class="file">ObservationModel.cs</span> SearchObservationsByPlats()</td><td class="col-line">93–104</td><td>JOIN Obs+Plats WHERE PlatsKod=@PLATSKOD</td></tr>
+<tr><td><span class="file">PersonModel.cs</span> GetAllPersons()</td><td class="col-line">17–27</td><td>SELECT * FROM Person</td></tr>
+<tr><td><span class="file">PersonModel.cs</span> GetAvgSakerhet()</td><td class="col-line">29–39</td><td>CALL GETAVGSAKERHET()</td></tr>
+<tr><td><span class="file">PersonModel.cs</span> SearchPersons(name)</td><td class="col-line">41–52</td><td>WHERE Namn LIKE @NAME (@NAME = "%"+name+"%")</td></tr>
+</table>
+
+<h3>VIEWS</h3>
+<table>
+<tr><th>Fil</th><th class="col-line">Rad</th><th>Vad den visar</th></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">5–17</td><td>Dropdown filtrera per plats → POST SearchObservations</td></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span> <span class="badge">KOLUMNLAYOUT</span></td><td class="col-line">26–55</td><td>Yttre IncidentId → inre observationer → nästlad tabell i kolumn 3</td></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">58–93</td><td>Insert-form: fält + 2 dropdownar handläggare (regnamn + regnr)</td></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">96–109</td><td>Update-form: dropdown ObsId + säkerhet</td></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">46</td><td>Arkivera-länk: @Html.ActionLink("Arkivera", ..., new { obsid })</td></tr>
+<tr><td><span class="file">Views/Person/Index.cshtml</span></td><td class="col-line">4–11</td><td>Sökformulär name → POST SearchPersons</td></tr>
+<tr><td><span class="file">Views/Person/Index.cshtml</span></td><td class="col-line">13–30</td><td>Enkel tabell Person (auto-header från Columns)</td></tr>
+<tr><td><span class="file">Views/Person/Index.cshtml</span></td><td class="col-line">33–50</td><td>Medelsäkerhet via procedur</td></tr>
+</table>
+
+<h3>CONFIG</h3>
+<table>
+<tr><th>Fil</th><th class="col-line">Rad</th><th>Innehåll</th></tr>
+<tr><td><span class="file">appsettings.json</span></td><td class="col-line">9</td><td>SchoolConnection = anslutningssträng (används i båda modeller)</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>4. MVC-KEDJOR — Fysisk layout (4 filer per funktion)</h2>
+<table>
+<tr><th>Funktion</th><th>View</th><th>Controller</th><th>Model</th><th>SQL</th></tr>
+<tr class="chain-row"><td>Visa alla (kolumnlayout)</td><td>Views/Observation/Index.cshtml:26–55</td><td>ObservationController.Index:18–24</td><td>ObservationModel.GetObservationsWithDetails:17–27</td><td>JOIN 4 tabeller</td></tr>
+<tr class="chain-row"><td>Filtrera per plats</td><td>Views/Observation/Index.cshtml:5–17</td><td>ObservationController.SearchObservations:26–30</td><td>ObservationModel.SearchObservationsByPlats:93–104</td><td>WHERE PlatsKod=@PLATSKOD</td></tr>
+<tr class="chain-row"><td>Insert observation</td><td>Views/Observation/Index.cshtml:58–93</td><td>ObservationController.InsertObservation:32–36</td><td>ObservationModel.InsertObservation:53–69</td><td>INSERT 9 parametrar</td></tr>
+<tr class="chain-row"><td>Update säkerhet</td><td>Views/Observation/Index.cshtml:96–109</td><td>ObservationController.UpdateSakerhet:38–42</td><td>ObservationModel.UpdateSakerhet:71–81</td><td>UPDATE Sakerhet WHERE ObsId</td></tr>
+<tr class="chain-row"><td>Arkivera (procedur)</td><td>Views/Observation/Index.cshtml:46</td><td>ObservationController.ArkiveraObservation:44–48</td><td>ObservationModel.ArkiveraObservation:83–91</td><td>CALL ARKIVERAOBSERVATION</td></tr>
+<tr class="chain-row"><td>Sök person</td><td>Views/Person/Index.cshtml:4–11</td><td>PersonController.SearchPersons:25–29</td><td>PersonModel.SearchPersons:41–52</td><td>WHERE Namn LIKE @NAME</td></tr>
+</table>
+<p class="comment">Alla SQL-anrop: Parameters.AddWithValue — INGEN strängkonkatenering</p>
+</div>
+
+<div class="section">
+<h2>5. PERSONLIGA FRÅGOR (vanliga)</h2>
+<table>
+<tr><th>Fråga</th><th>Svar (peka på fil:rad)</th></tr>
+<tr><td>Varför SchoolConnection?</td><td>Models/*Model.cs:14 — skolans miljövariabel, undviker kollision</td></tr>
+<tr><td>Varför 2 dropdownar handläggare?</td><td>Views/Observation/Index.cshtml:74–91 — PK i Handlaggare = sammansatt (AgentNamn, AgentNr)</td></tr>
+<tr><td>Varför radlayout PHP, kolumnlayout .NET?</td><td>PHP: 1 obs → N vittner (bredvid). .NET: 1 incident → N obs (i kolumn) — kravspec</td></tr>
+<tr><td>Vad gör CHECKOBSGRAD?</td><td>database.sql:231–238 — BEFORE INSERT, SIGNAL om GradKod ej 1–4 (dubbelsäkerhet)</td></tr>
+<tr><td>Varför ARKIVERAOBSERVATION som procedur?</td><td>database.sql:251–259 — atomärt: DELETE Rapporterat → INSERT ARKIVERAD → DELETE Observation</td></tr>
+<tr><td>Vad om ObservationLog saknas?</td><td>Trigger LOGGOBSERVATION kraschar — tabellen finns i database.sql:110–117</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>6. GIT-HITTA-SNABBT</h2>
+<table>
+<tr><th>Läraren säger...</th><th>Bläddra till...</th></tr>
+<tr><td>"Visa logisk design"</td><td>database.sql:9–107</td></tr>
+<tr><td>"Visa denormalisering"</td><td>database.sql:22–29 (horisontell), 39–50 (kodifiering), 59 (merge), 73–92 (vertikal)</td></tr>
+<tr><td>"Visa index"</td><td>database.sql:173–177</td></tr>
+<tr><td>"Visa grants"</td><td>database.sql:183–214</td></tr>
+<tr><td>"Visa triggers"</td><td>database.sql:221–239</td></tr>
+<tr><td>"Visa procedurer"</td><td>database.sql:241–259</td></tr>
+<tr><td>"Visa komplex tabell PHP"</td><td>PHPApplikation.php:168–214</td></tr>
+<tr><td>"Visa INSERT PHP"</td><td>PHPApplikation.php:48–76, 216–249</td></tr>
+<tr><td>"Visa DELETE/UPDATE PHP"</td><td>PHPApplikation.php:78–111, 251–279</td></tr>
+<tr><td>"Visa kolumnlayout .NET"</td><td>Views/Observation/Index.cshtml:26–55</td></tr>
+<tr><td>"Visa MVC-kedja Insert"</td><td>Se tabell ovan (4 filer)</td></tr>
+<tr><td>"Visa parameter-säkerhet"</td><td>Models/*Model.cs: alla AddWithValue-rader</td></tr>
+</table>
+</div>
+
+<div class="tip">
+<strong>TIP:</strong> Öppna fil på <span class="file">git.webug.se</span>, scrolla till rad, läs 3–5 rader högt, förklara vad de gör. Max 5 min/fråga.
+</div>
+
+</body>
+</html>

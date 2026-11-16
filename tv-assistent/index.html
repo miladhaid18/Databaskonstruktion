@@ -1,0 +1,1301 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#090d16">
+    <title>TV-Assistenten</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --panel: rgba(18, 26, 40, 0.84);
+            --panel-soft: rgba(14, 21, 34, 0.72);
+            --border: rgba(255, 255, 255, 0.08);
+            --text: #eef4ff;
+            --muted: #92a1b8;
+            --accent: #22d3ee;
+            --accent-2: #34d399;
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            color: var(--text);
+            font-family: "Segoe UI", "Helvetica Neue", Tahoma, Geneva, Verdana, sans-serif;
+            background:
+                radial-gradient(1000px 620px at 82% -10%, rgba(34, 211, 238, 0.14), transparent 62%),
+                radial-gradient(900px 520px at 8% 112%, rgba(52, 211, 153, 0.12), transparent 62%),
+                var(--bg);
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        .app {
+            width: min(1020px, 100%);
+            height: 100vh;
+            height: 100dvh;
+            margin: 0 auto;
+            padding: 18px 18px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            flex: 0 0 auto;
+            color: #04121a;
+            font-weight: 800;
+            font-size: 0.92rem;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+            box-shadow: 0 8px 30px rgba(34, 211, 238, 0.26);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.05rem;
+            letter-spacing: 0.2px;
+        }
+
+        .subtitle {
+            margin: 3px 0 0;
+            color: var(--muted);
+            font-size: 0.82rem;
+        }
+
+        .icon-btn {
+            width: 42px;
+            height: 42px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            color: #cfe0f5;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border);
+            transition: 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .icon-btn.active {
+            color: #67e8f9;
+            border-color: rgba(34, 211, 238, 0.3);
+            background: rgba(34, 211, 238, 0.1);
+        }
+
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 6px 4px;
+        }
+
+        .orb-wrap {
+            width: 76px;
+            height: 76px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+        }
+
+        .orb {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: radial-gradient(circle at 35% 30%, #2a3a55, #131b29 72%);
+            box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.05), 0 0 0 0 rgba(34, 211, 238, 0);
+            transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        .orb.listening {
+            background: radial-gradient(circle at 35% 30%, #67e8f9, #0891b2 72%);
+            animation: pulse-cyan 1.6s infinite;
+        }
+
+        .orb.processing {
+            background: radial-gradient(circle at 35% 30%, #fde68a, #d97706 72%);
+            animation: pulse-amber 0.8s infinite alternate;
+        }
+
+        .orb.speaking {
+            background: radial-gradient(circle at 35% 30%, #86efac, #059669 72%);
+            animation: pulse-green 1s infinite alternate;
+        }
+
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.45), 0 0 24px rgba(34, 211, 238, 0.35); }
+            70% { box-shadow: 0 0 0 18px rgba(34, 211, 238, 0), 0 0 34px rgba(34, 211, 238, 0.15); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0), 0 0 24px rgba(34, 211, 238, 0.2); }
+        }
+
+        @keyframes pulse-amber {
+            from { box-shadow: 0 0 14px rgba(245, 158, 11, 0.45); transform: scale(0.97); }
+            to { box-shadow: 0 0 34px rgba(245, 158, 11, 0.65); transform: scale(1.04); }
+        }
+
+        @keyframes pulse-green {
+            from { box-shadow: 0 0 16px rgba(52, 211, 153, 0.45); }
+            to { box-shadow: 0 0 38px rgba(52, 211, 153, 0.7); }
+        }
+
+        .status-block {
+            min-width: 0;
+        }
+
+        #statusText {
+            font-size: 0.98rem;
+            font-weight: 650;
+        }
+
+        #liveText {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 0.82rem;
+            min-height: 1.2em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat {
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 6px 4px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.16) transparent;
+        }
+
+        .chat::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+        }
+
+        .msg {
+            display: flex;
+        }
+
+        .msg.user {
+            justify-content: flex-end;
+        }
+
+        .msg.assistant {
+            justify-content: flex-start;
+        }
+
+        .bubble {
+            max-width: min(780px, 94%);
+            padding: 12px 15px;
+            border-radius: 16px;
+            line-height: 1.52;
+            font-size: 0.93rem;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+        }
+
+        .bubble-text {
+            white-space: pre-line;
+        }
+
+        .msg.user .bubble {
+            color: #04121a;
+            font-weight: 600;
+            border: none;
+            border-bottom-right-radius: 5px;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.94), rgba(52, 211, 153, 0.92));
+        }
+
+        .msg.assistant .bubble {
+            border-bottom-left-radius: 5px;
+        }
+
+        .results {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
+            gap: 9px;
+        }
+
+        .tv-result {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 10px 11px 10px 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: var(--panel-soft);
+        }
+
+        .tv-result::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 3px;
+            background: linear-gradient(var(--accent), var(--accent-2));
+        }
+
+        .tv-result-head {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            min-width: 0;
+        }
+
+        .tv-logo {
+            width: 26px;
+            height: 19px;
+            padding: 2px;
+            border-radius: 4px;
+            object-fit: contain;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .tv-channel {
+            font-size: 0.7rem;
+            font-weight: 750;
+            letter-spacing: 0.45px;
+            color: #7dd3fc;
+            text-transform: uppercase;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tv-time {
+            margin-left: auto;
+            padding: 2px 6px;
+            border-radius: 999px;
+            white-space: nowrap;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #a7f3d0;
+            background: rgba(52, 211, 153, 0.1);
+            border: 1px solid rgba(52, 211, 153, 0.16);
+        }
+
+        .tv-title {
+            margin: 0;
+            font-size: 0.88rem;
+            line-height: 1.3;
+        }
+
+        .tv-desc {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.76rem;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .badges {
+            display: flex;
+            gap: 5px;
+            margin-top: 1px;
+        }
+
+        .badge {
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 0.61rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #fda4af;
+            background: rgba(251, 113, 133, 0.13);
+        }
+
+        .badge.live {
+            color: #67e8f9;
+            background: rgba(34, 211, 238, 0.12);
+        }
+
+        .typing {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 0;
+            vertical-align: middle;
+        }
+
+        .typing span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #7dd3fc;
+            animation: typing-blink 1.2s infinite;
+        }
+
+        .typing span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes typing-blink {
+            0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+            40% { opacity: 1; transform: translateY(-2px); }
+        }
+
+        .loading-label {
+            color: var(--muted);
+            font-size: 0.86rem;
+        }
+
+        .composer {
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(16px);
+        }
+
+        .suggestions {
+            display: flex;
+            gap: 7px;
+            overflow-x: auto;
+            padding: 2px 2px 8px;
+            scrollbar-width: none;
+        }
+
+        .suggestions::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            flex: 0 0 auto;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            color: #c9d7ec;
+            font-size: 0.76rem;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .chip:hover {
+            color: #e0f7ff;
+            border-color: rgba(34, 211, 238, 0.3);
+            background: rgba(34, 211, 238, 0.12);
+        }
+
+        .composer-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #queryInput {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            outline: none;
+            color: var(--text);
+            font-size: 0.92rem;
+            background: rgba(5, 9, 16, 0.7);
+            transition: 0.2s ease;
+        }
+
+        #queryInput:focus {
+            border-color: rgba(34, 211, 238, 0.5);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+        }
+
+        #queryInput::placeholder {
+            color: #61708a;
+        }
+
+        .btn {
+            width: 44px;
+            height: 44px;
+            flex: 0 0 auto;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            border-radius: 13px;
+            border: 1px solid var(--border);
+            color: #cfe0f5;
+            background: rgba(255, 255, 255, 0.06);
+            transition: 0.2s ease;
+        }
+
+        .btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .btn.primary {
+            color: #04121a;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        }
+
+        .btn.active {
+            color: #67e8f9;
+            border-color: rgba(34, 211, 238, 0.5);
+            background: rgba(34, 211, 238, 0.18);
+            animation: mic-glow 1.6s infinite;
+        }
+
+        @keyframes mic-glow {
+            0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.35); }
+            70% { box-shadow: 0 0 0 10px rgba(34, 211, 238, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+        }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hint {
+            padding-top: 8px;
+            text-align: center;
+            color: #5f6d85;
+            font-size: 0.7rem;
+        }
+
+        @media (max-width: 640px) {
+            .app {
+                padding: 12px 10px 10px;
+                gap: 10px;
+            }
+
+            .subtitle {
+                display: none;
+            }
+
+            .hero {
+                padding: 2px;
+            }
+
+            .orb-wrap {
+                width: 58px;
+                height: 58px;
+            }
+
+            .orb {
+                width: 48px;
+                height: 48px;
+            }
+
+            .bubble {
+                max-width: 97%;
+            }
+
+            .results {
+                grid-template-columns: 1fr;
+            }
+
+            .btn,
+            .icon-btn {
+                width: 42px;
+                height: 42px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <header>
+            <div class="brand">
+                <div class="logo" aria-hidden="true">TV</div>
+                <div>
+                    <h1>TV-Assistenten</h1>
+                    <p class="subtitle">Fråga om program, kanal, tid och datum</p>
+                </div>
+            </div>
+            <button class="icon-btn" id="voiceBtn" type="button" aria-label="Stäng av rösten" title="Röst på">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M4 9v6h4l5 4V5L8 9H4Z"></path>
+                    <path d="M16.5 8.5a5 5 0 0 1 0 7"></path>
+                    <path d="M19 6a8 8 0 0 1 0 12"></path>
+                </svg>
+            </button>
+        </header>
+
+        <section class="hero" aria-label="Assistentens status">
+            <div class="orb-wrap">
+                <div class="orb" id="orb"></div>
+            </div>
+            <div class="status-block">
+                <div id="statusText">Redo</div>
+                <div id="liveText">Klicka på mikrofonen och prata, eller skriv en fråga.</div>
+            </div>
+        </section>
+
+        <main class="chat" id="chat" aria-live="polite"></main>
+
+        <section class="composer">
+            <div class="suggestions" id="suggestions" aria-label="Exempelfrågor"></div>
+            <form class="composer-row" id="queryForm" autocomplete="off">
+                <input id="queryInput" type="text" placeholder="t.ex. Vad går på SVT1 klockan 20 ikväll?" aria-label="Skriv din fråga">
+                <button class="btn primary" type="submit" id="sendBtn" aria-label="Skicka frågan" title="Skicka">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m4 12 16-8-6 16-2.5-6.5L4 12Z"></path>
+                    </svg>
+                </button>
+                <button class="btn" type="button" id="micBtn" aria-label="Börja lyssna" aria-pressed="false" title="Börja lyssna">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 1 0-6 0v6a3 3 0 0 0 3 3Z"></path>
+                        <path d="M19 11a7 7 0 0 1-14 0"></path>
+                        <path d="M12 18v4"></path>
+                    </svg>
+                </button>
+            </form>
+            <div class="hint">Data från tv.nu · Fråga om alla kanaler, tider och datum</div>
+        </section>
+    </div>
+
+    <script src="parser.js"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const parser = window.TVParser;
+            const orb = document.getElementById('orb');
+            const statusText = document.getElementById('statusText');
+            const liveText = document.getElementById('liveText');
+            const chat = document.getElementById('chat');
+            const form = document.getElementById('queryForm');
+            const queryInput = document.getElementById('queryInput');
+            const micBtn = document.getElementById('micBtn');
+            const voiceBtn = document.getElementById('voiceBtn');
+            const suggestions = document.getElementById('suggestions');
+
+            const SPEAKER_ON_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"></path><path d="M16.5 8.5a5 5 0 0 1 0 7"></path><path d="M19 6a8 8 0 0 1 0 12"></path></svg>';
+            const SPEAKER_OFF_SVG = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z"></path><path d="m16 9 5 6"></path><path d="m21 9-5 6"></path></svg>';
+
+            const SUGGESTIONS = [
+                'Vad går på SVT1 klockan 20 ikväll?',
+                'Vad går på TV4 nu?',
+                'Vad går på tvåan imorgon klockan 21?',
+                'När börjar Rapport?',
+                'Vad går klockan 20 på alla kanaler?'
+            ];
+
+            const state = {
+                busy: false,
+                micOn: false,
+                voiceOn: true,
+                speaking: false,
+                context: { channels: [], time: null, date: null },
+                svVoice: null,
+                recognition: null,
+                restartTimer: null
+            };
+
+            let speechToken = 0;
+
+            try {
+                if (localStorage.getItem('tv-assistent-voice') === 'off') {
+                    state.voiceOn = false;
+                }
+            } catch (error) {
+            }
+
+            function setUiState(name, label) {
+                orb.className = 'orb' + (name === 'idle' ? '' : ' ' + name);
+                statusText.textContent = label;
+            }
+
+            function updateLiveText(text) {
+                liveText.textContent = text;
+            }
+
+            function scrollChat() {
+                requestAnimationFrame(function () {
+                    chat.scrollTop = chat.scrollHeight;
+                });
+            }
+
+            function appendMessage(role, text) {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'msg ' + role;
+
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+
+                const content = document.createElement('div');
+                content.className = 'bubble-text';
+                content.textContent = text;
+
+                bubble.appendChild(content);
+                wrapper.appendChild(bubble);
+                chat.appendChild(wrapper);
+                scrollChat();
+
+                return { wrapper: wrapper, bubble: bubble, content: content };
+            }
+
+            function addAssistantMessage(text, results) {
+                const parts = appendMessage('assistant', text || '');
+                if (Array.isArray(results) && results.length > 0) {
+                    parts.bubble.appendChild(buildResults(results));
+                }
+                scrollChat();
+                return parts;
+            }
+
+            function addUserMessage(text) {
+                appendMessage('user', text);
+            }
+
+            function buildResults(results) {
+                const grid = document.createElement('div');
+                grid.className = 'results';
+
+                results.slice(0, 24).forEach(function (result) {
+                    const card = document.createElement('article');
+                    card.className = 'tv-result';
+
+                    const head = document.createElement('div');
+                    head.className = 'tv-result-head';
+
+                    if (result.logo) {
+                        const logo = document.createElement('img');
+                        logo.className = 'tv-logo';
+                        logo.src = result.logo;
+                        logo.alt = '';
+                        logo.loading = 'lazy';
+                        logo.addEventListener('error', function () {
+                            logo.remove();
+                        });
+                        head.appendChild(logo);
+                    }
+
+                    const channel = document.createElement('span');
+                    channel.className = 'tv-channel';
+                    channel.textContent = result.channel || '';
+                    head.appendChild(channel);
+
+                    const time = document.createElement('span');
+                    time.className = 'tv-time';
+                    time.textContent = (result.start || '') + '–' + (result.end || '');
+                    head.appendChild(time);
+
+                    const title = document.createElement('h3');
+                    title.className = 'tv-title';
+                    title.textContent = result.title || '';
+
+                    card.appendChild(head);
+                    card.appendChild(title);
+
+                    if (result.description) {
+                        const description = document.createElement('p');
+                        description.className = 'tv-desc';
+                        description.textContent = result.description;
+                        card.appendChild(description);
+                    }
+
+                    const badges = document.createElement('div');
+                    badges.className = 'badges';
+
+                    if (result.isLive) {
+                        const live = document.createElement('span');
+                        live.className = 'badge live';
+                        live.textContent = 'Direkt';
+                        badges.appendChild(live);
+                    }
+
+                    if (result.isRerun) {
+                        const repeat = document.createElement('span');
+                        repeat.className = 'badge';
+                        repeat.textContent = 'Repris';
+                        badges.appendChild(repeat);
+                    }
+
+                    if (badges.childElementCount > 0) {
+                        card.appendChild(badges);
+                    }
+
+                    grid.appendChild(card);
+                });
+
+                return grid;
+            }
+
+            function addLoadingBubble() {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'msg assistant';
+
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble';
+
+                const typing = document.createElement('span');
+                typing.className = 'typing';
+                for (let index = 0; index < 3; index += 1) {
+                    typing.appendChild(document.createElement('span'));
+                }
+
+                const label = document.createElement('span');
+                label.className = 'loading-label';
+                label.textContent = ' Kollar tv.nu...';
+
+                bubble.appendChild(typing);
+                bubble.appendChild(label);
+                wrapper.appendChild(bubble);
+                chat.appendChild(wrapper);
+                scrollChat();
+
+                return wrapper;
+            }
+
+            function refreshVoices() {
+                if (!('speechSynthesis' in window)) {
+                    return;
+                }
+
+                const voices = window.speechSynthesis.getVoices();
+                state.svVoice = voices.find(function (voice) {
+                    return voice.lang && voice.lang.toLowerCase() === 'sv-se';
+                }) || voices.find(function (voice) {
+                    return voice.lang && voice.lang.toLowerCase().indexOf('sv') === 0;
+                }) || null;
+            }
+
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.onvoiceschanged = refreshVoices;
+                refreshVoices();
+            }
+
+            function stopSpeaking() {
+                speechToken += 1;
+                state.speaking = false;
+                if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                }
+            }
+
+            function speak(text) {
+                if (!state.voiceOn || !text || !('speechSynthesis' in window)) {
+                    return Promise.resolve();
+                }
+
+                const token = speechToken + 1;
+                speechToken = token;
+
+                return new Promise(function (resolve) {
+                    try {
+                        window.speechSynthesis.cancel();
+                    } catch (error) {
+                    }
+
+                    state.speaking = true;
+                    setUiState('speaking', 'Talar...');
+                    updateLiveText('Svaret läses upp...');
+
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'sv-SE';
+                    utterance.rate = 1.03;
+                    utterance.pitch = 1;
+                    if (state.svVoice) {
+                        utterance.voice = state.svVoice;
+                    }
+
+                    let finished = false;
+                    let fallback = null;
+
+                    function finish() {
+                        if (finished) {
+                            return;
+                        }
+                        finished = true;
+                        if (fallback) {
+                            clearTimeout(fallback);
+                        }
+
+                        if (token === speechToken) {
+                            state.speaking = false;
+
+                            if (!state.busy) {
+                                if (state.micOn) {
+                                    setUiState('listening', 'Lyssnar...');
+                                    updateLiveText('Säg din nästa fråga.');
+                                    maybeRestartMic();
+                                } else {
+                                    setUiState('idle', 'Redo');
+                                    updateLiveText('Klicka på mikrofonen och prata, eller skriv en fråga.');
+                                }
+                            }
+                        }
+
+                        resolve();
+                    }
+
+                    utterance.onend = finish;
+                    utterance.onerror = finish;
+                    fallback = setTimeout(finish, Math.min(60000, 5000 + text.length * 120));
+
+                    try {
+                        window.speechSynthesis.speak(utterance);
+                    } catch (error) {
+                        finish();
+                    }
+                });
+            }
+
+            function setMicUi() {
+                micBtn.classList.toggle('active', state.micOn);
+                micBtn.setAttribute('aria-pressed', String(state.micOn));
+                micBtn.title = state.micOn ? 'Stoppa lyssnandet' : 'Börja lyssna';
+                micBtn.setAttribute('aria-label', state.micOn ? 'Stoppa lyssnandet' : 'Börja lyssna');
+            }
+
+            function maybeRestartMic() {
+                if (!state.micOn || state.busy || state.speaking || !state.recognition) {
+                    return;
+                }
+
+                clearTimeout(state.restartTimer);
+                state.restartTimer = setTimeout(function () {
+                    if (!state.micOn || state.busy || state.speaking) {
+                        return;
+                    }
+                    try {
+                        state.recognition.start();
+                    } catch (error) {
+                    }
+                }, 400);
+            }
+
+            function renderVoiceButton() {
+                voiceBtn.innerHTML = state.voiceOn ? SPEAKER_ON_SVG : SPEAKER_OFF_SVG;
+                voiceBtn.classList.toggle('active', state.voiceOn);
+                voiceBtn.title = state.voiceOn ? 'Röst på' : 'Röst av';
+                voiceBtn.setAttribute('aria-label', state.voiceOn ? 'Stäng av rösten' : 'Sätt på rösten');
+            }
+
+            function localResponse(parsed) {
+                if (parsed.type === 'greet') {
+                    return {
+                        text: 'Hej! Jag kan hjälpa dig att hitta program i tv-tablån. Fråga till exempel: "Vad går på SVT1 klockan 20 ikväll?"'
+                    };
+                }
+
+                if (parsed.type === 'help') {
+                    return {
+                        text: 'Jag kan svara på vad som går på tv just nu, en viss tid eller ett visst datum – på en eller flera kanaler. Du kan också fråga när ett program börjar.\n\nExempel: "Vad går på TV4 klockan 20 imorgon?" eller "När börjar Rapport?"'
+                    };
+                }
+
+                if (parsed.type === 'thanks') {
+                    return { text: 'Varsågod!' };
+                }
+
+                if (parsed.type === 'channels') {
+                    const names = parser.channels.map(function (channel) {
+                        return channel.name;
+                    });
+                    const last = names.pop();
+                    return { text: 'Jag kan kolla ' + names.join(', ') + ' och ' + last + '.' };
+                }
+
+                return {
+                    text: 'Jag är inte säker på vad du menade. Prova att säga vilken kanal, tid och dag du vill veta något om.\n\nTill exempel: "Vad går på SVT1 klockan 20 ikväll?"'
+                };
+            }
+
+            function buildParams(parsed) {
+                if (parsed.type === 'search') {
+                    const params = {
+                        action: 'search',
+                        program: parsed.searchTerm
+                    };
+
+                    if (parsed.channels.length > 0 && !parsed.allChannels) {
+                        params.channel = parsed.channels.map(function (channel) {
+                            return channel.slug;
+                        }).join(',');
+                    }
+
+                    if (parsed.dateExplicit && parsed.date) {
+                        params.date = parsed.date;
+                    }
+
+                    return params;
+                }
+
+                const params = {
+                    action: 'schedule',
+                    date: parsed.date
+                };
+
+                if (parsed.channels.length > 0 && !parsed.allChannels) {
+                    params.channel = parsed.channels.map(function (channel) {
+                        return channel.slug;
+                    }).join(',');
+                }
+
+                if (parsed.time) {
+                    params.time = parsed.time;
+                }
+
+                return params;
+            }
+
+            async function fetchJson(params) {
+                const url = 'fetch_tv.php?' + new URLSearchParams(params).toString();
+                const response = await fetch(url, {
+                    headers: { Accept: 'application/json' },
+                    cache: 'no-store'
+                });
+
+                const body = await response.text();
+                try {
+                    return JSON.parse(body);
+                } catch (error) {
+                    throw new Error('Ogiltigt svar från servern');
+                }
+            }
+
+            async function handleUserInput(raw) {
+                const text = String(raw || '').trim();
+                if (!text || state.busy) {
+                    return;
+                }
+
+                addUserMessage(text);
+                queryInput.value = '';
+                updateLiveText('');
+
+                state.busy = true;
+
+                if (state.recognition && state.micOn) {
+                    try {
+                        state.recognition.abort();
+                    } catch (error) {
+                    }
+                }
+
+                const parsed = parser.parseQuery(text, state.context);
+
+                if (parsed.type === 'stop') {
+                    stopSpeaking();
+                    state.busy = false;
+                    addAssistantMessage('Okej, jag är tyst.');
+                    if (state.micOn) {
+                        setUiState('listening', 'Lyssnar...');
+                        updateLiveText('Säg din nästa fråga.');
+                        maybeRestartMic();
+                    } else {
+                        setUiState('idle', 'Redo');
+                        updateLiveText('Klicka på mikrofonen och prata, eller skriv en fråga.');
+                    }
+                    return;
+                }
+
+                if (parsed.type === 'greet' || parsed.type === 'help' || parsed.type === 'thanks' || parsed.type === 'channels' || parsed.type === 'unknown') {
+                    const response = localResponse(parsed);
+                    addAssistantMessage(response.text);
+                    await speak(response.text);
+                    state.busy = false;
+
+                    if (!state.speaking) {
+                        if (state.micOn) {
+                            setUiState('listening', 'Lyssnar...');
+                            updateLiveText('Säg din nästa fråga.');
+                            maybeRestartMic();
+                        } else {
+                            setUiState('idle', 'Redo');
+                            updateLiveText('Klicka på mikrofonen och prata, eller skriv en fråga.');
+                        }
+                    }
+                    return;
+                }
+
+                setUiState('processing', 'Tänker...');
+                updateLiveText(parsed.type === 'search' ? 'Söker i tv-tablån...' : 'Hämtar tablån från tv.nu...');
+
+                const loading = addLoadingBubble();
+
+                try {
+                    const data = await fetchJson(buildParams(parsed));
+                    loading.remove();
+
+                    const message = data.message || 'Jag hittade inget svar.';
+                    addAssistantMessage(message, data.results || []);
+
+                    if (data.success && parsed.type === 'schedule') {
+                        state.context = {
+                            channels: parsed.allChannels ? [] : parsed.channels,
+                            time: parsed.time || null,
+                            date: parsed.date
+                        };
+                    }
+
+                    await speak(message);
+                } catch (error) {
+                    loading.remove();
+                    const message = 'Jag kunde inte nå servern. Kontrollera att Apache och PHP körs och försök igen.';
+                    addAssistantMessage(message);
+                    await speak(message);
+                } finally {
+                    state.busy = false;
+                    if (!state.speaking) {
+                        if (state.micOn) {
+                            setUiState('listening', 'Lyssnar...');
+                            updateLiveText('Säg din nästa fråga.');
+                            maybeRestartMic();
+                        } else {
+                            setUiState('idle', 'Redo');
+                            updateLiveText('Klicka på mikrofonen och prata, eller skriv en fråga.');
+                        }
+                    }
+                }
+            }
+
+            function setupRecognition() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+                if (!SpeechRecognition) {
+                    micBtn.disabled = true;
+                    micBtn.title = 'Röstigenkänning stöds inte i den här webbläsaren';
+                    updateLiveText('Röstigenkänning stöds inte här – skriv din fråga i stället.');
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'sv-SE';
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.maxAlternatives = 1;
+
+                recognition.onstart = function () {
+                    if (state.micOn) {
+                        setUiState('listening', 'Lyssnar...');
+                        updateLiveText('Säg din fråga...');
+                    }
+                };
+
+                recognition.onresult = function (event) {
+                    if (state.busy) {
+                        return;
+                    }
+
+                    let interim = '';
+                    let final = '';
+
+                    for (let index = event.resultIndex; index < event.results.length; index += 1) {
+                        const result = event.results[index];
+                        const transcript = result[0] ? result[0].transcript : '';
+                        if (result.isFinal) {
+                            final += transcript;
+                        } else {
+                            interim += transcript;
+                        }
+                    }
+
+                    if (interim.trim()) {
+                        updateLiveText('"' + interim.trim() + '"');
+                        setUiState('listening', 'Lyssnar...');
+                    }
+
+                    if (final.trim()) {
+                        updateLiveText('');
+                        try {
+                            recognition.stop();
+                        } catch (error) {
+                        }
+                        handleUserInput(final.trim());
+                    }
+                };
+
+                recognition.onerror = function (event) {
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        state.micOn = false;
+                        setMicUi();
+                        setUiState('idle', 'Mikrofonen är blockerad');
+                        updateLiveText('Tillåt mikrofonen i webbläsaren, eller skriv din fråga i stället.');
+                    } else if (event.error === 'audio-capture') {
+                        state.micOn = false;
+                        setMicUi();
+                        setUiState('idle', 'Hittar ingen mikrofon');
+                        updateLiveText('Anslut en mikrofon eller skriv din fråga.');
+                    } else if (event.error === 'network') {
+                        updateLiveText('Nätverksproblem med röstigenkänningen. Försök igen.');
+                    }
+                };
+
+                recognition.onend = function () {
+                    if (!state.micOn) {
+                        if (!state.speaking && !state.busy) {
+                            setUiState('idle', 'Redo');
+                        }
+                        return;
+                    }
+
+                    if (!state.busy && !state.speaking) {
+                        maybeRestartMic();
+                    }
+                };
+
+                state.recognition = recognition;
+            }
+
+            micBtn.addEventListener('click', function () {
+                if (!state.recognition) {
+                    return;
+                }
+
+                if (state.micOn) {
+                    state.micOn = false;
+                    setMicUi();
+                    try {
+                        state.recognition.abort();
+                    } catch (error) {
+                    }
+                    if (!state.speaking && !state.busy) {
+                        setUiState('idle', 'Redo');
+                    }
+                    updateLiveText('Mikrofonen är avstängd.');
+                    return;
+                }
+
+                state.micOn = true;
+                setMicUi();
+
+                if (state.speaking) {
+                    updateLiveText('Lyssnar när svaret har lästs upp.');
+                    return;
+                }
+
+                if (state.busy) {
+                    updateLiveText('Väntar tills svaret är klart...');
+                    return;
+                }
+
+                setUiState('listening', 'Lyssnar...');
+                updateLiveText('Säg din fråga...');
+
+                try {
+                    state.recognition.start();
+                } catch (error) {
+                }
+            });
+
+            voiceBtn.addEventListener('click', function () {
+                state.voiceOn = !state.voiceOn;
+
+                try {
+                    localStorage.setItem('tv-assistent-voice', state.voiceOn ? 'on' : 'off');
+                } catch (error) {
+                }
+
+                if (!state.voiceOn) {
+                    stopSpeaking();
+                    if (!state.busy) {
+                        if (state.micOn) {
+                            setUiState('listening', 'Lyssnar...');
+                            updateLiveText('Säg din nästa fråga.');
+                            maybeRestartMic();
+                        } else {
+                            setUiState('idle', 'Redo');
+                        }
+                    }
+                }
+
+                renderVoiceButton();
+            });
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                if (state.busy) {
+                    return;
+                }
+                handleUserInput(queryInput.value);
+            });
+
+            SUGGESTIONS.forEach(function (text) {
+                const chip = document.createElement('button');
+                chip.type = 'button';
+                chip.className = 'chip';
+                chip.textContent = text;
+                chip.addEventListener('click', function () {
+                    if (!state.busy) {
+                        handleUserInput(text);
+                    }
+                });
+                suggestions.appendChild(chip);
+            });
+
+            setupRecognition();
+            renderVoiceButton();
+            setMicUi();
+            setUiState('idle', 'Redo');
+
+            addAssistantMessage(
+                'Hej! Jag är din TV-assistent. Fråga mig vad som går på tv – vilken kanal, tid och dag som helst.\n\nProva till exempel: "Vad går på SVT1 klockan 20 ikväll?" eller "När börjar Rapport?"'
+            );
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Träning 3 Frågor — Muntlig Redovisning</title>
+<style>
+  body { font-family: Consolas, 'Courier New', monospace; max-width: 1000px; margin: 20px auto; padding: 20px; background: #1e1e1e; color: #d4d4d4; line-height: 1.6; }
+  h1 { color: #4ec9b0; border-bottom: 2px solid #4ec9b0; padding-bottom: 10px; }
+  h2 { color: #569cd6; margin-top: 30px; background: #252526; padding: 10px 15px; border-radius: 4px; border-left: 5px solid #569cd6; }
+  h3 { color: #dcdcaa; margin-top: 20px; }
+  .section { background: #252526; padding: 20px; margin: 20px 0; border-radius: 4px; border-left: 4px solid #4ec9b0; }
+  .file { color: #9cdcfe; font-weight: bold; background: #2d2d2d; padding: 2px 8px; border-radius: 3px; }
+  .line { color: #b5cea8; background: #2d2d2d; padding: 2px 6px; border-radius: 3px; }
+  .code { background: #2d2d2d; border-left: 3px solid #569cd6; padding: 15px; margin: 15px 0; overflow-x: auto; color: #d4d4d4; }
+  .speech { background: #1e2a2e; border-left: 3px solid #4ec9b0; padding: 15px; margin: 15px 0; color: #b5e6c7; font-style: italic; }
+  .keywords { background: #2d2d2d; border: 1px solid #3c3c3c; padding: 10px 15px; border-radius: 4px; margin: 15px 0; }
+  .keywords strong { color: #dcdcaa; }
+  .keywords span { background: #4ec9b0; color: #1e1e1e; padding: 2px 8px; border-radius: 3px; margin: 2px; display: inline-block; font-size: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 13px; }
+  th, td { padding: 10px 12px; border: 1px solid #3c3c3c; text-align: left; vertical-align: top; }
+  th { background: #2d2d2d; color: #4ec9b0; }
+  tr:nth-child(even) { background: #252526; }
+  tr:hover { background: #2a2d2e; }
+  .col-file { width: 30%; color: #9cdcfe; }
+  .col-line { width: 12%; color: #b5cea8; text-align: center; }
+  .col-desc { width: 58%; }
+  .step { background: #252526; border-left: 3px solid #dcdcaa; padding: 10px 15px; margin: 10px 0; }
+  .step strong { color: #dcdcaa; }
+  .tip { background: #2d2d2d; border-left: 4px solid #ce9178; padding: 15px; margin: 20px 0; }
+  .tip strong { color: #ce9178; }
+  .cheat { background: #1e2a2e; border: 2px solid #4ec9b0; padding: 15px; margin: 20px 0; }
+  .cheat table { font-size: 12px; }
+  a { color: #569cd6; }
+</style>
+</head>
+<body>
+
+<h1>Träning — 3 Exempelfrågor från Läraren</h1>
+<p>Fokus: <strong>Hitta kod på git.webug.se < 30 sek</strong> + <strong>Förklara på 2–3 min</strong></p>
+
+<div class="section">
+<h2>📋 FRÅGA 1: "Visa din komplexa tabell för PHP"</h2>
+
+<h3>Vad du visar på wwwlab.webug.se</h3>
+<div class="step"><strong>1.</strong> Öppna <span class="file">PHPApplikation.php</span> i webbläsaren</div>
+<div class="step"><strong>2.</strong> Scrolla till <span class="highlight">"3. Observationer med vittnen (Radlayout)"</span></div>
+<div class="step"><strong>3.</strong> Visa: yttre rad per observation → inre tabell med vittnen</div>
+<div class="step"><strong>4.</strong> Testa "Filtrera" / "Sök" → fungerar</div>
+
+<h3>Vad du visar på git.webug.se</h3>
+<table>
+<tr><th>Fil</th><th class="col-line">Rad</th><th>Vad</th></tr>
+<tr><td><span class="file">PHPApplikation.php</span></td><td class="col-line">168–214</td><td>Komplex tabell + radlayout-kod</td></tr>
+</table>
+
+<h3>Manus — tala fritt (läs inte)</h3>
+<div class="speech">
+"Här är min komplexa tabell för PHP. Den visar observationer med vittnen — en observation kan ha flera vittner (1:N), därför valde jag <strong>RADLAYOUT</strong>.<br><br>
+Koden börjar rad 168. Nyckeln är jämförelsevariabeln <strong>$prevObs rad 182</strong>.<br><br>
+<strong>Rad 183:</strong> SQL med LEFT JOIN Observation → Rapporterat → Person + JOIN Plats. Sorterat på ObsId så samma observation kommer i följd.<br>
+<strong>Rad 185–186:</strong> Loopen kör varje rad från frågan.<br>
+<strong>Rad 186–188:</strong> Om $prevObs != nuvarande ObsId → ny observation. Stänger föregående inre tabell om inte första.<br>
+<strong>Rad 190–197:</strong> Skriver yttre radens celler (ObsId, Datum, Grad, Säkerhet, Incident, Plats, Handläggare) — sedan öppnar <td><table> för vittnerna.<br>
+<strong>Rad 198–199:</strong> Header i inre tabell (PersonId, Namn, Kodnamn).<br>
+<strong>Rad 201–206:</strong> Om PersonId finns (inte NULL) → skriv en rad i inre tabell.<br>
+<strong>Rad 208:</strong> Uppdatera $prevObs = nuvarande ObsId.<br>
+<strong>Rad 210–212:</strong> Efter loopen stänger sista inre tabell.<br><br>
+<strong>Varför radlayout här?</strong> En observation har N vittner → vittnerna hör till ENA observationen. De visas som en nästlad tabell INNE I observationens rad (kolumn 8). Yttre loop = observationer, inre loop = vittner per observation."
+</div>
+
+<div class="keywords">
+<strong>NYCKELORD ATT NÄMNA:</strong>
+<span>LEFT JOIN</span>
+<span>jämförelsevariabel $prevObs</span>
+<span>nä stlad tabell</span>
+<span>1:N relation</span>
+<span>Radlayout</span>
+</div>
+</div>
+
+<div class="section">
+<h2>🔄 FRÅGA 2: "Visa din update / delete i dotnet"</h2>
+
+<h3>Vad du visar på wwwlab.webug.se</h3>
+<div class="step"><strong>UPDATE:</strong> Observation-sida → "Andra säkerhet" → välj obs → ny säkerhet → Update → tabell uppdateras</div>
+<div class="step"><strong>DELETE (Arkivera):</strong> Klicka "Arkivera"-länken i kolumnlayouten → observation försvinner från aktiva</div>
+
+<h3>Vad du visar på git.webug.se — 4 FILER (MVC-kedja)</h3>
+<table>
+<tr><th>Fil</th><th class="col-line">Rad</th><th>Vad</th></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">96–109</td><td>UPDATE-formulär</td></tr>
+<tr><td><span class="file">Views/Observation/Index.cshtml</span></td><td class="col-line">46</td><td>ARKIVERA-länk (ActionLink)</td></tr>
+<tr><td><span class="file">Controllers/ObservationController.cs</span></td><td class="col-line">38–42</td><td>UpdateSakerhet action</td></tr>
+<tr><td><span class="file">Controllers/ObservationController.cs</span></td><td class="col-line">44–48</td><td>ArkiveraObservation action</td></tr>
+<tr><td><span class="file">Models/ObservationModel.cs</span></td><td class="col-line">71–81</td><td>UpdateSakerhet metod (SQL)</td></tr>
+<tr><td><span class="file">Models/ObservationModel.cs</span></td><td class="col-line">83–91</td><td>ArkiveraObservation metod (CALL)</td></tr>
+<tr><td><span class="file">database.sql</span></td><td class="col-line">251–259</td><td>ARKIVERAOBSERVATION procedur</td></tr>
+</table>
+
+<h3>Manus — UPDATE</h3>
+<div class="speech">
+"Här är UPDATE-kedjan — fyra filer: <strong>View → Controller → Model → SQL</strong>.<br><br>
+<strong>VIEW (Index.cshtml:96–109):</strong> Dropdown hämtar alla observationer från ViewBag.ObsTable. Användaren väljer ObsId och fyller i ny Säkerhet. POST till UpdateSakerhet-action.<br><br>
+<strong>CONTROLLER (ObservationController.cs:38–42):</strong> Tar obsid och sakerhet som strängar. Anropar _observationModel.UpdateSakerhet(obsid, sakerhet). Redirect till Index (PRG-mönster).<br><br>
+<strong>MODEL (ObservationModel.cs:71–81):</strong> Öppnar connection med SchoolConnection från appsettings.json. SQL: <code>UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID;</code> Parameters.AddWithValue för BÅDA — ingen strängkonkatenering, skydd mot injection. ExecuteNonQuery → stänger connection.<br><br>
+<strong>SQL:</strong> Enkel UPDATE på primärnyckel ObsId. Snabbt, säkert."
+</div>
+
+<h3>Manus — DELETE / ARKIVERA</h3>
+<div class="speech">
+"DELETE görs via <strong>arkivering</strong> — en lagrad procedur som är <strong>atomär</strong>.<br><br>
+<strong>VIEW (Index.cshtml:46):</strong> @Html.ActionLink skapar länk: <code>/Observation/ArkiveraObservation?obsid=501</code>. GET-request → anropar action direkt.<br><br>
+<strong>CONTROLLER (ObservationController.cs:44–48):</strong> Tar obsid, anropar modell.ArkiveraObservation(obsid), redirect Index.<br><br>
+<strong>MODEL (ObservationModel.cs:83–91):</strong> SQL: <code>CALL ARKIVERAOBSERVATION(@OBSID);</code> Parameter @OBSID via AddWithValue. ExecuteNonQuery.<br><br>
+<strong>DATABASE.SQL (Procedur, rad 251–259):</strong><br>
+<code>CREATE PROCEDURE ARKIVERAOBSERVATION(IN p_ObsId INTEGER)<br>
+BEGIN<br>
+  DELETE FROM Rapporterat WHERE ObsId = p_ObsId;     -- 1. Rensa FK-kopplingar<br>
+  INSERT INTO ARKIVERADObservation SELECT * FROM Observation WHERE ObsId = p_ObsId;  -- 2. Kopiera<br>
+  DELETE FROM Observation WHERE ObsId = p_ObsId;     -- 3. Radera original<br>
+END;</code><br>
+<strong>Varför procedur?</strong> Atomärt — antingen alla tre steg lyckas, eller inget. Används i BÅDE PHP (CALL) och .NET (CALL) — DRY-princip."
+</div>
+
+<div class="keywords">
+<strong>NYCKELORD ATT NÄMNA:</strong>
+<span>MVC-kedja</span>
+<span>Parameters.AddWithValue</span>
+<span>PRG-mönster</span>
+<span>atomär procedur</span>
+<span>FK-kopplingar rensas först</span>
+<span>DRY-princip</span>
+</div>
+</div>
+
+<div class="section">
+<h2>🔒 FRÅGA 3: "Visa en av dina constraints i databasen"</h2>
+
+<h3>Vad du visar på git.webug.se — database.sql</h3>
+<table>
+<tr><th>Exempel</th><th class="col-line">Rad</th><th>Vad</th></tr>
+<tr><td><strong>BÄST: Observation CHECK + FK</strong></td><td class="col-line">63–70</td><td>PK, 2 CHECK, 3 FK — komplett bild</td></tr>
+<tr><td>Agent CHECK (lön, agentnr)</td><td class="col-line">15–19</td><td>Domänconstraints</td></tr>
+<tr><td>Plats UNIQUE PlatsNamn</td><td class="col-line">41</td><td>Unikhet</td></tr>
+<tr><td>Rapporterat FK</td><td class="col-line">104–106</td><td>Kopplingstabell FK</td></tr>
+</table>
+
+<h3>Manus — Observation-tabell (rad 63–70)</h3>
+<div class="speech>
+"Här är Observation-tabellen, rad 53–71. Jag visar constraints på rad 63–70.<br><br>
+<strong>PRIMARY KEY (rad 63):</strong> ObsId är PK — unikt ID för varje observation.<br><br>
+<strong>CHECK 1 (rad 64–65):</strong> <code>CHECK (GradKod >= 1 AND GradKod <= 4)</code><br>
+Syfte: <strong>Domänintegritet</strong> — närkontaktsgrad enbart 1–4. Fungerar även om FK till GradBeskrivning inaktiveras. Dubbelsäkerhet tillsammans med triggern CHECKOBSGRAD (BEFORE INSERT).<br><br>
+<strong>CHECK 2 (rad 66–67):</strong> <code>CHECK (Sakerhet >= 1.00 AND Sakerhet <= 114.00)</code><br>
+Syfte: Säkerhet i procent måste vara 1–114%. Fångar felaktiga värden vid INSERT/UPDATE direkt i databasen.<br><br>
+<strong>FK 1 (rad 68):</strong> <code>FOREIGN KEY (RegistreradAvNamn, RegistreradAvNr) REFERENCES Handlaggare(AgentNamn, AgentNr)</code><br>
+Syfte: <strong>Referensintegritet</strong> — bara handläggare får registrera. Sammansatt FK matchar sammansatt PK i Handlaggare.<br><br>
+<strong>FK 2 (rad 69):</strong> <code>FOREIGN KEY (PlatsKod) REFERENCES Plats(PlatsKod)</code> — Endast kända platser från kodtabell.<br><br>
+<strong>FK 3 (rad 70):</strong> <code>FOREIGN KEY (GradKod) REFERENCES GradBeskrivning(GradKod)</code> — Endast kända grader från kodtabell.<br><br>
+<strong>Sammanfattning:</strong> CHECK = domänregler (värden), FK = referensregler (kopplingar). Båda körs av databasen — skyddar även om applikationen glömmer validera."
+</div>
+
+<div class="keywords">
+<strong>NYCKELORD ATT NÄMNA:</strong>
+<span>domänintegritet</span>
+<span>referensintegritet</span>
+<span>dubbelsäkerhet med trigger</span>
+<span>sammansatt FK</span>
+</div>
+</div>
+
+<div class="cheat">
+<h2>🎯 SNABBKOMLANDO — SÖKORDA PÅ GIT</h2>
+<table>
+<tr><th>Fråga</th><th>Fil</th><th class="col-line">Rad</th><th>Sök på git</th></tr>
+<tr><td>Komplex tabell PHP</td><td>PHPApplikation.php</td><td class="col-line">168–214</td><td>$prevObs</td></tr>
+<tr><td>Update .NET</td><td>ObservationModel.cs</td><td class="col-line">71–81</td><td>UpdateSakerhet</td></tr>
+<tr><td>Delete/Arkivera .NET</td><td>ObservationModel.cs</td><td class="col-line">83–91</td><td>ArkiveraObservation</td></tr>
+<tr><td>Constraints</td><td>database.sql</td><td class="col-line">63–70</td><td>CHECK (GradKod</td></tr>
+</table>
+</div>
+
+<div class="tip">
+<strong>ÖVNING JUST NU (15 min totalt):</strong><br>
+1. Öppna din repo på <span class="file">git.webug.se</span><br>
+2. Sätt timer <strong>5 min per fråga</strong><br>
+3. Fråga 1: Hitta PHPApplikation.php:168 → förklara högt<br>
+4. Fråga 2: Hitta de 4 filerna → peka och förklara kedjan<br>
+5. Fråga 3: Hitta database.sql:63 → förklara CHECK + FK<br><br>
+Upprepa tills du gör det på <strong>< 3 min per fråga</strong> utan att titta på papper.
+</div>
+
+</body>
+</html>

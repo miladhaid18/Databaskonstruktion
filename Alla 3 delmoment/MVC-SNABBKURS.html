@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MVC-snabbkurs - IT429G</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--pink:#bb9af7;--code:#c0caf5}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,-apple-system,sans-serif}
+header{position:sticky;top:0;z-index:30;background:rgba(15,17,21,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 20px 10px}
+.hrow{max-width:1100px;margin:0 auto;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;font-size:1.05rem;letter-spacing:.3px}
+.brand span{color:var(--blue)}
+.meta{color:var(--muted);font-size:.82rem}
+.search{flex:1;min-width:220px;max-width:420px;position:relative;margin-left:auto}
+.search input{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:9px 36px 9px 12px;font-size:.92rem;outline:none}
+.search input:focus{border-color:var(--blue)}
+.search kbd{position:absolute;right:10px;top:8px;background:#2a3040;border:1px solid #3a4257;border-radius:5px;padding:1px 6px;color:var(--muted);font-size:.75rem}
+nav{position:sticky;top:64px;z-index:29;background:rgba(15,17,21,.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:8px 20px;overflow-x:auto;white-space:nowrap}
+.chips{max-width:1100px;margin:0 auto;display:flex;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:7px;text-decoration:none;color:var(--muted);background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:.8rem;transition:.15s}
+.chip:hover{color:var(--text);border-color:#3a4257}
+.chip.active{color:#0f1115;background:var(--blue);border-color:var(--blue);font-weight:600}
+.chip .dot{width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.8}
+main{max-width:1100px;margin:0 auto;padding:22px 20px 90px}
+.card{background:linear-gradient(180deg,var(--card),#14171d);border:1px solid var(--line);border-radius:14px;padding:18px 20px 6px;margin:0 0 18px;scroll-margin-top:125px}
+.card.dim{opacity:.25}
+.card h2{font-size:1.15rem;margin:0 0 4px;line-height:1.35}
+.badge{display:inline-block;font-size:.68rem;letter-spacing:.8px;font-weight:700;padding:3px 9px;border-radius:999px;margin-right:8px;vertical-align:2px;text-transform:uppercase}
+.b-grund{background:#233052;color:var(--blue)} .b-kedja{background:#1f3345;color:#89ddff}
+.b-peka{background:#1e3a2c;color:var(--green)} .b-manus{background:#1e3a2c;color:var(--green)}
+.b-qa{background:#3a321e;color:var(--yellow)} .b-quiz{background:#3a321e;color:var(--yellow)}
+.b-fall{background:#3a2438;color:var(--pink)} .b-plan{background:#3a2438;color:var(--pink)}
+.body{white-space:pre-wrap;font:15px/1.6 Consolas,"Cascadia Mono",monospace;color:#d5dae6;margin:6px 0 14px;overflow-wrap:anywhere}
+.body code{font-family:inherit;border-radius:4px;padding:0 4px}
+code.f{background:#233052;color:#9ecbff}
+code.ln{background:#2b2438;color:#e2b8ff}
+b.manus{color:var(--green)}
+b.warn{color:#f7768e}
+.manus{display:block}
+#count{color:var(--muted);font-size:.8rem;margin:0 0 10px}
+.top{position:fixed;right:22px;bottom:22px;background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 12px;text-decoration:none;font-size:.85rem;z-index:40}
+.top:hover{border-color:var(--blue)}
+@media (max-width:640px){header{padding:10px 14px}nav{top:88px;padding:6px 14px}main{padding:16px 14px 80px}.card{padding:14px 14px 4px}.body{font-size:13.5px}.search{margin-left:0}}
+@media print{header,nav,#count,.top{display:none}body{background:#fff;color:#111}.card{border:1px solid #bbb;background:#fff;break-inside:avoid}.body{color:#111}code.f{background:#eee;color:#000}code.ln{background:#eee;color:#000}.badge{border:1px solid #999;color:#111;background:#fff}}
+</style></head><body id="top">
+<header><div class="hrow"><div class="brand">MVC-<span>snabbkurs</span></div><div class="meta">IT429G &middot; 8 avsnitt &middot; ~40 min</div><div class="search"><input id="q" type="search" placeholder="Sok: insert, trigger, dropdown, rad 68..."><kbd>/</kbd></div></div></header>
+<nav><div class="chips"><a class='chip' href='#s1' data-s='s1'><span class='dot'></span>Start</a><a class='chip' href='#s2' data-s='s2'><span class='dot'></span>Mental modell</a><a class='chip' href='#s3' data-s='s3'><span class='dot'></span>Insert-kedjan</a><a class='chip' href='#s4' data-s='s4'><span class='dot'></span>Peka-rÃ¤tt</a><a class='chip' href='#s5' data-s='s5'><span class='dot'></span>Manus A1-A5</a><a class='chip' href='#s6' data-s='s6'><span class='dot'></span>FrÃ¥gor & svar</a><a class='chip' href='#s7' data-s='s7'><span class='dot'></span>Quiz</a><a class='chip' href='#s8' data-s='s8'><span class='dot'></span>FÃ¤llor</a><a class='chip' href='#s9' data-s='s9'><span class='dot'></span>Plan</a></div></nav>
+<main>
+<p id="count"></p><section class='card' id='s1' data-title='MVC-SNABBKURS - NATTEN INNAN (IT429G HT26)'><h2><span class='badge b-grund'>START</span>MVC-SNABBKURS - NATTEN INNAN (IT429G HT26)</h2><pre class='body'> Fokus: det du behover kunna for den muntliga delen i .NET/MVC
+Sa anvander du filen:
+1. Las avsnitt 1-2 en gang (10 min) - mental modell + en hel kedja
+2. Trada igenom avsnitt 3 och saga hogt (10 min) - peka ratt
+3. Las avsnitt 4 hogt (10 min) - 60-sekundersmanus per fraga
+4. Kor quizzen i avsnitt 6 (10 min)
+5. Imorgon bitti: repetition av avsnitt 3 + 4 (10 min)
+
+<b class="warn">VIKTIGT:</b> radnummer nedan ar fran din kod NU. Om de skiljer sig efter
+en commit - sok pa METODNAMN i stallet (Ctrl+F), inte pa radnummer.</pre></section>
+<section class='card' id='s2' data-title='1. MENTAL MODELL - SA HANGER MVC IHOP (60 sekunder)'><h2><span class='badge b-grund'>GRUND</span>1. MENTAL MODELL - SA HANGER MVC IHOP (60 sekunder)</h2><pre class='body'>En HTTP-request gar alltid samma vag:
+
+  URL -&gt; <code class="f">Program.cs</code> (routing) -&gt; Controller -&gt; Model -&gt; Databas
+                                      |
+                                      v
+                                    View (HTML)
+
+- <code class="f">Program.cs</code> <code class="ln">rad 24</code>: MapControllerRoute "{controller}/{action}"
+  =&gt; /Observation/InsertObservation hamnar i ObservationController.
+- Controller = TAR EMOT formulardata, anropar modellen och valjer
+  vad som ska returneras (View eller RedirectToAction).
+- Model = PRATAR MED DATABASEN (MySqlConnection, MySqlCommand,
+  DataAdapter, DataTable). Ingen HTML har.
+- View = VISAR data (Razor: @, foreach, ViewBag) och bygger formulär.
+- ViewBag = en väska som controllern stoppar data i och vyn laser.
+
+Tre controllers:
+  HomeController         startsida (tva lankar)
+  ObservationController  tabell, sok, insert, update, arkivera
+  PersonController       personlista, medelsakerhet, soksida
+Tva modeller:
+  ObservationModel       all SQL for observationer
+  PersonModel            all SQL for personer</pre></section>
+<section class='card' id='s3' data-title='2. KEDJAN DU MASTE KUNNA UTANTILL - INSERT AV OBSERVATION'><h2><span class='badge b-kedja'>KEDJAN</span>2. KEDJAN DU MASTE KUNNA UTANTILL - INSERT AV OBSERVATION</h2><pre class='body'>Folj en insert fran klick till databas och tillbaka:
+
+1) VYN - formularet
+   <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 67-101</code>
+   - action="@Url.Action("InsertObservation", "Observation")"
+     =&gt; postar till ObservationController.InsertObservation
+   - faltens name=obsid, incidentid, incidentnamn, platskod,
+     gradkod, sakerhet, regnamn, regnr
+   - Plats och Handlaggare ar &lt;select&gt; som byggs fran ViewBag
+     (<code class="ln">rad 73-83</code> och 84-101)
+
+2) CONTROLLERN - tar emot
+   <code class="f">Controllers/ObservationController.cs</code> <code class="ln">rad 32-44</code>
+   - metodens parametrar har SAMMA namn som faltens name
+   - anropar _observationModel.InsertObservation(...)
+   - try/catch: ArgumentException =&gt; TempData["Error"]
+   - vid lyckat: TempData["Success"] + RedirectToAction("Index")
+
+3) MODELLEN - kor SQL
+   <code class="f">Models/ObservationModel.cs</code> <code class="ln">rad 49-79</code>
+   - validering <code class="ln">rad 51-64</code> (heltal, intervall, obligatoriska falt)
+   - SQL <code class="ln">rad 68</code>: INSERT INTO Observation(...) VALUES(@OBSID, NOW(), ...)
+   - parametrar <code class="ln">rad 69-78</code> (AddWithValue) - skyddar mot SQL-injektion
+   - ExecuteNonQuery() = ingen rad tillbaka, bara antal drabbade rader
+
+4) DATABASEN - regler (bonus om de fragar)
+   <code class="f">database.sql</code> <code class="ln">rad 232-239</code> CHECKOBSGRAD stoppar GradKod utanfor 1-4
+   <code class="f">database.sql</code> <code class="ln">rad 222-228</code> LOGGOBSERVATION loggar insert i ObservationLog
+
+5) TILLBAKA - redirect till Index
+   <code class="f">ObservationController.cs</code> <code class="ln">rad 18-24</code> fyller ViewBag:
+   - ObsTable = GetObservationsWithDetails()
+   - AllPlats = GetAllPlats()
+   - AllHandlaggare = GetAllHandlaggare()
+   Vyn <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 20-55</code> ritar tabellen.
+   TempData-felen visas <code class="ln">rad 59-66</code>.
+
+SA HAR SAGER DU DET HOGT (60 sek):
+"Formularet i <code class="f">Index.cshtml</code> <code class="ln">rad 67</code> postar via Url.Action till
+InsertObservation i ObservationController. Controllern tar emot
+falten som strangar och anropar modellen. I ObservationModel <code class="ln">rad 49</code>
+valideras indata och sedan kors en parameteriserad INSERT pa <code class="ln">rad 68</code>.
+Efter det redirectar controllern till Index, som hamtar tabellerna
+via ViewBag och renderar vyn. Triggers i databasen loggar inserten
+och kontrollerar graden."</pre></section>
+<section class='card' id='s4' data-title='3. PEKA-RATT-TABELL (det lararen klickar -&gt; detta visar du)'><h2><span class='badge b-peka'>PEKA-RATT</span>3. PEKA-RATT-TABELL (det lararen klickar -&gt; detta visar du)</h2><pre class='body'>Sok observation (= "Filtrera per plats" i appen):
+  View:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 6-18</code> (formular)
+  Controller: <code class="f">ObservationController.cs</code> <code class="ln">rad 26-30</code>
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 101-110</code> (WHERE PlatsKod = @PLATSKOD)
+  Svarssida:  <code class="f">Views/Observation/SearchObservations.cshtml</code> <code class="ln">rad 5-23</code>
+
+Sok person:
+  View:       <code class="f">Views/Person/Index.cshtml</code> <code class="ln">rad 5-12</code>
+  Controller: <code class="f">PersonController.cs</code> <code class="ln">rad 25-29</code>
+  Model:      <code class="f">PersonModel.cs</code> <code class="ln">rad 39-47</code> (WHERE Namn LIKE @NAME)
+  Svarssida:  <code class="f">Views/Person/SearchPersons.cshtml</code> <code class="ln">rad 5-23</code>
+
+Lagg till observation (INSERT):
+  View:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 67-101</code>
+  Controller: <code class="f">ObservationController.cs</code> <code class="ln">rad 32-44</code>
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 49-79</code> (SQL <code class="ln">rad 68</code>)
+
+Ändra säkerhet (UPDATE):
+  View:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 105-117</code>
+  Controller: <code class="f">ObservationController.cs</code> <code class="ln">rad 46-50</code>
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 81-90</code> (SQL <code class="ln">rad 85</code>)
+
+Arkivera (PROCEDUR):
+  Lank:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 46</code> (ActionLink)
+  Controller: <code class="f">ObservationController.cs</code> <code class="ln">rad 52-56</code>
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 92-99</code> (CALL <code class="ln">rad 96</code>)
+
+Enkel tabell - personer:
+  Controller: <code class="f">PersonController.cs</code> <code class="ln">rad 18-23</code>
+  Model:      <code class="f">PersonModel.cs</code> <code class="ln">rad 19-27</code> (SELECT * FROM Person, SQL <code class="ln">rad 23</code>)
+  View:       <code class="f">Views/Person/Index.cshtml</code> <code class="ln">rad 14-31</code>
+
+Medelsakerhet (procedur):
+  Model:      <code class="f">PersonModel.cs</code> <code class="ln">rad 29-37</code> (CALL <code class="ln">rad 33</code>)
+  View:       <code class="f">Views/Person/Index.cshtml</code> <code class="ln">rad 34-51</code>
+
+Komplex tabell (joins + nastlad):
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 19-27</code> (SQL <code class="ln">rad 23</code>: JOIN Plats,
+              GradBeskrivning, Agent)
+  View:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 20-55</code>
+              (yttre loop 28, ny rad per IncidentId 31, inre loop 35-50,
+               nastlad tabell 39-48, Arkivera-lank 46)
+
+Dropdowns:
+  Controller: <code class="f">ObservationController.cs</code> <code class="ln">rad 18-24</code> (fyller ViewBag)
+  Model:      <code class="f">ObservationModel.cs</code> <code class="ln">rad 29-37</code> (Plats), 39-47 (Handlaggare)
+  View:       <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 9-17</code> (sok),
+              73-83 (plats i insert), 84-101 (handlaggare),
+              108-116 (obsid i update)
+
+Startsida/lankar:
+  <code class="f">Views/Home/Index.cshtml</code> <code class="ln">rad 6-7</code> (ActionLink till Person/Observation)
+  Tillbaka-lankar: <code class="f">Observation/Index.cshtml</code> <code class="ln">rad 119</code>,
+                   <code class="f">Person/Index.cshtml</code> <code class="ln">rad 52</code>
+
+Routing/anslutning:
+  <code class="f">Program.cs</code> <code class="ln">rad 8</code> (UsePathBase), <code class="ln">rad 18</code> (UseStaticFiles), <code class="ln">rad 24</code> (route)
+  <code class="f">appsettings.json</code> <code class="ln">rad 9</code> (SchoolConnection)
+  Modellernas konstruktor: <code class="f">ObservationModel.cs</code> <code class="ln">rad 11-17</code>,
+                            <code class="f">PersonModel.cs</code> <code class="ln">rad 11-17</code></pre></section>
+<section class='card' id='s5' data-title='4. 60-SEKUNDERSMANUS PER FRAGA (sag hogt, inte tyst)'><h2><span class='badge b-manus'>MANUS</span>4. 60-SEKUNDERSMANUS PER FRAGA (sag hogt, inte tyst)</h2><pre class='body'><b class="manus">A1 - Applikationens struktur:</b>
+"Det har ar en MVC-applikation. <code class="f">Program.cs</code> <code class="ln">rad 24</code> mappar URL:er till
+controller och action. Controllers tar emot formulärdata, Models kor
+SQL mot MySQL och Views renderar HTML med Razor. Vi har tre
+controllers och tva modeller. Formulären anvander Url.Action sa att
+lankarna foljer routingen. Appen ligger under en PathBase, <code class="ln">rad 8</code>."
+
+<b class="manus">A2 - Enkla tabeller:</b>
+"PersonController.Index <code class="ln">rad 18-23</code> hamtar tva DataTables: alla personer
+med SELECT * FROM Person i PersonModel <code class="ln">rad 19-27</code>, och medelsakerhet
+via proceduren GETAVGSAKERHET i <code class="ln">rad 29-37</code>. De laggs i ViewBag och
+skrivs ut i <code class="f">Views/Person/Index.cshtml</code> <code class="ln">rad 14-51</code> med foreach over
+Columns och Rows. Ingen join - hela tabellen visas."
+
+<b class="manus">A3 - Komplexa tabeller:</b>
+"ObservationModel <code class="ln">rad 19-27</code> joinar Observation med Plats,
+GradBeskrivning och Agent. I vyn <code class="ln">rad 20-55</code> finns en yttre loop over
+incidenter och en inre loop som bygger en nastlad tabell med
+observationerna for samma incident. Variabeln prev <code class="ln">rad 26</code>, 31 och 52
+gor att den yttre raden bara skrivs nar IncidentId andras. Varje
+observation har en Arkivera-lank pa <code class="ln">rad 46</code>."
+
+<b class="manus">A4 - Sokning / lankning / dropdown:</b>
+"Sokningen borjar i formularet <code class="ln">rad 6-18</code> som postar platskod till
+SearchObservations i controllern <code class="ln">rad 26-30</code>. Modellen <code class="ln">rad 101-110</code>
+filtrerar med WHERE PlatsKod = @PLATSKOD och resultatet visas i
+<code class="f">SearchObservations.cshtml</code>. Personsokningen ar samma monster: <code class="ln">rad 5-12</code>,
+PersonController <code class="ln">rad 25-29</code>, PersonModel <code class="ln">rad 39-47</code> med LIKE.
+Dropdowns fylls i Index-action <code class="ln">rad 18-24</code> med GetAllPlats och
+GetAllHandlaggare, och i vyn loopas Rows till option-element.
+Arkivera ar en lank till en action som anropar en procedur."
+
+<b class="manus">A5 - Insert / Update / procedur:</b>
+"Vi uppdaterar databasen pa tre stallen. INSERT: formularet <code class="ln">rad 67-101</code>
+till controller <code class="ln">rad 32-44</code> till modellen <code class="ln">rad 49-79</code> dar INSERT kor pa
+<code class="ln">rad 68</code> med parametrar. UPDATE: formularet <code class="ln">rad 105-117</code> till controller
+<code class="ln">rad 46-50</code> till modellen <code class="ln">rad 81-90</code> med UPDATE ... WHERE ObsId.
+Arkiveringen gar via proceduren ARKIVERAOBSERVATION som anropas i
+modellen <code class="ln">rad 96</code> och flyttar raden till arkivtabellen. Allt anvander
+parametrar, inte strangkonkatenering."</pre></section>
+<section class='card' id='s6' data-title='5. OM LARAREN FRAGAR - KORTA SVAR'><h2><span class='badge b-qa'>Q&A</span>5. OM LARAREN FRAGAR - KORTA SVAR</h2><pre class='body'><b>Fraga:</b> Vad ar skillnaden mellan View() och RedirectToAction()?
+<b>Svar:</b> View() renderar en vy direkt. RedirectToAction() skickar en ny
+HTTP-request till en action (Post-Redirect-Get), sa att F5 inte
+skickar om formularet.
+
+<b>Fraga:</b> Varför ViewBag istallet for en modellklass?
+<b>Svar:</b> Det foljer lararens kodexempel for den har uppgiften. ViewBag
+racker nar vi bara ska skicka en DataTable till vyn; ingen extra
+modellklass behovs.
+
+<b>Fraga:</b> Vad gor @Url.Action?
+<b>Svar:</b> Genererar en URL till en controller/action utifran routingen och
+PathBase, sa lankarna fungerar aven nar appen ligger under /app.
+
+<b>Fraga:</b> Vad gor ActionLink("Arkivera", ...)?
+<b>Svar:</b> Skapar en lank till actionen ArkiveraObservation med obsid som
+route-varde. Det ar en GET-lank, inte ett formulär.
+
+<b>Fraga:</b> Hur vet modellen vilken databas den ska ansluta till?
+<b>Svar:</b> Konstruktorn laser SchoolConnection fran <code class="f">appsettings.json</code> <code class="ln">rad 9</code>
+(annars miljovariabel), se ObservationModel <code class="ln">rad 11-17</code>.
+
+<b>Fraga:</b> Vad betyder parameteriserad SQL?
+<b>Svar:</b> Vi anvander @NAMN och AddWithValue i stallet for att klistra in
+varden i SQL-strangen. Det skyddar mot SQL-injektion och skoter
+typning.
+
+<b>Fraga:</b> Vad hander i databasen vid en insert?
+<b>Svar:</b> CHECKOBSGRAD (BEFORE INSERT) stoppar ogiltig grad och
+LOGGOBSERVATION (AFTER INSERT) skriver en loggrad. Se <code class="f">database.sql</code>
+<code class="ln">rad 222-239</code>.
+
+<b>Fraga:</b> Varför ar dropdowns fyllda fran databasen?
+<b>Svar:</b> Annars kan man valja en plats/handlaggare som inte finns och fa
+FK-fel. Nu kommer listan alltid fran Plats/Agent-tabellerna.
+
+<b>Fraga:</b> Vad gor UsePathBase?
+<b>Svar:</b> Talar om att appen ligger under /databaskonstruktion/a25milha/app
+sa att routing och genererade lankar blir ratt.
+
+<b>Fraga:</b> Vad gor UseStaticFiles?
+<b>Svar:</b> Serverar filer fran wwwroot (css/js) utan att ga via en
+controller.
+
+<b>Fraga:</b> Vad ar skillnaden mot PHP-appen?
+<b>Svar:</b> PHP-appen ar sjalv-refererande: en fil tar emot POST och skriver
+HTML. MVC delar upp i controller, modell och vy. Bada anvander samma
+databas och samma procedurer.
+
+<b>Fraga:</b> Vad hander vid RedirectToAction("Index")?
+<b>Svar:</b> Webblasaren far en ny request till Index-actionen, som fyller
+ViewBag pa nytt och renderar vyn med uppdaterad data.</pre></section>
+<section class='card' id='s7' data-title='6. QUIZ - 10 FRAGOR (svara hogt innan du tittar)'><h2><span class='badge b-quiz'>QUIZ</span>6. QUIZ - 10 FRAGOR (svara hogt innan du tittar)</h2><pre class='body'>1. Vilken fil mappar en URL till controller/action?
+   Svar: <code class="f">Program.cs</code> <code class="ln">rad 24</code>.
+
+2. Var ligger formularet for att lagga till en observation?
+   Svar: <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 67</code>.
+
+3. Vilken controller-action tar emot insert?
+   Svar: ObservationController.InsertObservation <code class="ln">rad 32</code>.
+
+4. Var kor sjalva INSERT-SQL:en?
+   Svar: <code class="f">ObservationModel.cs</code> <code class="ln">rad 68</code>.
+
+5. Hur skickas felmeddelanden tillbaka till vyn?
+   Svar: TempData["Error"] i controllern <code class="ln">rad 41</code>, visas i vyn <code class="ln">rad 59</code>.
+
+6. Vilken metod hamtar alla personer?
+   Svar: PersonModel.GetAllPersons <code class="ln">rad 19</code> (SQL <code class="ln">rad 23</code>).
+
+7. Vilken metod anropar proceduren for medelsakerhet?
+   Svar: PersonModel.GetAvgSakerhet <code class="ln">rad 29</code> (CALL <code class="ln">rad 33</code>).
+
+8. Var byggs den nastlade tabellen i observationsvyn?
+   Svar: <code class="f">Views/Observation/Index.cshtml</code> <code class="ln">rad 20-55</code> (inre tabell 39-48).
+
+9. Vilken action anropas nar man klickar Arkivera?
+   Svar: ObservationController.ArkiveraObservation <code class="ln">rad 52</code>, som
+   anropar modellen <code class="ln">rad 92</code> (CALL <code class="ln">rad 96</code>).
+
+10. Vad gor RedirectToAction efter en lyckad insert?
+    Svar: Skickar en ny request till Index sa listan laddas om utan
+    att formularet skickas igen.</pre></section>
+<section class='card' id='s8' data-title='7. FALLOR - SAG INTE DETTA'><h2><span class='badge b-fall'>FALLOR</span>7. FALLOR - SAG INTE DETTA</h2><pre class='body'>- SAG INTE "modellen ar en databastabell". Modellen ar C#-klassen som
+  kor SQL och returnerar DataTable.
+- SAG INTE att ViewBag ar en modellklass. Det ar en dictionary i vyn.
+- SAG INTE att Arkivera ar ett formulär. Det ar en ActionLink (GET).
+- SAG INTE att RedirectToAction renderar en vy. Den gor en ny request.
+- SAG INTE att appen anvander SQL Server. Det ar MySQL (MySql.Data).
+- SAG INTE att du oppnar Visual Studio. Du visar allt pa git.
+- Om radnumret inte stammer: sok pa metodnamnet och forklara i stallet.</pre></section>
+<section class='card' id='s9' data-title='8. 10-MINUTERSREPETITION IMORGON BITTI'><h2><span class='badge b-plan'>PLAN</span>8. 10-MINUTERSREPETITION IMORGON BITTI</h2><pre class='body'>1. Rita kedjan pa papper: form -&gt; controller -&gt; model -&gt; SQL -&gt; view.
+2. Saga A5-manuset hogt tva ganger utan att titta.
+3. Oppna git och hitta: InsertObservation (controller + model),
+   <code class="f">Index.cshtml</code> formularet, SearchObservations-kedjan.
+4. Kor quizzen i avsnitt 6.
+5. Las fallorna i avsnitt 7.
+
+LYCKA TILL - du kan mer an du tror. Borja varje svar med:
+"Jag visar fil X, rad Y" och forklara sedan vad koden gor.</pre></section>
+</main>
+<a class="top" href="#top">Till toppen</a>
+<script>
+const q=document.getElementById('q'),cards=[...document.querySelectorAll('.card')],chips=[...document.querySelectorAll('.chip')],count=document.getElementById('count');
+function apply(){const v=q.value.trim().toLowerCase();let n=0;cards.forEach(c=>{const hit=!v||(c.dataset.title+' '+c.textContent).toLowerCase().includes(v);c.classList.toggle('dim',!hit);c.style.display=hit?'':'none';if(hit)n++});chips.forEach(ch=>{const s=document.getElementById(ch.dataset.s);const hit=!v||(s&&s.style.display!=='none');ch.style.display=hit?'':'none'});count.textContent=v?(n+' av '+cards.length+' avsnitt matchar "'+q.value.trim()+'"'):''}
+q.addEventListener('input',apply);document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus()}if(e.key==='Escape'){q.value='';apply();q.blur()}});
+const obs=new IntersectionObserver(es=>{es.forEach(en=>{if(en.isIntersecting){chips.forEach(c=>c.classList.toggle('active',c.dataset.s===en.target.id))}})},{rootMargin:'-45% 0px -50% 0px'});cards.forEach(c=>obs.observe(c));
+</script></body></html>

@@ -1,0 +1,119 @@
+@{
+    ViewBag.Title = "Index";
+}
+@* Nästlad tabell kolumnlayout yttre incident inre obs *@
+<h2>Filtrera per plats</h2>
+<form method="post" action="@Url.Action("SearchObservations", "Observation")">
+    <label>
+        Plats:
+        <select name="platskod">
+            @foreach (var row in ViewBag.AllPlats.Rows)
+            {
+                <option value="@row["PlatsKod"]">@row["PlatsNamn"]</option>
+            }
+        </select>
+    </label>
+    <input type="submit" value="Search" />
+</form>
+<br />
+<h2>Observationer per incident</h2>
+<table border="1">
+    <tr>
+        <th>Incident</th>
+        <th>Plats</th>
+        <th>Observationer</th>
+    </tr>
+    @{string prev = "None";}
+
+    @foreach (var obsRow in ViewBag.ObsTable.Rows)
+    {
+        <tr>
+        @if (prev != obsRow["IncidentId"].ToString())
+        {
+            <td>@obsRow["IncidentNamn"]</td>
+            <td>@obsRow["PlatsNamn"]</td>
+            @foreach (var obsInnerRow in ViewBag.ObsTable.Rows)
+            {
+                @if (obsInnerRow["IncidentId"].ToString() == obsRow["IncidentId"].ToString())
+                {
+                    <td><table border="1">
+                    <tr>
+                        <td>@obsInnerRow["ObsId"]</td>
+                        <td>@obsInnerRow["Datum"]</td>
+                        <td>@obsInnerRow["Sakerhet"]</td>
+                        <td>@obsInnerRow["Grad"]</td>
+                        <td>@obsInnerRow["Handlaggare"]</td>
+                        <td>@Html.ActionLink("Arkivera", "ArkiveraObservation", "Observation", new { obsid = obsInnerRow["ObsId"] }, null)</td>
+                    </tr>
+                    </table></td>
+                }
+            }
+        }
+        @{prev = obsRow["IncidentId"].ToString();}
+        </tr>
+    }
+</table>
+<br />
+
+<h2>Lagg till observation</h2>
+@if (TempData["Error"] != null)
+{
+    <div style="color:red;">@TempData["Error"]</div>
+}
+@if (TempData["Success"] != null)
+{
+    <div style="color:green;">@TempData["Success"]</div>
+}
+<form method="post" action="@Url.Action("InsertObservation", "Observation")">
+    <label>ObsId: <input type="text" name="obsid" /></label>
+    <label>Incidentnr: <input type="text" name="incidentid" /></label>
+    <label>Incidentnamn: <input type="text" name="incidentnamn" /></label>
+    <label>
+        Plats:
+        <select name="platskod">
+            @foreach (var row in ViewBag.AllPlats.Rows)
+            {
+                <option value="@row["PlatsKod"]">@row["PlatsNamn"]</option>
+            }
+        </select>
+    </label>
+    <label>Grad (1-4): <input type="number" name="gradkod" min="1" max="4" /></label>
+    <label>Sakerhet: <input type="number" name="sakerhet" step="0.01" min="1" max="114" /></label>
+    <label>
+        Handlaggare namn:
+        <select name="regnamn">
+            @foreach (var hrow in ViewBag.AllHandlaggare.Rows)
+            {
+                <option value="@hrow["AgentNamn"]">@hrow["AgentNamn"] @hrow["Namn"]</option>
+            }
+        </select>
+    </label>
+    <label>
+        Handlaggare nr:
+        <select name="regnr">
+            @foreach (var hrow in ViewBag.AllHandlaggare.Rows)
+            {
+                <option value="@hrow["AgentNr"]">@hrow["AgentNr"] @hrow["Namn"]</option>
+            }
+        </select>
+    </label>
+    <input type="submit" value="Add" />
+</form>
+<br />
+
+<h2>Andra sakerhet</h2>
+<form method="post" action="@Url.Action("UpdateSakerhet", "Observation")">
+    <label>
+        Observation:
+        <select name="obsid">
+            @foreach (var obsRow in ViewBag.ObsTable.Rows)
+            {
+                <option value="@obsRow["ObsId"]">@obsRow["ObsId"] @obsRow["IncidentNamn"]</option>
+            }
+        </select>
+    </label>
+    <label>Ny sakerhet: <input type="number" name="sakerhet" step="0.01" min="1" max="114" /></label>
+    <input type="submit" value="Update" />
+</form>
+<br />
+<a href="@Url.Content("~/")">Link back to home</a>

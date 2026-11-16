@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Databaskonstruktion – vertikal vs horisontell split</title>
+<style>
+  @page { size: A4; margin: 15mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html { background: #0d1117; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 10.4pt; line-height: 1.42; color: #e6edf3; background: #0d1117; margin: 0; }
+  .topline { font-size: 8.8pt; color: #8b949e; letter-spacing: .4px; margin-bottom: 4px; }
+  .tag { display: inline-block; background: #1f6feb; color: #fff; padding: 1px 7px; border-radius: 3px; font-size: 8.2pt; margin-right: 6px; }
+  h1 { font-size: 19pt; color: #79c0ff; margin: 4px 0 4px; line-height: 1.15; }
+  .lead { font-size: 10.4pt; color: #c9d1d9; margin: 0 0 8px; }
+  h2 { font-size: 13pt; color: #79c0ff; border-bottom: 2px solid #1f6feb; padding-bottom: 2px; margin: 14px 0 8px; break-after: avoid; page-break-after: avoid; }
+  h3 { font-size: 10.8pt; color: #a5d6ff; margin: 8px 0 4px; }
+  p { margin: 4px 0; }
+  .box { border: 1.4px solid #1f6feb; background: #161b22; padding: 8px 11px; border-radius: 6px; margin: 8px 0 10px; break-inside: avoid; page-break-inside: avoid; color: #e6edf3; }
+  .box.warn { border-color: #d29922; background: #2d1a10; color: #ffd7b0; }
+  .box.green { border-color: #3fb950; background: #0f2a1a; color: #d7f5e0; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  th { background: #1f3a5f; color: #e6edf3; text-align: left; font-size: 9.4pt; }
+  th, td { border: 1px solid #30363d; padding: 5px 7px; vertical-align: top; }
+  td { font-size: 9.5pt; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  ul, ol { margin: 3px 0 5px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .q { margin: 12px 0 10px; page-break-inside: avoid; }
+  .qnum { display: inline-block; background: #1f6feb; color: #fff; min-width: 22px; height: 22px; border-radius: 50%; text-align: center; font-weight: 600; font-size: 9.8pt; line-height: 22px; margin-right: 5px; }
+  .type { font-size: 8.2pt; color: #fff; background: #484f58; padding: 1px 6px; border-radius: 3px; margin-left: 5px; vertical-align: 2px; }
+  .type.multi { background: #b35900; }
+  .alt { margin: 2px 0 2px 28px; }
+  .alt b { color: #79c0ff; }
+  .motlabel { margin: 7px 0 0 28px; font-size: 9pt; color: #8b949e; font-weight: 600; }
+  .mot { border-bottom: 1px solid #30363d; height: 21px; margin: 3px 28px 0 28px; }
+  .small { font-size: 8.8pt; color: #8b949e; }
+  .facit { page-break-before: always; }
+  .answer { color: #3fb950; font-weight: 700; }
+  .stop { border: 2px dashed #d29922; background: #2d1a10; padding: 8px 10px; border-radius: 6px; text-align: center; font-weight: 600; color: #ffd7b0; margin: 10px 0; }
+  .model { background: #0f2a1a; border-left: 3px solid #3fb950; padding: 6px 9px; margin: 5px 0 8px; font-size: 9.4pt; color: #d7f5e0; }
+  .why { font-size: 8.9pt; color: #8b949e; margin: 2px 0 8px; }
+  .pagebreak { page-break-before: always; }
+  code { background: #161b22; color: #ffa657; padding: 1px 3px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="topline"><span class="tag">IT429G</span> Databaskonstruktion · Omtenta 18 december 2026 · Pass 3</div>
+<h1>Vertikal vs horisontell split</h1>
+<p class="lead">Dagens mål: efter det här passet ska du aldrig blanda ihop de två begreppen. Det var din enda helt felaktiga definition i diagnostestet.</p>
+
+<h2>1. Repetition (5 min)</h2>
+<p>Markera rätt eller fel. Svaren finns i facit längst bak – titta inte innan du svarat.</p>
+<table>
+  <tr><th style="width:8%">Nr</th><th>Påstående</th><th style="width:18%">Rätt / Fel</th></tr>
+  <tr><td>1</td><td>Vertikal split delar upp rader i aktiva och arkiverade tabeller.</td><td></td></tr>
+  <tr><td>2</td><td>Horisontell split behåller samma kolumnstruktur i båda tabellerna.</td><td></td></tr>
+  <tr><td>3</td><td>Vid vertikal split ska den nya tabellen ha samma primärnyckel.</td><td></td></tr>
+  <tr><td>4</td><td>Merge är lämpligast för N:M-relationer.</td><td></td></tr>
+</table>
+
+<h2>2. Mikrolektion (15 min)</h2>
+
+<table>
+  <tr><th style="width:16%"></th><th style="width:42%">Vertikal split</th><th>Horisontell split</th></tr>
+  <tr><td><strong>Vad delas?</strong></td><td><strong>Kolumner.</strong> Stora eller sällan använda fält flyttas till en egen tabell.</td><td><strong>Rader.</strong> Tabellen delas i två med samma kolumner, t.ex. aktiva och arkiverade rader.</td></tr>
+  <tr><td><strong>Primärnyckel</strong></td><td>Samma primärnyckel i båda tabellerna.</td><td>Samma kolumnstruktur; primärnyckeln finns i båda tabellerna.</td></tr>
+  <tr><td><strong>Case-exempel</strong></td><td><em>informationOmMig</em> flyttas från <em>BadJB_medlemmar</em> till <em>MedlemInfo(Nick, informationOmMig)</em>.</td><td>Aktiva spel ligger i <em>Spel</em>; avslutade spel flyttas till <em>SpelArkiv</em> med samma kolumner.</td></tr>
+  <tr><td><strong>Varför?</strong></td><td>Huvudtabellen blir smalare och snabbare att läsa; stora textfält läses bara när de behövs.</td><td>Den aktiva tabellen blir mindre och snabbare att läsa; arkivet kan hanteras separat.</td></tr>
+  <tr><td><strong>Nackdel</strong></td><td>Frågor som behöver båda tabellerna kräver JOIN.</td><td>Frågor över båda tabellerna kräver UNION eller sammanslagning.</td></tr>
+</table>
+
+<div class="box">
+  <strong>Minnesregel:</strong> <strong>Vertikal = kolumner</strong> (tänk en stående lista med fält). <strong>Horisontell = rader</strong> (tänk en liggande hög med rader). Båda är denormaliseringar – de kan öka redundansen, inte minska den.
+</div>
+
+<h3>Typiska fällor</h3>
+<ul>
+  <li>Att kalla raddelning för vertikal och kolumndelning för horisontell – exakt den omkastning du gjorde.</li>
+  <li>Att tro att vertikal split ger en ny primärnyckel – den behåller samma PK.</li>
+  <li>Att tro att split minskar redundans – split är denormalisering och kan öka den.</li>
+  <li>Att blanda in merge: merge slår ihop tabeller, split delar upp dem.</li>
+</ul>
+
+<h2>3. Quiz (10 min)</h2>
+
+<div class="q">
+  <p><span class="qnum">1</span><strong>Vilket exempel är en vertikal split i caset?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> Aktiva spel flyttas till SpelAktiv och arkiverade till SpelArkiv.</div>
+  <div class="alt"><b>b)</b> informationOmMig flyttas från BadJB_medlemmar till MedlemInfo med Nick som primärnyckel.</div>
+  <div class="alt"><b>c)</b> Spel och Utgivare slås ihop till en tabell.</div>
+  <div class="alt"><b>d)</b> Plattform ersätts med en plattformskod som pekar på en kodtabell.</div>
+  <div class="alt"><b>e)</b> Ett index skapas på Spel.Namn.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">2</span><strong>Vilket exempel är en horisontell split i caset?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> informationOmMig flyttas till en egen tabell.</div>
+  <div class="alt"><b>b)</b> Spel och Utgivare slås ihop till en tabell.</div>
+  <div class="alt"><b>c)</b> Aktiva spel ligger kvar i Spel och avslutade flyttas till SpelArkiv med samma kolumner.</div>
+  <div class="alt"><b>d)</b> Plattform ersätts med en plattformskod.</div>
+  <div class="alt"><b>e)</b> En vy skapas över alla spel.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">3</span><strong>Vilka påståenden är korrekta?</strong><span class="type multi">Flera svar</span></p>
+  <div class="alt"><b>a)</b> Vid vertikal split flyttas kolumner till en ny tabell med samma primärnyckel.</div>
+  <div class="alt"><b>b)</b> Vid horisontell split delas rader upp i två tabeller med samma kolumnstruktur.</div>
+  <div class="alt"><b>c)</b> Båda teknikerna minskar redundansen.</div>
+  <div class="alt"><b>d)</b> Horisontell split kan göra den aktiva tabellen mindre och snabbare att läsa.</div>
+  <div class="alt"><b>e)</b> Vertikal split kräver att den nya tabellen har en annan primärnyckel.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="facit">
+  <div class="stop">STOPP – rätta inte förrän du svarat på repetitionen och quizen.</div>
+  <h2>Facit</h2>
+
+  <h3>Repetition</h3>
+  <table>
+    <tr><th style="width:8%">Nr</th><th>Svar</th><th>Förklaring</th></tr>
+    <tr><td>1</td><td class="answer">Fel</td><td>Det beskriver horisontell split. Vertikal split delar kolumner.</td></tr>
+    <tr><td>2</td><td class="answer">Rätt</td><td>Horisontell split delar rader men behåller samma kolumnstruktur.</td></tr>
+    <tr><td>3</td><td class="answer">Rätt</td><td>Den nya tabellen har samma primärnyckel som originalet.</td></tr>
+    <tr><td>4</td><td class="answer">Fel</td><td>Merge passar för 1:1 och 1:N, inte i första hand N:M.</td></tr>
+  </table>
+
+  <h3>Quiz</h3>
+  <table>
+    <tr><th style="width:8%">Fråga</th><th style="width:12%">Rätt svar</th><th>Modellmotivering (30–50 ord)</th></tr>
+    <tr><td>1</td><td class="answer">b</td><td><div class="model">Vertikal split flyttar kolumner, inte rader. informationOmMig är ett stort, sällan använt textfält som kan flyttas till MedlemInfo med samma primärnyckel Nick. Huvudtabellen blir smalare och snabbare, medan join krävs när fältet behövs.</div><div class="why">a = horisontell split, c = merge, d = kodifiering, e = index.</div></td></tr>
+    <tr><td>2</td><td class="answer">c</td><td><div class="model">Horisontell split delar upp rader i tabeller med samma kolumnstruktur. Aktiva spel kan ligga kvar i Spel och avslutade flyttas till SpelArkiv. Den aktiva tabellen blir mindre och snabbare att läsa, men frågor över båda kräver UNION eller sammanslagning.</div><div class="why">a = vertikal split, b = merge, d = kodifiering, e = vy.</div></td></tr>
+    <tr><td>3</td><td class="answer">a, b, d</td><td><div class="model">Vertikal split flyttar kolumner till en ny tabell med samma primärnyckel, och horisontell split delar rader med samma kolumnstruktur. Båda kan göra den aktiva tabellen mindre och snabbare. Däremot minskar de inte redundansen; de är denormaliseringar och kan öka den.</div><div class="why">c är fel: split är denormalisering och kan öka redundansen. e är fel: den nya tabellen behåller samma primärnyckel.</div></td></tr>
+  </table>
+
+  <div class="box warn">
+    <strong>Rätta din Q2 från diagnostestet:</strong> Du svarade <strong>a</strong> (som beskrev horisontell split). Rätt svar var <strong>d</strong>: vertikal split flyttar stora eller sällan använda <em>kolumner</em> till en egen tabell med samma primärnyckel. Uppdatera också kommentarerna i din <code>database.sql</code> där samma omkastning finns (rad 22 och 73).
+  </div>
+
+  <div class="box green">
+    <strong>Nästa pass:</strong> C#-kodfel av Q9-typen – vi går igenom ett löst exempel, sedan ett med ledtråd och till sist ett själv. Ta med dig din felanalys.
+  </div>
+</div>
+
+</body>
+</html>

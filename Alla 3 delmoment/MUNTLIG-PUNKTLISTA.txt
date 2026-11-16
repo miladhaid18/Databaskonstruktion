@@ -1,0 +1,430 @@
+=====================================================================
+ MUNTLIG REDOVISNING - PUNKTLISTA (IT429G HT26)
+ Byggd pa: "Förtydligande frågor pa muntlig tentamen" + instruktionsfilen
+=====================================================================
+Sa examineras du:
+- 3 slumpvis valda fragor fran listan nedan + 1 personlig fraga
+- Max 5 minuter per fraga (tar en delfraga > 5 min = underkand)
+- Du visar appen pa wwwlab.webug.se och koden pa git.webug.se
+- ENDAST dessa tva sidor. Ingen editor/Visual Studio.
+- Du maste HITTA koden pa git och FORKLARA vad den gor.
+- Examinationen utgar fran SENASTE COMMIT i det publika repot.
+- Fungerar inte appen = ofullstandig.
+
+FRAGORNA (exakt enligt kravlistorna):
+DATABAS
+ D1. Forsta förebyggande steget i logisk design: skapa relationer
+ D2. Forsta steget i logisk design: bestam datatyper
+ D3. Andra steget i logisk design: bestam constraints
+ D4. Forsta steget i fysisk design: denormalisering (merge, horisontell,
+     vertikal, kodifiering)
+ D5. Andra steget i fysisk design: indexering
+ D6. Tredje steget i fysisk design: rattigheter
+ D7. Femte steget i fysisk design: procedures/triggers (funktioner,
+     constraints, loggning, materialisering/flytt)
+PHP / .NET
+ A1. Bygga strukturen (sjalv-refererande PHP eller separata filer)
+ A2. Enkla tabeller (utan joins, hela tabellen i html-tabell)
+ A3. Komplexa tabeller (joins/merge, nastlad html-tabell)
+ A4. Sokning / lankning / dropdown (filtrerad tabell fran formularet)
+ A5. Uppdatering: Insert / Delete / Update (minst 3 stallen, varav
+     minst ett via procedur)
+
+SVARSMELLODI: oppna ratt fil pa git -> scrolla till raden -> sag VAD
+koden gor -> sag VARFOR (designval) -> koppla till appen pa wwwlab.
+
+=====================================================================
+ D1 - LOGISK DESIGN: RELATIONER (forsta forebyggande steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql + ER_diagram.png + README.md
+
+Tabellerna (radnummer i database.sql):
+- rad   9  Agent                (AgentNamn + AgentNr = PK)
+- rad  23  AgentKommentar       (svag entity, samma PK som Agent)
+- rad  31  Handlaggare          (specialisering av Agent, 1:1)
+- rad  39  Plats                (kodtabell)
+- rad  46  GradBeskrivning      (kodtabell)
+- rad  53  Observation          (huvudtabell)
+- rad  74  ARKIVERADObservation (arkiv, samma kolumner)
+- rad  94  Person
+- rad 101  Rapporterat          (M:N Person <-> Observation)
+- rad 110  ObservationLog       (logg)
+
+Sag sa har:
+- "Forsta steget i logisk design ar att ga fran ER-diagrammet till
+  relationer: vilka tabeller, nycklar och relationer vi behover."
+- 1:1: Agent-Handlaggare (arv) - FK rad 35, samma PK rad 34
+- 1:1: Agent-AgentKommentar - FK rad 28, samma PK rad 27
+- 1:N: Plats -> Observation (FK rad 69)
+- 1:N: GradBeskrivning -> Observation (FK rad 70)
+- 1:N: Handlaggare -> Observation (FK rad 68, sammansatt nyckel)
+- M:N: Person <-> Observation loses med Rapporterat (rad 101-106)
+- Relationerna ar dokumenterade i README/ER-diagrammet, den fysiska
+  modellen ar SQL-koden i database.sql
+
+=====================================================================
+ D2 - LOGISK DESIGN: DATATYPER (forsta steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql
+
+- rad 10  AgentNamn CHAR(1)        fast kod, alltid 1 tecken
+- rad 11  AgentNr INTEGER          heltal
+- rad 12-13 Fornamn/Efternamn VARCHAR(50)
+- rad 14  Lon INTEGER DEFAULT 13000
+- rad 26  Kommentar VARCHAR(1024)  lang text
+- rad 40  PlatsKod INTEGER
+- rad 41  PlatsNamn VARCHAR(100)
+- rad 48  Beskrivning VARCHAR(100)
+- rad 54  ObsId INTEGER
+- rad 55  Datum DATETIME           datum + tid
+- rad 57  Sakerhet DECIMAL(5,2)    procent med 2 decimaler
+- rad 59  IncidentNamn VARCHAR(100)
+- rad 95  PersonId CHAR(13)        fast langd (personnummer)
+- rad 111 LogId INTEGER AUTO_INCREMENT
+- rad 112 Operation VARCHAR(10)
+
+Sag sa har:
+- "Minst tre olika datatyper anvands: CHAR, INTEGER, VARCHAR,
+  DECIMAL och DATETIME."
+- CHAR(1)/CHAR(13) for varden med fast langd (agentnamn, personnr)
+- DECIMAL(5,2) for Sakerhet: undviker avrundningsfel som flyttal ger
+- DATETIME for Datum: bade datum och klockslag
+- AUTO_INCREMENT pa LogId: databasen skapar unikt loggnummer
+
+=====================================================================
+ D3 - LOGISK DESIGN: CONSTRAINTS (andra steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql
+
+PRIMARY KEY: rad 15, 27, 34, 42, 49, 63, 84, 98, 104, 116
+FOREIGN KEY: rad 28, 35, 68, 69, 70, 89, 90, 91, 105, 106
+CHECK:
+- rad 17  CHECK (Lon >= 12000 AND Lon <= 25000)
+- rad 19  CHECK (AgentNr > 0 AND AgentNr <= 99)
+- rad 65  CHECK (GradKod >= 1 AND GradKod <= 4)
+- rad 67  CHECK (Sakerhet >= 1.00 AND Sakerhet <= 114.00)
+- rad 86, 88 samma CHECK i ARKIVERADObservation
+UNIQUE:
+- rad 41  PlatsNamn VARCHAR(100) NOT NULL UNIQUE
+  (ingen plats kan registreras tva ganger med samma namn)
+NOT NULL: bl.a. rad 10-14, 40-41, 54-62, 95-96
+
+Sag sa har:
+- "Constraints ar regler som databasen sjalv uppratter: PK, FK,
+  CHECK, UNIQUE och NOT NULL."
+- CHECK hindrar ogiltig lon, agentnr, grad och sakerhet
+- UNIQUE pa PlatsNamn hindrar dubbletter av platsnamn
+- FK hindrar att en observation pekar pa en plats/grad/handlaggare
+  som inte finns
+- Varje CHECK har en enradig forklarande kommentar (kravet)
+
+=====================================================================
+ D4 - FYSISK DESIGN: DENORMALISERING (forsta steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql
+
+Definitioner (lararens kodexempel):
+- MERGE          = sla ihop tabeller/kolumner till en tabell
+- HORISONTELL    = lyft ut stora textkolumner som sallan las
+- VERTIKAL       = dela upp rader efter anvandningsfrekvens
+- KODIFIERING    = byt ut upprepad text mot en kod + kodtabell
+
+I din databas:
+- MERGE + KODIFIERING 1 & 2: Observation (rad 52-71)
+  * IncidentId/IncidentNamn lagras direkt i varje observationsrad
+    (ingen separat Incident-tabell) = merge
+  * PlatsKod (rad 60, FK rad 69) mot Plats (rad 38-43) = kod 1
+  * GradKod (rad 56, FK rad 70) mot GradBeskrivning (rad 45-50) = kod 2
+- HORISONTELL: AgentKommentar (rad 22-29)
+  * Kommentar VARCHAR(1024) lyfts ut till egen tabell med samma PK
+  * vinst: stora texten las inte in vid vanliga Agent-fragor
+- VERTIKAL: ARKIVERADObservation (rad 73-92)
+  * aktiva observationer (Observation) och arkiverade
+    (ARKIVERADObservation) hall isar
+  * vinst: den aktiva tabellen blir mindre och snabbare
+
+Sag sa har:
+- "Kravet: merge + kodifiering minst 3 totalt (har: 1 merge + 2
+  kodifieringar) och horisontell/vertikal minst 2 totalt (har 1+1)."
+- Forflyttningen mellan aktivt/arkiv sker med proceduren
+  ARKIVERAOBSERVATION (rad 252-258)
+
+=====================================================================
+ D5 - FYSISK DESIGN: INDEXERING (andra steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql
+
+- rad 173-174  CREATE INDEX OBSDATUM ON Observation(Datum DESC) USING BTREE;
+  kommentar ovanfor visar query: SELECT * FROM Observation ORDER BY Datum DESC
+- rad 176-177  CREATE INDEX PERSONNAMN ON Person(Namn ASC) USING BTREE;
+  kommentar ovanfor visar query: SELECT * FROM Person ORDER BY Namn ASC
+
+Sag sa har:
+- "Index ar som en sorterad katalog som gor sokning/sortering snabbare."
+- Bada ar BTREE (bra for likhet, intervall och ORDER BY)
+- Indexen ar valda utifran vanliga queries som sorterar pa Datum/Namn
+- PK far automatiskt index; dessa tva ar extra for sortering
+- Kravet: minst 2 index, en enradig kommentar per index (uppfyllt)
+
+=====================================================================
+ D6 - FYSISK DESIGN: RATTIGHETER (tredje steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql rad 180-214
+
+- rad 184  CREATE USER IF NOT EXISTS 'handlaggare_app'@'localhost' IDENTIFIED BY '<REDACTED>';
+- rad 187  GRANT EXECUTE ON a25milha.* TO 'handlaggare_app'@'localhost';
+- rad 190  GRANT SELECT ON a25milha.GradBeskrivning ...
+- rad 193  GRANT SELECT ON a25milha.ARKIVERADObservation ...
+- rad 196  GRANT SELECT ON a25milha.Handlaggare ...
+- rad 199  GRANT SELECT ON a25milha.Plats ...
+- rad 202  GRANT SELECT, DELETE ON a25milha.Rapporterat ...
+- rad 205  GRANT SELECT ON a25milha.Person ...
+- rad 208  GRANT SELECT ON a25milha.ObservationLog ...
+- rad 211  GRANT SELECT ON a25milha.Agent ...
+- rad 214  GRANT SELECT, INSERT, UPDATE, DELETE ON a25milha.Observation ...
+
+Sag sa har:
+- "Rattigheter styr vad en anvandare/app far gora i databasen."
+- Egen app-anvandare i stallet for root = minsta ratts princip
+- Appen far lasa kodtabellerna och registren, och nar observationer
+  bade lasa, skapa, andra och radera (rad 214)
+- EXECUTE (rad 187) kravs for att appen skall fa anropa procedurerna
+- Kravet: minst 3 GRANT/REVOKE med kommentar per kommando
+  (har: 10 GRANTs, rad 187-214, uppfyllt)
+
+=====================================================================
+ D7 - FYSISK DESIGN: PROCEDURES / TRIGGERS (femte steget)
+=====================================================================
+Repo: databaskonstruktion-assignment-1-startup
+Visa: database.sql rad 218-260
+
+Fyra objekt = fyra av lararens typer:
+- rad 222-228  LOGGOBSERVATION (TRIGGER, AFTER INSERT)
+  * loggning: skriver Operation='INS', USER(), NEW.ObsId, NOW()
+    till ObservationLog (rad 110-117)
+- rad 232-239  CHECKOBSGRAD (TRIGGER, BEFORE INSERT)
+  * constraint: SIGNAL SQLSTATE '45000' om GradKod utanfor 1-4
+- rad 243-248  GETAVGSAKERHET (PROCEDURE)
+  * funktion: SELECT AVG(Sakerhet) FROM Observation
+- rad 252-258  ARKIVERAOBSERVATION (PROCEDURE, IN p_ObsId)
+  * materialisering/flytt i tre steg:
+    rad 254  DELETE FROM Rapporterat WHERE ObsId = p_ObsId;
+    rad 255-256  INSERT INTO ARKIVERADObservation
+                 SELECT * FROM Observation WHERE ObsId = p_ObsId;
+    rad 257  DELETE FROM Observation WHERE ObsId = p_ObsId;
+  * Rapportarat raderas forst sa att FK inte blockerar flytten
+
+Anvands i applikationerna:
+- PHP: rad 85 CALL ARKIVERAOBSERVATION(?), rad 161 CALL GETAVGSAKERHET()
+- .NET: ObservationModel.cs rad 96 CALL ARKIVERAOBSERVATION(@OBSID),
+  PersonModel.cs rad 33 CALL GETAVGSAKERHET()
+
+Sag sa har:
+- "Trigger kor automatiskt vid INSERT; procedur anropas med CALL."
+- Loggning och constraint kan inte glommas eller kringgas av appen
+- Samma procedur anvands av bade PHP och .NET (= logiken pa ett stalle)
+- Kravet: minst 4 objekt, minst 1 trigger + 1 procedur och minst
+  2 typer (har: funktion, constraint, loggning, flytt = 4 typer)
+
+=====================================================================
+ A1 - APPLIKATIONSSTRUKTUR (PHP / .NET)
+=====================================================================
+PHP-repo: databaskonstruktion-assignment-2-startup
+Fil: PHPApplikation.php (sjalv-refererande, allt i en fil)
+- rad 17-112  PHP overst: koppling (rad 18), queries, POST-hantering
+- rad 49-76   INSERT, rad 78-95 arkivering, rad 96-111 UPDATE
+- rad 114-281  HTML: formulär och tabeller
+- Formulären postar till samma fil: rad 116, 123, 216 m.fl.
+- Ingen modell/controller - PHP-kod och HTML i samma dokument
+
+.NET-repo: databaskonstruktion-assignment-3-startup
+- Program.cs rad 8  UsePathBase, rad 18 UseStaticFiles, rad 24 route
+- Controllers/  HomeController, ObservationController, PersonController
+- Models/       ObservationModel, PersonModel
+- Views/        Home, Observation, Person
+- Formulären anvander @Url.Action(...) till controller-action
+
+Sag sa har:
+- "PHP-varianten ar sjalv-refererande: samma fil visar sidan och
+  hanterar POST. .NET-varianten ar MVC med separata lager."
+
+=====================================================================
+ A2 - ENKLA TABELLER (utan joins)
+=====================================================================
+PHP: PHPApplikation.php
+- rad 25-37  SELECT PersonId, Namn, Kodnamn FROM Person (ev. filtrerad)
+- rad 140-156 html-tabell: foreach ($stmt as $row) -> <tr><td>
+- rad 158-166 medelsakerhet via procedur GETAVGSAKERHET (rad 161)
+
+.NET:
+- Models/PersonModel.cs rad 19-27  GetAllPersons: SELECT * FROM Person
+- Views/Person/Index.cshtml rad 14-31  html-tabell (Columns -> th,
+  Rows -> tr/td)
+- Models/PersonModel.cs rad 29-37  GetAvgSakerhet: CALL GETAVGSAKERHET()
+- Views/Person/Index.cshtml rad 34-51  tabell med medelsakerhet
+
+Sag sa har:
+- "Enkel tabell = data fran en tabell, ingen join, hela resultatet
+  skrivs ut i en html-tabell."
+- Data hamtas antingen med SQL eller med procedur (visa bada)
+- Kolumnrubriker byggs fran DataTable.Columns, rader fran Rows
+
+=====================================================================
+ A3 - KOMPLEXA TABELLER (joins + nastlad tabell)
+=====================================================================
+PHP: PHPApplikation.php rad 168-214
+- rad 183  SQL med LEFT JOIN Rapporterat + LEFT JOIN Person + JOIN Plats
+- rad 182  $prevObs = "NONE" (jamforelsevariabel)
+- rad 186  ny yttre rad nar ObsId andras
+- rad 190-199  en rad per observation + <td><table> for vittnen
+- rad 201-207  en inre rad per vittne/person
+- rad 208  prev uppdateras, rad 210-212 stanger sista tabellen
+
+.NET: Views/Observation/Index.cshtml rad 20-55
+- modell: ObservationModel.cs rad 19-27 (JOIN Plats, GradBeskrivning,
+  Agent)
+- rad 26  prev-variabel, rad 28 yttre loop, rad 31 ny rad per IncidentId
+- rad 35-50 inre loop: observationer for samma incident
+- rad 39-48 nastlad <table> med ObsId/Datum/Sakerhet/Grad/Handlaggare
+- rad 46  Arkivera-lank per observation
+
+Sag sa har:
+- "Komplex tabell = data fran flera tabeller via join, presenterad
+  som nastlad tabell: en yttre rad per incident/observation och en
+  inre tabell med detaljrader."
+- Jamforelsevariabeln (prev) gor att vi bara skriver ny yttre rad nar
+  gruppen andras.
+
+=====================================================================
+ A4 - SOKNING / LANKNING / DROPDOWN
+=====================================================================
+PHP: PHPApplikation.php
+- Sok person: formulär rad 115-119 -> query rad 25-37 (LIKE) ->
+  tabell rad 140-156
+- Filtrera pa kodnamn: dropdown rad 122-137 -> query rad 24-35
+- Dropdown-listor fran databasen: rad 39-42
+  * ny_grad rad 222-232, ny_plats rad 233-240, ny_handlaggare rad 241-254
+  * arkiv_obsid rad 255-268, upd_obsid rad 269-279
+
+.NET:
+- Sok observation: formulär Views/Observation/Index.cshtml rad 6-18
+  -> ObservationController.cs rad 26-30 -> ObservationModel.cs
+  rad 101-110 (WHERE PlatsKod = @PLATSKOD) -> svarssida
+  Views/Observation/SearchObservations.cshtml rad 5-23
+- Sok person: formulär Views/Person/Index.cshtml rad 5-12 ->
+  PersonController.cs rad 25-29 -> PersonModel.cs rad 39-47
+  (WHERE Namn LIKE @NAME) -> Views/Person/SearchPersons.cshtml rad 5-23
+- Dropdowns: Plats rad 9-17 och 73-83 (ViewBag.AllPlats),
+  Handlaggare rad 84-101 (ViewBag.AllHandlaggare),
+  observationer till update rad 108-116 (ViewBag.ObsTable)
+- Lankning: Arkivera-lank Views/Observation/Index.cshtml rad 46 ->
+  ObservationController.cs rad 52-56 -> ObservationModel.cs rad 92-99
+
+Sag sa har:
+- "Formularet postar till en action; actionen filtrerar i modellen
+  och skickar resultatet till en svarssida."
+- Dropdowns ar <select> som byggs med foreach over DataTable.Rows, sa
+  alla varden kommer fran databasen (inga hardkodade listor).
+
+=====================================================================
+ A5 - INSERT / UPDATE / PROCEDUR (minst 3 stallen)
+=====================================================================
+PHP: PHPApplikation.php
+- INSERT: rad 69-70 (prepared statement med 9 parametrar)
+  formulär fran rad 216, validering rad 59-66
+- PROCEDUR: rad 85 CALL ARKIVERAOBSERVATION(?) (arkivering)
+- UPDATE: rad 105 UPDATE Observation SET Sakerhet = ? WHERE ObsId = ?
+
+.NET:
+- INSERT: Models/ObservationModel.cs rad 49-79
+  validering rad 51-64, parameteriserad INSERT rad 68-78
+  controller: ObservationController.cs rad 32-44
+- PROCEDUR: Models/ObservationModel.cs rad 92-99
+  CALL ARKIVERAOBSERVATION(@OBSID)
+  controller: ObservationController.cs rad 52-56
+- UPDATE: Models/ObservationModel.cs rad 81-90
+  UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID
+  controller: ObservationController.cs rad 46-50
+
+Sag sa har:
+- "Kravet: minst tre stallen och minst ett via procedur. Vi har
+  INSERT, UPDATE och arkivering via procedur i bada applikationerna."
+- Prepared statements/parametrar (?, AddWithValue) skyddar mot
+  SQL-injektion och skoter typning.
+- Efter POST görs RedirectToAction till Index (undviker dubbelpost).
+
+=====================================================================
+ PERSONLIG FRAGA - VALJ 2-3 ATT PRATA OM
+=====================================================================
+1. Loggtriggern LOGGOBSERVATION (database.sql rad 222-228)
+   - Automatisk revisionslogg i ObservationLog, kan inte glommas
+2. CHECKOBSGRAD (rad 232-239)
+   - Databasen stoppar ogiltig grad aven om appen har bugg
+3. ARKIVERAOBSERVATION (rad 252-258)
+   - Flytt aktiv -> arkiv i en procedur, anvands av bade PHP och .NET
+4. Nastlad tabell med prev-variabel (PHP rad 182-212, .NET rad 26-52)
+   - Grupperar detaljrader under ratt huvudrad
+5. Dropdowns fran databasen + validering/TempData
+   - Alla listor kommer fran Plats/Agent/Person; fel visas snyggt
+
+=====================================================================
+ SNABB HITTA-KOD-TABELL
+=====================================================================
+DATABAS (database.sql):
+  Relationer/tabeller         rad 9-117
+  Datatyper                   rad 9-117 (kolumndefinitionerna)
+  Constraints                 rad 15, 17, 19, 27-28, 34-35, 41 (UNIQUE),
+                              63-70, 84-91
+  Denormalisering             rad 22-29 (horisontell), 38-50 (koder),
+                              52-71 (merge+kod), 73-92 (vertikal)
+  Index                       rad 173-177
+  Rattigheter                 rad 180-214
+  Triggers                    rad 222-239
+  Procedurer                  rad 243-260
+
+PHP (PHPApplikation.php):
+  Koppling/query                rad 17-42
+  INSERT                        rad 49-76 (SQL rad 69)
+  Arkivering (procedur)         rad 78-95 (CALL rad 85)
+  UPDATE                        rad 96-111 (SQL rad 105)
+  Sok/filter                    rad 115-137
+  Enkel tabell                  rad 140-156
+  Medelsakerhet (procedur)      rad 158-166 (CALL rad 161)
+  Komplex/nastlad tabell        rad 168-214
+  Formular/dropdowns            rad 216-281
+
+.NET:
+  Routing/PathBase              Program.cs rad 8 och 24
+  Anslutning                    appsettings.json rad 9
+  ObservationController         Controllers/ObservationController.cs rad 18-56
+  PersonController              Controllers/PersonController.cs rad 18-29
+  ObservationModel              Models/ObservationModel.cs rad 11-110
+  PersonModel                   Models/PersonModel.cs rad 11-47
+  Startsida/lankar              Views/Home/Index.cshtml rad 6-7
+  Sok obs (formular+svar)       Views/Observation/Index.cshtml rad 6-18,
+                                Views/Observation/SearchObservations.cshtml
+  Insert/update/arkiv (vy)      Views/Observation/Index.cshtml rad 46-117
+  Komplex/nastlad tabell        Views/Observation/Index.cshtml rad 20-55
+  Person (enkel tabell)         Views/Person/Index.cshtml rad 14-51
+  Person-sok (svar)             Views/Person/SearchPersons.cshtml
+  Back-lankar                   Views/Observation/Index.cshtml rad 118,
+                                Views/Person/Index.cshtml rad 52
+
+=====================================================================
+ CHECKLISTA INNAN REDOVISNINGEN
+=====================================================================
+[ ] Alla andringar committade och pushade (annars visar git annan kod!)
+[ ] Bada applikationerna fungerar pa wwwlab.webug.se
+[ ] PHP: insert, arkivering, update, sok/filter, dropdowns, tabeller
+[ ] .NET: insert, arkivering, update, sokning, dropdowns, lankar
+[ ] Du kan hitta varje fil ovan pa git utan editor (Ctrl+F)
+[ ] Legitimation med, var pa plats i tid till din slot
+
+TIPS: Borja varje svar med "Jag visar fil X, rad Y" -> vad koden gor
+-> varfor den ar gjord sa -> koppla till det du visar i appen.

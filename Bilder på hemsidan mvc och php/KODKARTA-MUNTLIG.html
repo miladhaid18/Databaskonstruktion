@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0b1120">
+<title>Kodkarta – muntlig redovisning (PHP + MVC)</title>
+<style>
+:root{
+  color-scheme:dark;
+  --bg:#0b1120; --card:#121c31; --ink:#e5e7eb; --muted:#9aa8bd;
+  --line:#2b3a55; --accent:#fca5a5; --accent-solid:#b91c1c; --accent-soft:#3f1d1d;
+  --green:#5eead4; --green-soft:#123c38; --amber:#fbbf24; --amber-soft:#3a2608;
+  --code:#1a2438; --code-line:#334155;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,sans-serif;line-height:1.55}
+.wrap{max-width:1560px;margin:0 auto;padding:28px 22px 60px}
+.hero h1{font-size:clamp(1.65rem,2.6vw,2.45rem);line-height:1.15;margin:0 0 8px;letter-spacing:-.02em}
+.hero p.lede{margin:0;color:var(--muted);max-width:980px;font-size:1rem}
+.hero .meta{margin-top:8px;font-size:.82rem;color:var(--muted)}
+.warning{background:#2a1a0b;border:1px solid #7c2d12;border-left:6px solid #f97316;border-radius:10px;padding:14px 18px;margin:18px 0}
+.warning h2{font-size:1rem;margin:0 0 6px;color:#fdba74}
+.warning p{margin:6px 0;font-size:.93rem}
+.warning ul{margin:6px 0 0;padding-left:20px;font-size:.92rem}
+.warning li{margin-bottom:5px}
+details.local{margin:10px 0 0;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 14px;font-size:.9rem}
+details.local summary{cursor:pointer;font-weight:700}
+details.local ul{margin:8px 0 0;padding-left:20px}
+details.local li{margin-bottom:4px}
+.howto{background:#0b1f3a;border:1px solid #1e3a8a;border-left:6px solid #3b82f6;border-radius:10px;padding:12px 18px;margin:16px 0 0}
+.howto h2{font-size:1rem;margin:0 0 4px;color:#93c5fd}
+.howto ol{margin:6px 0 0;padding-left:22px;font-size:.92rem}
+.howto li{margin-bottom:3px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0 18px}
+.tab{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:9px 16px;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .15s ease}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:var(--accent-solid);border-color:var(--accent-solid);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+.training-toggle{display:flex;align-items:center;gap:7px;margin-left:auto;font-size:.86rem;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;cursor:pointer;user-select:none}
+.training-toggle input{accent-color:var(--accent);width:16px;height:16px}
+.screen{display:none}
+.screen.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:.35}to{opacity:1}}
+.screen-grid{display:grid;grid-template-columns:minmax(0,1.38fr) minmax(380px,.92fr);gap:24px;align-items:start}
+.image-panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:0 4px 18px rgba(0,0,0,.35);position:sticky;top:14px}
+.image-wrap{position:relative;border-radius:10px;overflow:hidden;background:#0b1120}
+.image-wrap img{display:block;width:100%;height:auto}
+.fullimg{margin:8px 4px 0;font-size:.8rem;color:var(--muted);text-align:right}
+.fullimg a{color:var(--accent);font-weight:700}
+.zone{position:absolute;border:2px dashed transparent;border-radius:7px;pointer-events:none;transition:all .18s ease;z-index:1}
+.zone.active{border-color:var(--accent);background:rgba(252,165,165,.12);box-shadow:0 0 0 3px rgba(252,165,165,.18)}
+.marker{position:absolute;transform:translate(-35%,-50%);width:30px;height:30px;border-radius:50%;border:2px solid #fff;background:#475569;color:#fff;font:700 .86rem/26px "Segoe UI",sans-serif;text-align:center;cursor:pointer;z-index:2;box-shadow:0 2px 7px rgba(15,23,42,.4);padding:0}
+.marker:hover{background:var(--accent-solid);transform:translate(-35%,-50%) scale(1.08)}
+.marker.active{background:var(--accent-solid);box-shadow:0 0 0 4px rgba(185,28,28,.35),0 3px 10px rgba(0,0,0,.5)}
+.guide{min-width:0}
+.stepbar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:12px;box-shadow:0 3px 12px rgba(0,0,0,.3)}
+.progress{font-size:.88rem;color:var(--muted);white-space:nowrap}
+.progress b{color:var(--ink);font-size:1.05rem}
+.btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;font-size:.85rem;font-weight:700;cursor:pointer}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.card{display:none;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 20px 22px;box-shadow:0 6px 22px rgba(0,0,0,.35)}
+.card.active{display:block}
+.card-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:4px}
+.badge{flex:0 0 36px;width:36px;height:36px;border-radius:10px;background:var(--accent-solid);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:1.05rem}
+.card h2{font-size:1.22rem;line-height:1.25;margin:2px 0 8px}
+.on-page{font-size:.92rem;color:var(--muted);margin:0 0 12px}
+.on-page span{font-weight:700;color:var(--accent)}
+.where{border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:0 0 14px;font-size:.9rem}
+.where .row{display:flex;gap:12px;padding:7px 10px;border-bottom:1px solid var(--line)}
+.where .row:last-child{border-bottom:0}
+.where .row:nth-child(odd){background:#182338}
+.where .label{flex:0 0 64px;font-size:.72rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.where .val{min-width:0;overflow-wrap:anywhere}
+code{font-family:Consolas,"Cascadia Mono","Courier New",monospace;background:var(--code);border:1px solid var(--code-line);border-radius:5px;padding:1px 5px;font-size:.9em;overflow-wrap:anywhere}
+.facit h3{font-size:.78rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 5px}
+.facit p{margin:0 0 8px;font-size:.96rem}
+blockquote.say{margin:0 0 8px;padding:11px 14px;background:var(--green-soft);border-left:4px solid var(--green);border-radius:0 8px 8px 0;font-size:.97rem}
+blockquote.say::before{content:"Säg så här: ";font-weight:800;color:var(--green)}
+ul.faq{margin:0;padding-left:20px;font-size:.94rem}
+ul.faq li{margin:0 0 6px}
+ul.faq b{color:#f1f5f9}
+.head-note{background:var(--amber-soft);border:1px solid #92400e;border-left:4px solid #d97706;border-radius:6px;padding:9px 12px;font-size:.88rem;margin:12px 0 0}
+.head-note b{color:var(--amber)}
+.tech-note{background:#0b1f3a;border:1px solid #1e3a8a;border-left:4px solid #3b82f6;border-radius:6px;padding:9px 12px;font-size:.88rem;margin:12px 0 0}
+.tech-note b{color:#93c5fd}
+.reveal{display:none;margin:0 0 10px}
+body.training .facit{display:none}
+body.training .card.revealed .facit{display:block}
+body.training .reveal{display:inline-block}
+.quick{margin-top:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:.9rem}
+.quick summary{cursor:pointer;font-weight:700}
+.quick table{width:100%;border-collapse:collapse;margin-top:10px}
+.quick td,.quick th{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;font-size:.86rem}
+.quick th{color:var(--muted);font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.quick-link{all:unset;color:var(--accent);cursor:pointer;font-weight:600;text-decoration:underline}
+.cheat{margin-top:30px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;box-shadow:0 4px 18px rgba(0,0,0,.3)}
+.cheat h2{font-size:1.2rem;margin:0 0 8px}
+.cheat h3{font-size:1rem;margin:18px 0 6px}
+.cheat table{width:100%;border-collapse:collapse;font-size:.9rem}
+.cheat th,.cheat td{border:1px solid var(--line);padding:8px 10px;vertical-align:top;text-align:left}
+.cheat th{background:#182338;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em;color:var(--muted)}
+.cheat ul{padding-left:20px;margin:6px 0 0}
+.cheat li{margin-bottom:5px}
+footer.pagefoot{margin-top:28px;text-align:center;color:var(--muted);font-size:.82rem}
+@media(max-width:1100px){
+  .screen-grid{grid-template-columns:1fr}
+  .image-panel{position:static}
+  .training-toggle{margin-left:0}
+}
+@media print{
+  .tabs,.stepbar,.training-toggle,.reveal,.quick,.howto{display:none!important}
+  .screen{display:block!important}
+  .card{display:block!important;break-inside:avoid;box-shadow:none;margin-bottom:12px}
+  .image-panel{position:static}
+  .zone,.marker{display:none}
+  body{background:#fff;color:#111827}
+  .card,.cheat,.quick,.image-panel,.stepbar,details.local,.training-toggle,.tab,.btn{background:#fff;color:#111827;box-shadow:none}
+  .where .row:nth-child(odd),.cheat th{background:#f8fafc}
+  .warning{background:#fff7ed;color:#111827}
+  .warning h2{color:#9a3412}
+  .howto,.tech-note{background:#eff6ff;color:#111827}
+  .howto h2,.tech-note b{color:#1d4ed8}
+  .head-note{background:#fef3c7;color:#111827}
+  .head-note b{color:#92400e}
+  blockquote.say{background:#ccfbf1;color:#111827}
+  blockquote.say::before{color:#0f766e}
+  code{background:#f3f4f6;color:#111827;border-color:#e5e7eb}
+  ul.faq b{color:#111827}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>Kodkarta – bild för bild (PHP + MVC)</h1>
+  <p class="lede">Varje ruta på skärmbilden motsvarar en sektion i koden. Klicka på en siffra, så visas <b>en sak i taget</b>: var på sidan det är, vilken fil och vilka rader du ska öppna, kort vad koden gör, och ett färdigt manus du kan säga högt.</p>
+  <div class="meta">Byggd 10 nov 2026 · Radnummer utgår från dina lokala filer (den version som den publicerade appen är byggd från).</div>
+
+  <div class="warning">
+    <h2>Läs detta först – ocommittade ändringar i MVC</h2>
+    <p>Dina MVC-filer i <code>databaskonstruktion-assignment-3-startup</code> har ändringar som <b>inte är committade</b>. Senaste commit är <code>5e1f878</code> (20 okt). Den publicerade builden i <code>Published</code> innehåller din lokala version (t.ex. texten <code>Observation registrerad</code>), men git-repot gör det inte.</p>
+    <p>Om du visar koden på git.webug.se utgår examinationen från <b>senaste commit</b>. Före redovisningen: committa och pusha ändringarna, annars visar git en äldre version med andra radnummer.</p>
+    <ul>
+      <li>Radnumren i den här kartan = dina lokala filer (den version appen körs från).</li>
+      <li>Gul ruta <b>Git HEAD</b> i ett steg = så ser raderna ut i senaste commit, om du inte hinner pusha.</li>
+      <li>Kör <code>git status</code> i MVC-mappen för att se att allt är committat före redovisningen.</li>
+      <li>Det lokala MVC-repot har ingen remote just nu (<code>git remote -v</code> är tomt); då kan du behöva lägga till rätt remote innan <code>git push</code>.</li>
+    </ul>
+  </div>
+
+  <details class="local">
+    <summary>Var ligger filerna lokalt? (klicka)</summary>
+    <ul>
+      <li><b>PHP:</b> <code>C:\xampp\htdocs\Alla 3 delmoment\databaskonstruktion-assignment-2-startup\PHPApplikation.php</code> (identisk kopia finns i <code>alla delmoment kod filer</code>).</li>
+      <li><b>MVC:</b> <code>C:\xampp\htdocs\databaskonstruktion-assignment-3-startup\</code> med <code>Controllers\</code>, <code>Models\</code> och <code>Views\</code>.</li>
+      <li><b>Databas:</b> <code>C:\xampp\htdocs\Alla 3 delmoment\databaskonstruktion-assignment-1-startup\database.sql</code> (den nyare versionen med <code>UNIQUE</code> på PlatsNamn och <code>GRANT EXECUTE</code>).</li>
+    </ul>
+  </details>
+
+  <div class="howto">
+    <h2>Så använder du kartan</h2>
+    <ol>
+      <li>Välj bildflik: PHP bild 1/2 eller MVC bild 1/2.</li>
+      <li>Klicka på en siffra på skärmbilden – eller använd <b>Föregående/Nästa</b>.</li>
+      <li>Läs <b>På sidan</b> (var du är), <b>Gå hit</b> (fil + rader), <b>Vad koden gör</b> och <b>Säg så här</b>.</li>
+      <li>Slå på <b>Träningsläge</b> längst upp till höger: då döljs facit och du kan testa dig själv. Klicka <b>Visa facit</b> i kortet när du försökt.</li>
+    </ol>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Bilder">
+  <button class="tab active" data-tab="php1">PHP – bild 1 (övre)</button>
+  <button class="tab" data-tab="php2">PHP – bild 2 (nedre)</button>
+  <button class="tab" data-tab="mvc1">MVC – bild 1 (Person)</button>
+  <button class="tab" data-tab="mvc2">MVC – bild 2 (Observation)</button>
+  <label class="training-toggle" title="Dölj förklaringarna och träna på att säga dem själv">
+    <input type="checkbox" id="trainingToggle">
+    Träningsläge: dölj facit
+  </label>
+</nav>
+
+<!-- ============================================================
+     PHP BILD 1
+============================================================ -->
+<section class="screen active" id="php1">
+  <div class="screen-grid">
+    <div class="image-panel">
+      <div class="image-wrap">
+        <img src="bild%201%20PHP%20delen.png" alt="PHP-applikationen, övre delen: sök personer, filtrera, personer, statistik och observationer med vittnen">
+
+        <div class="zone" data-step="0" style="left:0.5%;top:10.9%;width:32%;height:4.5%"></div>
+        <div class="zone" data-step="1" style="left:0.5%;top:15.5%;width:16%;height:9.5%"></div>
+        <div class="zone" data-step="2" style="left:0.5%;top:27.2%;width:18%;height:11.5%"></div>
+        <div class="zone" data-step="3" style="left:0.5%;top:40.5%;width:26%;height:15.5%"></div>
+        <div class="zone" data-step="4" style="left:0.5%;top:57.8%;width:36%;height:7%"></div>
+        <div class="zone" data-step="5" style="left:0.5%;top:64.8%;width:64%;height:26%"></div>
+
+        <button class="marker" data-step="1" style="left:14%;top:16.3%" title="Sok personer">2</button>
+        <button class="marker" data-step="2" style="left:17%;top:27.9%" title="Filtrera personer">3</button>
+        <button class="marker" data-step="3" style="left:10%;top:41.2%" title="Personer">4</button>
+        <button class="marker" data-step="4" style="left:30%;top:58.5%" title="Statistik">5</button>
+        <button class="marker" data-step="5" style="left:33%;top:65.5%" title="Radlayout">6</button>
+        <button class="marker" data-step="0" style="left:35%;top:11.5%" title="Rubrik och filstruktur">1</button>
+        <button class="marker" data-step="0" style="left:74%;top:2.6%" title="Flikens titel">1</button>
+      </div>
+      <p class="fullimg"><a href="bild%201%20PHP%20delen.png" target="_blank" rel="noopener">Öppna bilden i full storlek</a></p>
+    </div>
+
+    <div class="guide">
+      <div class="stepbar">
+        <button class="btn prev" disabled>← Föregående</button>
+        <span class="progress">Steg <b>1</b> av 6</span>
+        <button class="btn next">Nästa →</button>
+      </div>
+
+      <article class="card active" data-step="0">
+        <div class="card-head"><span class="badge">1</span><h2>Rubriken och filens struktur</h2></div>
+        <p class="on-page"><span>På sidan:</span> stora rubriken "PUCKO - Handlaggarapplikation" och flikens titel.</p>
+        <div class="where">
+          <div class="row"><span class="label">Repo</span><span class="val"><code>databaskonstruktion-assignment-2-startup</code></span></div>
+          <div class="row"><span class="label">Fil</span><span class="val"><code>PHPApplikation.php</code> (ligger i repo-roten)</span></div>
+          <div class="row"><span class="label">Rader</span><span class="val"><code>1–14</code> HTML-skal + rubrik · <code>17–112</code> all PHP · <code>114–281</code> HTML/formulär/tabeller</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>PUCKO - Handlaggarapplikation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Filen är en <b>självrefererande PHP-sida</b>: HTML-skal först, sedan ett PHP-block som läser POST, kör SQL och sätter meddelanden, och sist HTML med formulär och tabeller. Formulären postar tillbaka till samma fil, så PHP-blocket körs innan sidan ritas.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Det här är en självrefererande PHP-applikation. Allt ligger i samma fil: HTML, PHP och SQL. Formulären skickar POST tillbaka till PHPApplikation.php. Koden högst upp läser POST och kör SQL innan HTML:en längre ner skrivs ut.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför samma fil?</b> Det är uppgiftens PHP-variant: enklare att följa, men blandar logik och presentation. MVC-varianten delar upp i controller, model och view.</li>
+            <li><b>Var är databasanslutningen?</b> <code>rad 18–19</code>: <code>new PDO(...)</code> och <code>setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION)</code>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="1">
+        <div class="card-head"><span class="badge">2</span><h2>Sok personer</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Sok personer", textfältet Namn och knappen Sok.</p>
+        <div class="where">
+          <div class="row"><span class="label">Formulär</span><span class="val"><code>PHPApplikation.php</code> rad <code>115–119</code></span></div>
+          <div class="row"><span class="label">Logik</span><span class="val">rad <code>21–23</code> läser POST · rad <code>25–37</code> bygger SQL + prepare/bind/execute</span></div>
+          <div class="row"><span class="label">Utskrift</span><span class="val">rad <code>147–155</code> (samma Personer-tabell längre ner)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>soknamn</code> och <code>SearchPersons</code> (MVC-motsvarigheten)</span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>När sidan laddas sätts <code>$soknamn</code> till <code>$_POST['soknamn']</code> om fältet finns, annars till tom sträng. SQL:en blir <code>SELECT PersonId, Namn, Kodnamn FROM Person WHERE Namn LIKE ? ORDER BY Namn ASC</code>. <code>%...%</code> gör delsträngssökning. <code>prepare</code> + <code>bindValue</code> skickar indata som parameter, inte som SQL-text. Tom sökning ger <code>LIKE '%%'</code> = alla personer.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Formuläret postar fältet soknamn. Överst i filen läser jag $_POST, bygger en SELECT mot Person med LIKE och binder '%namn%' som en parameter. Samma resultat skrivs ut i Personer-tabellen längre ner. Tomt fält ger alla personer.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför prepared statement?</b> Skyddar mot SQL-injektion och sköter citattecken/typning automatiskt.</li>
+            <li><b>Varför samma tabell?</b> Sökningen filtrerar samma Personer-lista som redan visas; ingen separat svarssida behövs.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="2">
+        <div class="card-head"><span class="badge">3</span><h2>Filtrera personer</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Filtrera personer", dropdownen "Kodnamn: Alla" och knappen Filtrera.</p>
+        <div class="where">
+          <div class="row"><span class="label">Formulär</span><span class="val"><code>PHPApplikation.php</code> rad <code>122–137</code></span></div>
+          <div class="row"><span class="label">Dropdown</span><span class="val">data hämtas rad <code>24</code> · skrivs ut rad <code>127–134</code></span></div>
+          <div class="row"><span class="label">Filterlogik</span><span class="val">rad <code>26–36</code> (SAKNAS = <code>IS NULL</code>, annars <code>Kodnamn = ?</code>)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>filter_kod</code>, <code>SAKNAS</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Dropdownen fylls från databasen med <code>SELECT DISTINCT Kodnamn FROM Person WHERE Kodnamn IS NOT NULL ORDER BY Kodnamn ASC</code> (rad 24). Tomt värde = Alla. <code>SAKNAS</code> ger <code>AND Kodnamn IS NULL</code>. Ett vanligt kodnamn ger <code>AND Kodnamn = ?</code> och <code>bindValue(2, ...)</code>. Samma <code>$stmt</code> används i Personer-tabellen.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Kodlistan hämtas med SELECT DISTINCT från Person, så dropdownen kommer från databasen. När man filtrerar bygger jag SQL dynamiskt: Alla tar bort filtret, Saknar kodnamn ger Kodnamn IS NULL, och ett kodnamn ger AND Kodnamn = ? med en andra parameter.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför IS NULL?</b> NULL kan inte jämföras med <code>=</code>; man måste använda <code>IS NULL</code>.</li>
+            <li><b>Varför DISTINCT?</b> Listan ska bara visa unika kodnamn, inte en rad per person.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="3">
+        <div class="card-head"><span class="badge">4</span><h2>Personer – enkel tabell</h2></div>
+        <p class="on-page"><span>På sidan:</span> tabellen med kolumnerna PersonId, Namn och Kodnamn.</p>
+        <div class="where">
+          <div class="row"><span class="label">Rubrik</span><span class="val"><code>PHPApplikation.php</code> rad <code>140</code></span></div>
+          <div class="row"><span class="label">Tabell</span><span class="val">rad <code>141–156</code> · rubriker <code>142–146</code> · loop <code>147–155</code></span></div>
+          <div class="row"><span class="label">Data</span><span class="val">från <code>$stmt</code> (sökningen/filtret ovan)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>foreach ($stmt as $row)</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p><code>foreach ($stmt as $row)</code> skriver en <code>&lt;tr&gt;</code> per rad och en <code>&lt;td&gt;</code> per kolumn. Data kommer från sökningen/filtret ovan, så tabellen visar alltid aktuellt resultat. Ingen join – bara tabellen Person.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Det här är en enkel tabell utan join. Jag loopar över resultatet från prepared statement och skriver en rad per person med PersonId, Namn och Kodnamn. Samma tabell används både för sökning och filtrering.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Vad menas med enkel tabell?</b> Data från en tabell, ingen join, hela resultatet skrivs ut i en HTML-tabell.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="4">
+        <div class="card-head"><span class="badge">5</span><h2>Statistik över observationer (lagrad procedur)</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Statistik over Observationer (Lagrad procedur)" och texten "Medelsakerhet: 1.030000 %".</p>
+        <div class="where">
+          <div class="row"><span class="label">PHP</span><span class="val"><code>PHPApplikation.php</code> rad <code>158–166</code> · <code>CALL</code> rad <code>161</code> · fetch rad <code>162</code> · echo rad <code>163</code></span></div>
+          <div class="row"><span class="label">Databas</span><span class="val"><code>database.sql</code> rad <code>241–248</code> · <code>CREATE PROCEDURE GETAVGSAKERHET()</code> rad <code>243</code> · <code>SELECT AVG(Sakerhet)</code> rad <code>245</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>GETAVGSAKERHET</code>, <code>MedelSakerhet</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p><code>$pdo-&gt;query("CALL GETAVGSAKERHET()")</code> anropar proceduren. Proceduren returnerar en rad med <code>AVG(Sakerhet) AS MedelSakerhet</code>. PHP hämtar raden med <code>fetch(PDO::FETCH_ASSOC)</code> och skriver ut värdet. <code>closeCursor()</code> stänger resultatet så att nästa fråga kan köras.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Här anropar jag den lagrade proceduren GETAVGSAKERHET med CALL. Proceduren ligger i database.sql och räknar ut AVG(Sakerhet) från Observation. Jag hämtar resultatraden och skriver ut MedelSakerhet med procenttecken. closeCursor stänger resultatmängden.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför procedur?</b> Logiken ligger i databasen och återanvänds av både PHP och .NET.</li>
+            <li><b>Varför closeCursor?</b> Frigör resultatet innan nästa fråga körs; annars kan MySQL klaga på att en resultatmängd är öppen.</li>
+            <li><b>Är 1.03 procent?</b> Nej, det är medelvärdet av Sakerhet (skalan 1–114). Procenttecknet är bara en etikett som PHP lägger till; databasen räknar ingen procent.</li>
+          </ul>
+          <p class="head-note"><b>Kontrollera filen:</b> använd den nyare <code>database.sql</code> (den med <code>UNIQUE</code> på PlatsNamn och <code>GRANT EXECUTE</code>). En äldre kopia i <code>alla delmoment kod filer</code> har samma procedur på rad <code>222</code> i stället för <code>243</code>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="5">
+        <div class="card-head"><span class="badge">6</span><h2>Observationer med vittnen – radlayout</h2></div>
+        <p class="on-page"><span>På sidan:</span> tabellen "3. Observationer med vittnen (Radlayout)" – en yttre rad per observation och en inre tabell med vittnen/rapportörer.</p>
+        <div class="where">
+          <div class="row"><span class="label">PHP</span><span class="val"><code>PHPApplikation.php</code> rad <code>168–214</code></span></div>
+          <div class="row"><span class="label">SQL</span><span class="val">rad <code>183</code> · <code>LEFT JOIN Rapporterat</code> + <code>LEFT JOIN Person</code> + <code>JOIN Plats</code></span></div>
+          <div class="row"><span class="label">Nyckelrader</span><span class="val"><code>$prevObs</code> rad <code>182</code> och <code>208</code> · stäng föregående tabell <code>187–189</code> · ny yttre rad <code>186–200</code> · inre vittnesrader <code>201–207</code> · stäng sista tabellen <code>210–212</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>prevObs</code>, <code>Rapporterat</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>SQL:en tar Observation, joinar Plats (för platsnamn) och <b>LEFT JOINar</b> Rapporterat + Person (för vittnen). LEFT JOIN gör att observationer utan vittnen också kommer med. <code>$prevObs</code> jämför mot föregående ObsId. När ObsId ändras skapas en ny yttre rad med en ny inre tabell; när det är samma ObsId läggs vittnesraden i samma inre tabell. Det ger radlayouten.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Här gör jag radlayout med en jämförelsevariabel. SQL:en joinar Observation med Plats och LEFT JOINar Rapporterat och Person, så observationer utan vittnen också syns. När ObsId ändras skriver jag en ny yttre rad med en nästlad tabell; när det är samma ObsId lägger jag bara till en vittnesrad i den inre tabellen. prevObs håller reda på föregående ObsId.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför LEFT JOIN?</b> Vittnen är frivilliga; observationen ska visas även utan vittnen. Med vanlig JOIN hade sådana observationer försvunnit.</li>
+            <li><b>Varför nästlad tabell?</b> En observation kan ha flera vittnen (M:N via Rapporterat). Den inre tabellen visar dem kompakt under rätt observation.</li>
+            <li><b>Var stängs den inre tabellen?</b> När en ny observation börjar (rad <code>187–189</code>) och efter loopen (rad <code>210–212</code>). Utan den sista stängningen skulle sista tabellen lämnas öppen.</li>
+          </ul>
+        </div>
+      </article>
+
+      <details class="quick">
+        <summary>Snabblista: alla steg i PHP bild 1</summary>
+        <table>
+          <tr><th>#</th><th>Sektion</th><th>Fil</th><th>Rader</th></tr>
+          <tr><td>1</td><td><button class="quick-link" data-step="0">Rubrik/filstruktur</button></td><td>PHPApplikation.php</td><td>1–14, 17–112, 114–281</td></tr>
+          <tr><td>2</td><td><button class="quick-link" data-step="1">Sok personer</button></td><td>PHPApplikation.php</td><td>115–119, 21–37, 147–155</td></tr>
+          <tr><td>3</td><td><button class="quick-link" data-step="2">Filtrera personer</button></td><td>PHPApplikation.php</td><td>122–137, 24–36</td></tr>
+          <tr><td>4</td><td><button class="quick-link" data-step="3">Personer</button></td><td>PHPApplikation.php</td><td>140–156</td></tr>
+          <tr><td>5</td><td><button class="quick-link" data-step="4">Statistik/procedur</button></td><td>PHPApplikation.php + database.sql</td><td>158–166 + 241–248</td></tr>
+          <tr><td>6</td><td><button class="quick-link" data-step="5">Radlayout/vittnen</button></td><td>PHPApplikation.php</td><td>168–214</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PHP BILD 2
+============================================================ -->
+<section class="screen" id="php2">
+  <div class="screen-grid">
+    <div class="image-panel">
+      <div class="image-wrap">
+        <img src="Bild%202%20php%20delen.png" alt="PHP-applikationen, nedre delen: statistik, radlayout, registrera, arkivera och uppdatera">
+
+        <div class="zone" data-step="0" style="left:0.5%;top:9.7%;width:31%;height:7%"></div>
+        <div class="zone" data-step="1" style="left:0.5%;top:16.2%;width:64%;height:26.5%"></div>
+        <div class="zone" data-step="2" style="left:0.5%;top:44.6%;width:42%;height:22.5%"></div>
+        <div class="zone" data-step="3" style="left:0.5%;top:69.3%;width:35%;height:8%"></div>
+        <div class="zone" data-step="4" style="left:0.5%;top:79.8%;width:32%;height:12.5%"></div>
+
+        <button class="marker" data-step="0" style="left:33%;top:10.4%" title="Statistik">1</button>
+        <button class="marker" data-step="1" style="left:36%;top:16.9%" title="Radlayout">2</button>
+        <button class="marker" data-step="2" style="left:31%;top:45.3%" title="Registrera ny observation">3</button>
+        <button class="marker" data-step="3" style="left:28%;top:70.0%" title="Arkivera observation">4</button>
+        <button class="marker" data-step="4" style="left:25%;top:80.5%" title="Uppdatera sakerhet">5</button>
+      </div>
+      <p class="fullimg"><a href="Bild%202%20php%20delen.png" target="_blank" rel="noopener">Öppna bilden i full storlek</a></p>
+    </div>
+
+    <div class="guide">
+      <div class="stepbar">
+        <button class="btn prev" disabled>← Föregående</button>
+        <span class="progress">Steg <b>1</b> av 5</span>
+        <button class="btn next">Nästa →</button>
+      </div>
+
+      <article class="card active" data-step="0">
+        <div class="card-head"><span class="badge">1</span><h2>Statistik – repetition från bild 1</h2></div>
+        <p class="on-page"><span>På sidan:</span> samma statistikrad högst upp: "Medelsakerhet: 1.030000 %".</p>
+        <div class="where">
+          <div class="row"><span class="label">PHP</span><span class="val"><code>PHPApplikation.php</code> rad <code>158–166</code> · <code>CALL GETAVGSAKERHET()</code> rad <code>161</code></span></div>
+          <div class="row"><span class="label">Databas</span><span class="val"><code>database.sql</code> rad <code>241–248</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>GETAVGSAKERHET</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Proceduren räknar medelvärdet av Sakerhet i Observation. PHP anropar med <code>CALL</code>, hämtar en rad och skriver ut <code>MedelSakerhet</code>. Samma procedur används i MVC via <code>PersonModel.GetAvgSakerhet()</code>.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Det här är samma statistik som i bild 1: PHP anropar proceduren GETAVGSAKERHET som räknar AVG(Sakerhet) i databasen. Jag hämtar resultatet och skriver ut medelsäkerheten.</blockquote>
+          <h3>Full förklaring</h3>
+          <p>Se <b>PHP bild 1 → steg 5</b>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="1">
+        <div class="card-head"><span class="badge">2</span><h2>Observationer med vittnen – repetition från bild 1</h2></div>
+        <p class="on-page"><span>På sidan:</span> samma radlayoutstabell högst upp i bild 2.</p>
+        <div class="where">
+          <div class="row"><span class="label">PHP</span><span class="val"><code>PHPApplikation.php</code> rad <code>168–214</code></span></div>
+          <div class="row"><span class="label">SQL</span><span class="val">rad <code>183</code> · <code>$prevObs</code> rad <code>182</code> och <code>208</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>prevObs</code>, <code>Rapporterat</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Samma kod som i bild 1: en yttre rad per observation och en inre tabell med vittnen. <code>LEFT JOIN</code> behåller observationer utan vittnen, och <code>$prevObs</code> avgör när en ny yttre rad ska skrivas.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Det här är samma radlayout som i bild 1. Jag grupperar vittnena per observation med hjälp av prevObs: ny yttre rad när ObsId ändras, annars en ny vittnesrad i samma inre tabell.</blockquote>
+          <h3>Full förklaring</h3>
+          <p>Se <b>PHP bild 1 → steg 6</b>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="2">
+        <div class="card-head"><span class="badge">3</span><h2>Registrera ny observation (INSERT)</h2></div>
+        <p class="on-page"><span>På sidan:</span> formuläret "Registrera ny observation (INSERT)" med ObsId, Datum, Grad, Sakerhet, IncidentId, IncidentNamn, Plats, Handläggare och knappen Registrera.</p>
+        <div class="where">
+          <div class="row"><span class="label">Formulär</span><span class="val"><code>PHPApplikation.php</code> rad <code>216–249</code> (rubrik 216, meddelande 217, form 218, submit 248)</span></div>
+          <div class="row"><span class="label">Logik</span><span class="val">rad <code>48–76</code> · validering <code>59–66</code> · INSERT <code>69–70</code></span></div>
+          <div class="row"><span class="label">Dropdowndata</span><span class="val">plats <code>39</code>, grad <code>40</code>, handläggare <code>41</code> · utskrift grad <code>224–227</code>, plats <code>235–238</code>, handläggare <code>243–246</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>registrera</code>, <code>INSERT INTO Observation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>När <code>registrera</code> skickas: trimma fälten, gör om <code>datetime-local</code>s <code>T</code> till mellanslag och lägg till sekunder, dela handläggaren på <code>|</code>. Validera att allt är ifyllt, att ObsId/IncidentId är heltal, grad 1–4 och säkerhet 1–114. Därefter en parameteriserad INSERT med nio värden. Vid DB-fel fångas <code>PDOException</code> och ett meddelande visas.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Formuläret postar till samma fil. Överst kontrollerar jag att fälten finns och är giltiga: heltal, grad 1–4 och säkerhet 1–114. Sedan kör jag en parameteriserad INSERT med nio värden. Datumet från datetime-local görs om till MySQL-format. Lyckas det visas ett bekräftelsemeddelande; annars fångas felet.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför validera i PHP när databasen har CHECK/trigger?</b> Snabbare och tydligare fel till användaren; databasen är sista skyddsnätet.</li>
+            <li><b>Varför prepared statement?</b> Skyddar mot SQL-injektion och sköter typning/citattecken.</li>
+            <li><b>Varför datumomvandling?</b> <code>datetime-local</code> ger <code>YYYY-MM-DDTHH:MM</code>; MySQL vill ha mellanslag och gärna sekunder.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="3">
+        <div class="card-head"><span class="badge">4</span><h2>Arkivera observation (procedur)</h2></div>
+        <p class="on-page"><span>På sidan:</span> "Arkivera observation (Procedur)" med dropdown och knappen Arkivera.</p>
+        <div class="where">
+          <div class="row"><span class="label">Formulär</span><span class="val"><code>PHPApplikation.php</code> rad <code>251–263</code> · dropdown <code>255–261</code></span></div>
+          <div class="row"><span class="label">Logik</span><span class="val">rad <code>78–94</code> · <code>CALL ARKIVERAOBSERVATION(?)</code> rad <code>85–88</code></span></div>
+          <div class="row"><span class="label">Databas</span><span class="val"><code>database.sql</code> rad <code>250–260</code> · <code>CREATE PROCEDURE</code> rad <code>252</code> · DELETE Rapporterat <code>254</code> · INSERT arkiv <code>255–256</code> · DELETE Observation <code>257</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>ARKIVERAOBSERVATION</code>, <code>arkiv_obsid</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Proceduren flyttar observationen från aktiva <code>Observation</code> till <code>ARKIVERADObservation</code>. Först raderas kopplingarna i <code>Rapporterat</code> (annars blockerar FK), sedan kopieras raden, sist raderas den aktiva. PHP anropar bara proceduren via <code>CALL</code>; flytten sker i databasen.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Arkivera anropar proceduren ARKIVERAOBSERVATION med ObsId som parameter. Proceduren raderar först vittneskopplingarna i Rapporterat, kopierar observationen till ARKIVERADObservation och raderar den sedan från Observation. På så sätt ligger flyttlogiken på ett ställe och kan användas av både PHP och .NET.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför DELETE i Rapporterat först?</b> Foreign key hindrar att en observation tas bort medan den har vittneskopplingar.</li>
+            <li><b>Varför procedur i stället för tre SQL-satser i PHP?</b> Flytten blir en enda logisk operation som återanvänds och inte glöms bort.</li>
+          </ul>
+          <p class="head-note"><b>Kontrollera filen:</b> i den nyare <code>database.sql</code> ligger proceduren på rad <code>252</code>. En äldre kopia har den på rad <code>231</code>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="4">
+        <div class="card-head"><span class="badge">5</span><h2>Uppdatera säkerhet (UPDATE)</h2></div>
+        <p class="on-page"><span>På sidan:</span> "Uppdatera sakerhet (UPDATE)" med dropdown, fältet Ny sakerhet och knappen Uppdatera.</p>
+        <div class="where">
+          <div class="row"><span class="label">Formulär</span><span class="val"><code>PHPApplikation.php</code> rad <code>265–279</code> · dropdown <code>269–276</code> · input <code>277</code></span></div>
+          <div class="row"><span class="label">Logik</span><span class="val">rad <code>96–111</code> · validering <code>100–103</code> · UPDATE <code>105–108</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>uppdatera</code>, <code>UPDATE Observation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Validerar att ObsId är ett heltal och att säkerhet är 1–114. Kör en parameteriserad <code>UPDATE Observation SET Sakerhet = ? WHERE ObsId = ?</code> med två parametrar. Meddelandet skrivs ut direkt ovanför formuläret (rad <code>266</code>).</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Här uppdaterar jag bara säkerhetsvärdet för en vald observation. Jag väljer observation i en dropdown, validerar det nya värdet och kör sedan en parameteriserad UPDATE med två frågetecken: ett för det nya värdet och ett för ObsId.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför bara UPDATE?</b> Kravet är att kunna uppdatera en befintlig rad; här ändras ett fält.</li>
+            <li><b>Varför WHERE?</b> Utan WHERE skulle alla observationer få samma säkerhetsvärde.</li>
+            <li><b>Finns det felhantering?</b> INSERT och Arkivera har try/catch; UPDATE saknar egen catch. PDO är i exception-läge, så ett DB-fel kastas vidare och syns som ett fel på sidan.</li>
+          </ul>
+        </div>
+      </article>
+
+      <details class="quick">
+        <summary>Snabblista: alla steg i PHP bild 2</summary>
+        <table>
+          <tr><th>#</th><th>Sektion</th><th>Fil</th><th>Rader</th></tr>
+          <tr><td>1</td><td><button class="quick-link" data-step="0">Statistik</button></td><td>PHPApplikation.php + database.sql</td><td>158–166 + 241–248</td></tr>
+          <tr><td>2</td><td><button class="quick-link" data-step="1">Radlayout</button></td><td>PHPApplikation.php</td><td>168–214</td></tr>
+          <tr><td>3</td><td><button class="quick-link" data-step="2">Registrera (INSERT)</button></td><td>PHPApplikation.php</td><td>216–249, 48–76</td></tr>
+          <tr><td>4</td><td><button class="quick-link" data-step="3">Arkivera (procedur)</button></td><td>PHPApplikation.php + database.sql</td><td>251–263, 78–94 + 250–260</td></tr>
+          <tr><td>5</td><td><button class="quick-link" data-step="4">Uppdatera (UPDATE)</button></td><td>PHPApplikation.php</td><td>265–279, 96–111</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MVC BILD 1 - PERSON
+============================================================ -->
+<section class="screen" id="mvc1">
+  <div class="screen-grid">
+    <div class="image-panel">
+      <div class="image-wrap">
+        <img src="bild%201%20MVC%20delen.png" alt="MVC Personsidan: Sok person, Personer, Medelsakerhet och Link back to home">
+
+        <div class="zone" data-step="0" style="left:22%;top:6.4%;width:45%;height:4.5%"></div>
+        <div class="zone" data-step="1" style="left:0.5%;top:13.4%;width:24%;height:8.5%"></div>
+        <div class="zone" data-step="2" style="left:0.5%;top:25.2%;width:28%;height:19.5%"></div>
+        <div class="zone" data-step="3" style="left:0.5%;top:48.4%;width:12%;height:12%"></div>
+        <div class="zone" data-step="4" style="left:0.5%;top:60.6%;width:15%;height:4%"></div>
+        <div class="zone" data-step="5" style="left:0.5%;top:65.6%;width:23%;height:4%"></div>
+
+        <button class="marker" data-step="1" style="left:13%;top:14.2%" title="Sok person">2</button>
+        <button class="marker" data-step="2" style="left:10%;top:26.0%" title="Personer">3</button>
+        <button class="marker" data-step="3" style="left:17%;top:49.2%" title="Medelsakerhet">4</button>
+        <button class="marker" data-step="4" style="left:19%;top:61.4%" title="Link back to home">5</button>
+        <button class="marker" data-step="5" style="left:27%;top:66.4%" title="Layout och sidfot">6</button>
+        <button class="marker" data-step="0" style="left:64%;top:7.8%" title="Adressen /Person">1</button>
+        <button class="marker" data-step="5" style="left:70%;top:2.6%" title="Flikens titel">6</button>
+      </div>
+      <p class="fullimg"><a href="bild%201%20MVC%20delen.png" target="_blank" rel="noopener">Öppna bilden i full storlek</a></p>
+    </div>
+
+    <div class="guide">
+      <div class="stepbar">
+        <button class="btn prev" disabled>← Föregående</button>
+        <span class="progress">Steg <b>1</b> av 6</span>
+        <button class="btn next">Nästa →</button>
+      </div>
+
+      <article class="card active" data-step="0">
+        <div class="card-head"><span class="badge">1</span><h2>Adressen /Person – routing</h2></div>
+        <p class="on-page"><span>På sidan:</span> adressfältet längst upp: <code>.../databaskonstruktion/a25milha/app/Person</code>.</p>
+        <div class="where">
+          <div class="row"><span class="label">Repo</span><span class="val"><code>databaskonstruktion-assignment-3-startup</code></span></div>
+          <div class="row"><span class="label">Routing</span><span class="val"><code>Program.cs</code> rad <code>8</code> (<code>UsePathBase</code>) och <code>24–26</code> (default route)</span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/PersonController.cs</code> rad <code>18–23</code> (<code>Index</code>)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>MapControllerRoute</code>, <code>UsePathBase</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Default-routen matchar första segmentet mot controller och andra mot action. <code>/Person</code> → <code>PersonController.Index</code>. <code>UsePathBase</code> sätter appens basväg så att länkar och redirects behåller <code>/databaskonstruktion/a25milha/app</code>.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Adressen /Person matchas av default-routen i Program.cs: första segmentet är controller, andra är action. Det ger PersonController.Index. UsePathBase gör att appen fungerar under underkatalogen på weblab.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Vad är en controller?</b> Klassen som tar emot requesten och väljer vad som ska göras.</li>
+            <li><b>Vad är en action?</b> Den publika metoden i controllern, t.ex. <code>Index()</code>.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> i senaste commit saknas <code>UsePathBase</code>; route ligger då på rad <code>23–25</code>. Övriga radnummer i Person-delen är i stort sett samma.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="1">
+        <div class="card-head"><span class="badge">2</span><h2>Sok person</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Sok person", fältet Namn och knappen Search.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Person/Index.cshtml</code> rad <code>4–11</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/PersonController.cs</code> rad <code>25–29</code> (<code>SearchPersons</code>)</span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/PersonModel.cs</code> rad <code>39–48</code> · SQL rad <code>43</code> · parameter rad <code>44</code></span></div>
+          <div class="row"><span class="label">Svar</span><span class="val"><code>Views/Person/SearchPersons.cshtml</code> rad <code>4–21</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>SearchPersons</code>, <code>SearchResults</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Formuläret använder <code>method="post"</code> och <code>action="@Url.Action("SearchPersons", "Person")"</code>, så URL:en byggs av routing. Fältet <code>name="name"</code> binds till actionens parameter <code>string name</code>. Controllern anropar modellen och lägger resultatet i <code>ViewBag.SearchResults</code>; returnerar <code>SearchPersons</code>-vyn. Modellen kör parameteriserad <code>LIKE</code>.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Formuläret postar name till actionen SearchPersons. Controllern tar emot namnet, anropar PersonModel, som kör SELECT * FROM Person WHERE Namn LIKE @NAME med %name% som parameter. Resultatet läggs i ViewBag.SearchResults och returneras till SearchPersons-vyn, som bygger tabellen.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför @Url.Action?</b> Genererar rätt URL även med path base, i stället för en hårdkodad sökväg.</li>
+            <li><b>Vad är ViewBag?</b> En dynamisk behållare för data från controller till view. Här ligger en DataTable.</li>
+            <li><b>Varför parameter?</b> <code>@NAME</code> med <code>AddWithValue</code> skyddar mot SQL-injektion.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="2">
+        <div class="card-head"><span class="badge">3</span><h2>Personer – enkel tabell</h2></div>
+        <p class="on-page"><span>På sidan:</span> tabellen med PersonId, Namn och Kodnamn.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Person/Index.cshtml</code> rad <code>13–30</code> · rubriker <code>16–19</code> · rader <code>21–29</code></span></div>
+           <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/PersonController.cs</code> rad <code>18–23</code> (<code>Index</code>) · <code>GetAllPersons</code> rad <code>20</code></span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/PersonModel.cs</code> rad <code>19–27</code> · SQL rad <code>23</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>GetAllPersons</code>, <code>PersonTable</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p><code>Index</code> anropar <code>GetAllPersons()</code> som fyller en DataTable med <code>SELECT * FROM Person</code>. Resultatet läggs i <code>ViewBag.PersonTable</code>. Vyn loopar först <code>Columns</code> för <code>&lt;th&gt;</code> och sedan <code>Rows</code> för <code>&lt;tr&gt;/&lt;td&gt;</code>, så tabellen anpassar sig efter frågans kolumner.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">PersonController.Index hämtar alla personer via PersonModel.GetAllPersons, som kör SELECT * FROM Person och fyller en DataTable. Tabellen läggs i ViewBag.PersonTable. Vyn skriver kolumnnamnen som rubriker och varje rad som en tr med td:er.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför DataTable i stället för en modellklass?</b> Det är lärarens exempel; vyn kan bygga tabellen dynamiskt utan att känna till kolumnerna i förväg.</li>
+            <li><b>Vad menas med enkel tabell?</b> Data från en tabell, ingen join.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="3">
+        <div class="card-head"><span class="badge">4</span><h2>Medelsakerhet – procedur via modellen</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Medelsakerhet" och tabellen med värdet 1.030000.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Person/Index.cshtml</code> rad <code>33–50</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/PersonController.cs</code> rad <code>21</code></span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/PersonModel.cs</code> rad <code>29–37</code> · <code>CALL</code> rad <code>33</code></span></div>
+          <div class="row"><span class="label">Databas</span><span class="val"><code>database.sql</code> rad <code>241–248</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>GetAvgSakerhet</code>, <code>AvgSakerhet</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p><code>GetAvgSakerhet()</code> anropar <code>CALL GETAVGSAKERHET()</code>, fyller en DataTable och lägger den i <code>ViewBag.AvgSakerhet</code>. Vyn skriver rubrik från <code>Columns</code> och värdet från <code>Rows</code>. Proceduren räknar <code>AVG(Sakerhet)</code>.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Medelsäkerheten hämtas med proceduren GETAVGSAKERHET. PersonModel anropar den med CALL, lägger resultatet i en DataTable och controllern skickar den via ViewBag.AvgSakerhet. Vyn skriver ut kolumnrubriken och medelvärdet.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför samma procedur som PHP?</b> Logiken ligger i databasen och återanvänds av båda applikationerna.</li>
+            <li><b>Varför står det ingen % i MVC?</b> PHP lägger till <code>%</code> som etikett; MVC skriver bara värdet. Själva medelvärdet är <code>1.03</code>.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="4">
+        <div class="card-head"><span class="badge">5</span><h2>Link back to home + layout</h2></div>
+        <p class="on-page"><span>På sidan:</span> länken "Link back to home" längst ner i vyn. Sidfoten och fliken hör till nästa steg.</p>
+        <div class="where">
+          <div class="row"><span class="label">Länk</span><span class="val"><code>Views/Person/Index.cshtml</code> rad <code>52</code></span></div>
+          <div class="row"><span class="label">Layout</span><span class="val"><code>Views/Shared/_Layout.cshtml</code> rad <code>6</code> (titel), <code>9–15</code> (RenderBody + footer), <code>13</code> (footertext)</span></div>
+          <div class="row"><span class="label">Koppling</span><span class="val"><code>Views/_ViewStart.cshtml</code> rad <code>2</code> · <code>Views/Person/Index.cshtml</code> rad <code>1–3</code> (ViewBag.Title)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>_ViewStart</code>, <code>RenderBody</code>, <code>PUCKO - Handlaggareapplikation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Alla vyer ärver <code>_Layout</code> via <code>_ViewStart</code>. <code>@RenderBody()</code> lägger in vyens innehåll; layouten ansvarar för html, head och footer. Länken går till appens rot. Flikens titel blir "Index - MVC Startup" eftersom vyn sätter <code>ViewBag.Title = "Index"</code> och layouten lägger till <code> - MVC Startup</code>.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Vyn ärver layouten via _ViewStart. Layouten ansvarar för html-skalet, titeln och sidfoten, och RenderBody lägger in Person-vyns innehåll. Länken går till appens rot.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför layout?</b> Gemensam HTML på ett ställe i stället för att upprepas i varje vy.</li>
+            <li><b>Vad är RenderBody?</b> Platshållaren där den aktuella vyns innehåll stoppas in.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> länken på rad <code>52</code> använder <code>@Url.Action("Index", "Home")</code> i stället för <code>@Url.Content("~/")</code>. Radnumret är detsamma.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="5">
+        <div class="card-head"><span class="badge">6</span><h2>Sidfoten, fliken och layouten</h2></div>
+        <p class="on-page"><span>På sidan:</span> flikens titel "Index - MVC Startup" och sidfoten "PUCKO - Handlaggareapplikation".</p>
+        <div class="where">
+          <div class="row"><span class="label">Titel</span><span class="val"><code>Views/Shared/_Layout.cshtml</code> rad <code>6</code></span></div>
+          <div class="row"><span class="label">Footer</span><span class="val"><code>Views/Shared/_Layout.cshtml</code> rad <code>12–14</code> · text rad <code>13</code></span></div>
+          <div class="row"><span class="label">Innehåll</span><span class="val"><code>@RenderBody()</code> rad <code>10</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>RenderBody</code>, <code>PUCKO - Handlaggareapplikation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Samma layout som föregående steg. <code>_Layout.cshtml</code> är HTML-skalet runt alla vyer: <code>@RenderBody()</code> stoppar in vyns innehåll, <code>&lt;hr&gt;</code> och <code>&lt;footer&gt;</code> lägger till den gemensamma sidfoten. Titeln byggs av <code>@ViewData["Title"]</code> + " - MVC Startup".</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Sidfoten och flikens titel kommer från den gemensamma layouten. Layouten är HTML-skalet runt alla vyer, och RenderBody är platsen där den aktuella vyns innehåll läggs in.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Var sätts titeln?</b> Vyn sätter <code>ViewBag.Title = "Index"</code> (rad 1–3) och layouten lägger till " - MVC Startup" (rad 6).</li>
+          </ul>
+        </div>
+      </article>
+
+      <details class="quick">
+        <summary>Snabblista: alla steg i MVC bild 1 (Person)</summary>
+        <table>
+          <tr><th>#</th><th>Sektion</th><th>Fil</th><th>Rader</th></tr>
+          <tr><td>1</td><td><button class="quick-link" data-step="0">Route /Person</button></td><td>Program.cs + PersonController.cs</td><td>8, 24–26 + 18–23</td></tr>
+          <tr><td>2</td><td><button class="quick-link" data-step="1">Sok person</button></td><td>Views/Person/Index.cshtml + controller + model + SearchPersons</td><td>4–11 + 25–29 + 39–48 + 4–21</td></tr>
+          <tr><td>3</td><td><button class="quick-link" data-step="2">Personer</button></td><td>Views/Person/Index.cshtml + PersonModel</td><td>13–30 + 19–27</td></tr>
+          <tr><td>4</td><td><button class="quick-link" data-step="3">Medelsakerhet</button></td><td>Views/Person/Index.cshtml + PersonModel + database.sql</td><td>33–50 + 29–37 + 241–248</td></tr>
+          <tr><td>5</td><td><button class="quick-link" data-step="4">Link back to home</button></td><td>Views/Person/Index.cshtml + _Layout.cshtml</td><td>52 + 6, 9–15</td></tr>
+          <tr><td>6</td><td><button class="quick-link" data-step="5">Layout/sidfot</button></td><td>Views/Shared/_Layout.cshtml</td><td>6, 10, 12–14</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     MVC BILD 2 - OBSERVATION
+============================================================ -->
+<section class="screen" id="mvc2">
+  <div class="screen-grid">
+    <div class="image-panel">
+      <div class="image-wrap">
+        <img src="bild%202%20MVC%20delen.png" alt="MVC Observationssidan: filtrera per plats, observationer per incident, lagg till observation och andra sakerhet">
+
+        <div class="zone" data-step="0" style="left:22%;top:6.4%;width:45%;height:4.5%"></div>
+        <div class="zone" data-step="1" style="left:0.5%;top:12.4%;width:18%;height:10.5%"></div>
+        <div class="zone" data-step="2" style="left:0.5%;top:23.6%;width:58%;height:19.5%"></div>
+        <div class="zone" data-step="3" style="left:46%;top:31.8%;width:12%;height:4.5%"></div>
+        <div class="zone" data-step="4" style="left:0.5%;top:44.4%;width:88%;height:14%"></div>
+        <div class="zone" data-step="5" style="left:0.5%;top:58%;width:32%;height:10.5%"></div>
+        <div class="zone" data-step="6" style="left:0.5%;top:68.7%;width:15%;height:4%"></div>
+
+        <button class="marker" data-step="1" style="left:17%;top:13.2%" title="Filtrera per plats">2</button>
+        <button class="marker" data-step="2" style="left:29%;top:24.4%" title="Observationer per incident">3</button>
+        <button class="marker" data-step="3" style="left:52%;top:32.5%" title="Arkivera">4</button>
+        <button class="marker" data-step="4" style="left:20%;top:45.2%" title="Lagg till observation">5</button>
+        <button class="marker" data-step="5" style="left:17%;top:58.8%" title="Andra sakerhet">6</button>
+        <button class="marker" data-step="6" style="left:19%;top:69.5%" title="Link back to home">7</button>
+        <button class="marker" data-step="0" style="left:64%;top:7.8%" title="Adressen /Observation">1</button>
+        <button class="marker" data-step="6" style="left:70%;top:2.6%" title="Flikens titel">7</button>
+      </div>
+      <p class="fullimg"><a href="bild%202%20MVC%20delen.png" target="_blank" rel="noopener">Öppna bilden i full storlek</a></p>
+    </div>
+
+    <div class="guide">
+      <div class="stepbar">
+        <button class="btn prev" disabled>← Föregående</button>
+        <span class="progress">Steg <b>1</b> av 7</span>
+        <button class="btn next">Nästa →</button>
+      </div>
+
+      <article class="card active" data-step="0">
+        <div class="card-head"><span class="badge">1</span><h2>Adressen /Observation – routing</h2></div>
+        <p class="on-page"><span>På sidan:</span> adressfältet: <code>.../databaskonstruktion/a25milha/app/Observation</code>.</p>
+        <div class="where">
+          <div class="row"><span class="label">Repo</span><span class="val"><code>databaskonstruktion-assignment-3-startup</code></span></div>
+          <div class="row"><span class="label">Routing</span><span class="val"><code>Program.cs</code> rad <code>8</code> (<code>UsePathBase</code>) och <code>24–26</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>18–24</code> (<code>Index</code>)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>MapControllerRoute</code>, <code>UsePathBase</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p><code>/Observation</code> matchar <code>ObservationController</code> och actionen <code>Index</code>. <code>Index</code> hämtar tre saker: observationsraderna (<code>GetObservationsWithDetails</code>), alla platser (<code>GetAllPlats</code>) och alla handläggare (<code>GetAllHandlaggare</code>), och lägger dem i ViewBag innan vyn returneras.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Adressen /Observation matchas av default-routen till ObservationController.Index. Index hämtar observationerna med join, alla platser och alla handläggare och lägger dem i ViewBag innan vyn returneras.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför tre anrop i Index?</b> Vyn behöver både tabellen och två dropdown-listor; alla laddas på en gång.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> i senaste commit saknas <code>UsePathBase</code>; route ligger då på rad <code>23–25</code>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="1">
+        <div class="card-head"><span class="badge">2</span><h2>Filtrera per plats</h2></div>
+        <p class="on-page"><span>På sidan:</span> rubriken "Filtrera per plats", dropdownen Plats och knappen Search.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>5–17</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>26–30</code> (<code>SearchObservations</code>)</span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/ObservationModel.cs</code> rad <code>101–110</code> · SQL rad <code>105</code> · parameter rad <code>106</code></span></div>
+          <div class="row"><span class="label">Svar</span><span class="val"><code>Views/Observation/SearchObservations.cshtml</code> rad <code>4–21</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>SearchObservationsByPlats</code>, <code>AllPlats</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Dropdownen byggs från <code>ViewBag.AllPlats</code> (DataTable från <code>GetAllPlats</code>, model rad 29–37). Formuläret postar <code>platskod</code>. Actionen hämtar filtrerat resultat och returnerar svarvyn. SQL: <code>WHERE o.PlatsKod = @PLATSKOD</code> med parameter.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Dropdownen byggs från GetAllPlats, som hämtar alla platser. När man klickar Search postas platskod till SearchObservations, som anropar modellen. Modellen kör en parameteriserad fråga med WHERE PlatsKod = @PLATSKOD och resultatet visas i SearchObservations-vyn.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför dropdown från databasen?</b> Listan följer med när platser läggs till/ändras; inga hårdkodade värden.</li>
+            <li><b>Varför parameter?</b> Skyddar mot SQL-injektion och sköter typning.</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="card" data-step="2">
+        <div class="card-head"><span class="badge">3</span><h2>Observationer per incident – nästlad tabell</h2></div>
+        <p class="on-page"><span>På sidan:</span> tabellen "Observationer per incident" med kolumnerna Incident, Plats och Observationer. Varje incident visar sina observationer i små nästlade tabeller, med en Arkivera-länk per rad.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>19–55</code></span></div>
+          <div class="row"><span class="label">Nyckelrader</span><span class="val"><code>prev</code> rad <code>26</code> · yttre loop <code>28</code> · ny yttre rad <code>31</code> · inre loop <code>35–50</code> · nästlad tabell <code>39–48</code> · Arkivera <code>46</code> · <code>prev</code> uppdateras <code>52</code></span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/ObservationModel.cs</code> rad <code>19–27</code> · SQL rad <code>23</code> (JOIN Plats, GradBeskrivning, Agent)</span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>20</code> (<code>ViewBag.ObsTable</code>)</span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>ObsTable</code>, <code>prev</code>, <code>IncidentId</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Modellen joinar Observation med Plats, GradBeskrivning och Agent för att få namn i stället för koder. Vyn grupperar per <code>IncidentId</code> med <code>prev</code>: när IncidentId ändras skrivs incident och plats ut, och den inre loopen skapar en liten nästlad tabell per observation som hör till incidenten. Varje sådan rad får en Arkivera-länk. När IncidentId är samma blir <code>prev</code>-villkoret falskt, så incidenten skrivs inte igen.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Här är den komplexa tabellen. SQL:en joinar fyra tabeller så att jag får platsnamn, gradbeskrivning och handläggarens namn. Vyn använder en jämförelsevariabel prev för att bara skriva incident och plats när IncidentId ändras. Den inre loopen skriver en nästlad tabell per observation för samma incident, och varje rad har en Arkivera-länk.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför nästlad tabell?</b> En incident kan ha flera observationer (1:N). Den yttre raden visar incidenten en gång; de nästlade tabellerna visar observationerna.</li>
+            <li><b>Varför JOIN mot GradBeskrivning och Agent?</b> Tabellen ska visa läsbara namn/beskrivningar i stället för koder.</li>
+            <li><b>Hur fungerar prev?</b> Den sparas efter varje rad. Om nästa rad har samma IncidentId skrivs ingen ny yttre rad; annars blir det en ny.</li>
+          </ul>
+          <p class="tech-note"><b>Teknisk detalj:</b> Koden öppnar en <code>&lt;tr&gt;</code> för varje datarad. Om en incident har flera observationer skrivs incidenten bara en gång (prev-villkoret), medan varje observation blir en egen liten nästlad tabell i samma yttre rad. Övriga varv i yttre loopen blir tomma <code>&lt;tr&gt;</code>; det syns inte med testdatan men är så koden är byggd.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="3">
+        <div class="card-head"><span class="badge">4</span><h2>Arkivera – länk till action och procedur</h2></div>
+        <p class="on-page"><span>På sidan:</span> de blå "Arkivera"-länkarna i den nästlade tabellen.</p>
+        <div class="where">
+          <div class="row"><span class="label">Länk</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>46</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>52–56</code> (<code>ArkiveraObservation</code>)</span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/ObservationModel.cs</code> rad <code>92–99</code> · <code>CALL ARKIVERAOBSERVATION(@OBSID)</code> rad <code>96</code></span></div>
+          <div class="row"><span class="label">Databas</span><span class="val"><code>database.sql</code> rad <code>250–260</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>ArkiveraObservation</code>, <code>ARKIVERAOBSERVATION</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Länken bygger en URL till actionen med observationens <code>obsid</code>. Actionen anropar modellen som kör <code>CALL ARKIVERAOBSERVATION(@OBSID)</code>, och sedan görs <code>RedirectToAction("Index")</code> så att listan läses om. Proceduren flyttar raden från aktiv till arkiv.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Arkivera-länken skickar med observationens ObsId till actionen ArkiveraObservation. Controllern anropar modellen, som kör proceduren ARKIVERAOBSERVATION med ObsId som parameter. Efteråt görs RedirectToAction till Index så att tabellen läses om och den arkiverade raden försvinner.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför RedirectToAction?</b> Efter en ändring ska användaren tillbaka till listan och se uppdaterad data; det undviker också dubbelpost vid refresh.</li>
+            <li><b>Varför procedur?</b> Samma flyttlogik används av PHP och .NET; den ligger på ett ställe.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> controller <code>44–48</code>; model <code>83–91</code> med <code>CALL</code> på rad <code>87</code>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="4">
+        <div class="card-head"><span class="badge">5</span><h2>Lagg till observation (INSERT)</h2></div>
+        <p class="on-page"><span>På sidan:</span> formuläret "Lagg till observation" med ObsId, Incidentnr, Incidentnamn, Plats, Grad, Sakerhet, Handlaggare namn/nr och knappen Add.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>58–101</code> · fel/lyckat-meddelande <code>59–66</code> · form <code>67</code> · fält <code>68–99</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>32–44</code> · try/catch <code>34–42</code> · redirect <code>43</code></span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/ObservationModel.cs</code> rad <code>49–79</code> · validering <code>51–64</code> · INSERT <code>68</code> · parametrar <code>70–77</code> · execute <code>78</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>InsertObservation</code>, <code>TempData</code>, <code>NOW()</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Formuläret postar åtta fält (obsid, incidentid, incidentnamn, platskod, gradkod, sakerhet, regnamn, regnr). Controllern tar emot dem och anropar modellen i try/catch. Modellen validerar: heltal, grad 1–4, säkerhet 1–114 och att handläggare är vald. Sedan körs en parameteriserad INSERT med <code>NOW()</code> som datum. Vid <code>ArgumentException</code> sätts <code>TempData["Error"]</code>; vid lyckat insert <code>TempData["Success"]</code>; redirect till Index. Vyn visar meddelandet ovanför formuläret.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Formuläret postar fälten till InsertObservation. Controllern anropar modellen i ett try/catch. Modellen validerar alla värden och kör sedan en parameteriserad INSERT med åtta parametrar, där Datum sätts med NOW(). Vid valideringsfel kastas ArgumentException som controllern fångar och lägger i TempData, så vyn kan visa felet efter redirecten. Vid lyckat insert visas ett bekräftelsemeddelande.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför TempData?</b> Meddelandet ska överleva <code>RedirectToAction</code> (en redirect); TempData lever över en redirect, ViewBag gör det inte.</li>
+            <li><b>Varför RedirectToAction?</b> PRG-mönstret: undviker att formuläret skickas igen när man laddar om sidan.</li>
+            <li><b>Varför validering i modellen?</b> Affärslogiken samlas i model-lagret; controllern blir tunn och vyn slipper räkna.</li>
+            <li><b>Vad händer vid DB-fel?</b> Try/catch fångar bara <code>ArgumentException</code> (valideringsfel). Ett MySQL-fel, t.ex. dubblett på primärnyckeln, kastas vidare och blir inte ett TempData-meddelande.</li>
+            <li><b>Varför number-input för Grad i MVC men dropdown i PHP?</b> PHP väljer från kodtabellen <code>GradBeskrivning</code>; MVC skickar GradKod som tal och joinar <code>GradBeskrivning</code> i listningen. Båda validerar 1–4.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> senaste commit saknar validering och TempData. Då är controller <code>32–36</code>, model <code>53–69</code> (INSERT <code>57</code>, execute <code>67</code>) och vyn <code>58–93</code>. Hoppa då över valideringsraderna och TempData-blocket.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="5">
+        <div class="card-head"><span class="badge">6</span><h2>Andra sakerhet (UPDATE)</h2></div>
+        <p class="on-page"><span>På sidan:</span> "Andra sakerhet" med dropdown, fältet Ny sakerhet och knappen Update.</p>
+        <div class="where">
+          <div class="row"><span class="label">Vy</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>104–117</code> · form <code>105</code> · dropdown <code>108–113</code> · input <code>115</code></span></div>
+          <div class="row"><span class="label">Controller</span><span class="val"><code>Controllers/ObservationController.cs</code> rad <code>46–50</code> (<code>UpdateSakerhet</code>)</span></div>
+          <div class="row"><span class="label">Model</span><span class="val"><code>Models/ObservationModel.cs</code> rad <code>81–90</code> · UPDATE rad <code>85</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>UpdateSakerhet</code>, <code>UPDATE Observation</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Dropdownen byggs från <code>ViewBag.ObsTable</code> (samma data som tabellen). Formuläret postar <code>obsid</code> + <code>sakerhet</code>. Actionen anropar modellen som kör parameteriserad <code>UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID</code>, sedan redirect till Index.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Här väljer man en observation och ett nytt säkerhetsvärde. Formuläret postar obsid och sakerhet till UpdateSakerhet. Modellen kör en parameteriserad UPDATE med två parametrar, och sedan redirectas man till Index så tabellen visar det nya värdet.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Varför bara ett fält?</b> Uppgiften är att visa UPDATE; här ändras säkerhetsvärdet.</li>
+            <li><b>Varför WHERE?</b> Utan WHERE skulle alla observationer uppdateras.</li>
+            <li><b>Finns validering?</b> Input-fältet har <code>min</code>/<code>max</code>/<code>step</code> i HTML, men modellen validerar inte server-side. Det är en förenkling i exemplet.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> controller <code>38–42</code>; model <code>71–81</code> (UPDATE <code>75</code>); vyn <code>96–109</code>.</p>
+        </div>
+      </article>
+
+      <article class="card" data-step="6">
+        <div class="card-head"><span class="badge">7</span><h2>Link back to home + layout</h2></div>
+        <p class="on-page"><span>På sidan:</span> länken "Link back to home", flikens titel och sidfoten "PUCKO - Handlaggareapplikation".</p>
+        <div class="where">
+          <div class="row"><span class="label">Länk</span><span class="val"><code>Views/Observation/Index.cshtml</code> rad <code>119</code></span></div>
+          <div class="row"><span class="label">Layout</span><span class="val"><code>Views/Shared/_Layout.cshtml</code> rad <code>6</code>, <code>10</code>, <code>12–14</code> (footertext rad <code>13</code>)</span></div>
+          <div class="row"><span class="label">Koppling</span><span class="val"><code>Views/_ViewStart.cshtml</code> rad <code>2</code></span></div>
+          <div class="row"><span class="label">Sök på</span><span class="val"><code>_ViewStart</code>, <code>RenderBody</code></span></div>
+        </div>
+        <button class="btn reveal">Visa facit</button>
+        <div class="facit">
+          <h3>Vad koden gör</h3>
+          <p>Samma layout som Personsidan. Länken går till appens rot; layouten ansvarar för html, titel och sidfot; <code>@RenderBody()</code> lägger in Observationsvyns innehåll.</p>
+          <h3>Säg så här</h3>
+          <blockquote class="say">Även den här vyn använder den gemensamma layouten. RenderBody lägger in Observationsvyns innehåll, och layouten står för titeln och sidfoten. Länken "Link back to home" ligger i vyn och går till appens rot.</blockquote>
+          <h3>Om läraren frågar</h3>
+          <ul class="faq">
+            <li><b>Var bestäms layouten?</b> I <code>_ViewStart.cshtml</code> rad 2: <code>Layout = "_Layout"</code>.</li>
+          </ul>
+          <p class="head-note"><b>Git HEAD:</b> länken ligger på rad <code>111</code> och använder <code>@Url.Action("Index", "Home")</code>.</p>
+        </div>
+      </article>
+
+      <details class="quick">
+        <summary>Snabblista: alla steg i MVC bild 2 (Observation)</summary>
+        <table>
+          <tr><th>#</th><th>Sektion</th><th>Fil</th><th>Rader</th></tr>
+          <tr><td>1</td><td><button class="quick-link" data-step="0">Route /Observation</button></td><td>Program.cs + ObservationController.cs</td><td>8, 24–26 + 18–24</td></tr>
+          <tr><td>2</td><td><button class="quick-link" data-step="1">Filtrera per plats</button></td><td>Views/Observation/Index.cshtml + controller + model + SearchObservations</td><td>5–17 + 26–30 + 101–110 + 4–21</td></tr>
+          <tr><td>3</td><td><button class="quick-link" data-step="2">Observationer per incident</button></td><td>Views/Observation/Index.cshtml + ObservationModel</td><td>19–55 + 19–27</td></tr>
+          <tr><td>4</td><td><button class="quick-link" data-step="3">Arkivera</button></td><td>Views/Observation/Index.cshtml + controller + model + database.sql</td><td>46 + 52–56 + 92–99 + 250–260</td></tr>
+          <tr><td>5</td><td><button class="quick-link" data-step="4">Lagg till (INSERT)</button></td><td>Views/Observation/Index.cshtml + controller + model</td><td>58–101 + 32–44 + 49–79</td></tr>
+          <tr><td>6</td><td><button class="quick-link" data-step="5">Andra sakerhet (UPDATE)</button></td><td>Views/Observation/Index.cshtml + controller + model</td><td>104–117 + 46–50 + 81–90</td></tr>
+          <tr><td>7</td><td><button class="quick-link" data-step="6">Link back/layout</button></td><td>Views/Observation/Index.cshtml + _Layout.cshtml</td><td>119 + 6, 10, 12–14</td></tr>
+        </table>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     SNABBFAKTA
+============================================================ -->
+<section class="cheat">
+  <h2>Snabbfakta: PHP vs MVC (om läraren ber dig jämföra)</h2>
+  <table>
+    <tr><th>Område</th><th>PHP-varianten</th><th>MVC-varianten (.NET)</th></tr>
+    <tr><td>Struktur</td><td>Allt i en självrefererande fil: <code>PHPApplikation.php</code></td><td>Tre lager: <code>Controllers/</code>, <code>Models/</code>, <code>Views/</code></td></tr>
+    <tr><td>Indata</td><td><code>$_POST['fält']</code> läses högst upp i filen</td><td>Action-parametrar tar emot formulärfälten via model binding</td></tr>
+    <tr><td>Data till vyn</td><td><code>$stmt</code>/<code>$row</code> loopas direkt i HTML:en</td><td><code>ViewBag</code> innehåller en <code>DataTable</code> som vyn loopar</td></tr>
+    <tr><td>Sökning</td><td>Filtrerar samma sida; Personer-tabellen visar resultatet</td><td>Postar till en action som returnerar en separat sökvy</td></tr>
+    <tr><td>SQL-anrop</td><td>PDO: <code>prepare</code> + <code>bindValue</code> eller <code>query</code></td><td><code>MySqlDataAdapter</code>/<code>MySqlCommand</code> + <code>AddWithValue</code></td></tr>
+    <tr><td>Nästlad tabell</td><td>Yttre rad per <b>observation</b>; inre tabell med <b>vittnen</b></td><td>Yttre rad per <b>incident</b>; inre tabell(er) med <b>observationer</b></td></tr>
+    <tr><td>Efter POST</td><td>Samma sida renderas igen med meddelande</td><td><code>RedirectToAction</code> (PRG) + <code>TempData</code> för meddelande</td></tr>
+    <tr><td>Återanvändning</td><td>Procedurer anropas direkt med <code>CALL</code></td><td>Samma procedurer anropas från model-klasserna</td></tr>
+  </table>
+
+  <h3>Sex fällor att inte gå i</h3>
+  <ul>
+    <li><b>Blanda inte radlayouterna:</b> PHP grupperar <b>vittnen under en observation</b>; MVC grupperar <b>observationer under en incident</b>.</li>
+    <li><b><code>LIKE '%%'</code> betyder alla rader</b> – inte tomt resultat. Det är därför Personer-tabellen visar alla vid tom sökning.</li>
+    <li><b><code>LEFT JOIN</code> vs <code>JOIN</code>:</b> LEFT JOIN behåller observationer utan vittnen; vanlig JOIN hade tagit bort dem.</li>
+    <li><b><code>ViewBag</code> är ingen modellklass:</b> det är en dynamisk behållare. Här ligger DataTables som vyn loopar över.</li>
+    <li><b>Git HEAD vs lokal version:</b> dina MVC-ändringar är ocommittade. Committa + pusha före redovisningen, annars stämmer inte radnumren på git.</li>
+    <li><b><code>closeCursor()</code> efter <code>CALL</code>:</b> stänger resultatmängden så nästa fråga kan köras.</li>
+  </ul>
+
+  <h3>Så svarar du på en slumpad fråga (5 min)</h3>
+  <ul>
+    <li><b>1. Peka:</b> "Jag visar fil X, rad Y." Öppna rätt repo → mapp → fil → scrolla/sök.</li>
+    <li><b>2. Förklara vad koden gör:</b> följ flödet inifrån och ut (formulär → controller/PHP → SQL → utskrift).</li>
+    <li><b>3. Förklara varför:</b> nämn designvalet (t.ex. prepared statement, LEFT JOIN, procedur, PRG, layout).</li>
+    <li><b>4. Koppla till appen:</b> säg vad man ser på wwwlab och vilken rad i koden som skapar det.</li>
+  </ul>
+</section>
+
+<footer class="pagefoot">
+  Kodkarta för muntlig redovisning · PHP: <code>PHPApplikation.php</code> · MVC: <code>databaskonstruktion-assignment-3-startup</code> · DB: <code>database.sql</code>
+</footer>
+</div>
+
+<script>
+(function () {
+  const tabs = Array.from(document.querySelectorAll('.tab'));
+  const screens = Array.from(document.querySelectorAll('.screen'));
+
+  function showStep(screen, index, updateHash) {
+    const cards = Array.from(screen.querySelectorAll('.card'));
+    if (!cards.length) return;
+    index = Math.max(0, Math.min(index, cards.length - 1));
+    screen.dataset.current = String(index);
+
+    cards.forEach(function (card, i) {
+      const active = i === index;
+      card.classList.toggle('active', active);
+      card.setAttribute('aria-hidden', active ? 'false' : 'true');
+    });
+    Array.from(screen.querySelectorAll('.marker')).forEach(function (marker) {
+      marker.classList.toggle('active', Number(marker.dataset.step) === index);
+    });
+    Array.from(screen.querySelectorAll('.zone')).forEach(function (zone) {
+      zone.classList.toggle('active', Number(zone.dataset.step) === index);
+    });
+
+    const progress = screen.querySelector('.progress b');
+    if (progress) progress.textContent = String(index + 1);
+    const prev = screen.querySelector('.prev');
+    const next = screen.querySelector('.next');
+    if (prev) prev.disabled = index === 0;
+    if (next) next.disabled = index === cards.length - 1;
+
+    if (updateHash !== false) {
+      const hash = '#' + screen.id + '/' + (index + 1);
+      if (location.hash !== hash) {
+        try { history.replaceState(null, '', hash); } catch (e) { location.hash = hash; }
+      }
+    }
+  }
+
+  function activateTab(id, step, updateHash) {
+    let screen = document.getElementById(id);
+    if (!screen) screen = document.getElementById('php1');
+    tabs.forEach(function (tab) {
+      const active = tab.dataset.tab === screen.id;
+      tab.classList.toggle('active', active);
+      tab.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    screens.forEach(function (s) {
+      s.classList.toggle('active', s === screen);
+    });
+    showStep(screen, (Number(step) || 1) - 1, updateHash);
+  }
+
+  tabs.forEach(function (tab) {
+    tab.addEventListener('click', function () {
+      activateTab(tab.dataset.tab, 1, true);
+      const tabsEl = document.querySelector('.tabs');
+      if (tabsEl) tabsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  screens.forEach(function (screen) {
+    screen.querySelectorAll('.marker').forEach(function (marker) {
+      marker.addEventListener('click', function () {
+        showStep(screen, Number(marker.dataset.step), true);
+        if (window.matchMedia('(max-width: 1100px)').matches) {
+          screen.querySelector('.guide').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+    screen.querySelectorAll('.quick-link').forEach(function (link) {
+      link.addEventListener('click', function () {
+        showStep(screen, Number(link.dataset.step), true);
+        screen.querySelector('.guide').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    });
+    const prev = screen.querySelector('.prev');
+    const next = screen.querySelector('.next');
+    if (prev) prev.addEventListener('click', function () {
+      showStep(screen, Number(screen.dataset.current || 0) - 1, true);
+    });
+    if (next) next.addEventListener('click', function () {
+      showStep(screen, Number(screen.dataset.current || 0) + 1, true);
+    });
+  });
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const screen = document.querySelector('.screen.active');
+    if (!screen) return;
+    const current = Number(screen.dataset.current || 0);
+    showStep(screen, current + (event.key === 'ArrowRight' ? 1 : -1), true);
+  });
+
+  const trainingToggle = document.getElementById('trainingToggle');
+  if (trainingToggle) {
+    trainingToggle.addEventListener('change', function () {
+      document.body.classList.toggle('training', trainingToggle.checked);
+    });
+  }
+  document.querySelectorAll('.reveal').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const card = button.closest('.card');
+      card.classList.toggle('revealed');
+      button.textContent = card.classList.contains('revealed') ? 'Dölj facit' : 'Visa facit';
+    });
+  });
+
+  function initFromHash() {
+    const raw = location.hash.replace('#', '');
+    const parts = raw.split('/');
+    if (parts[0] && document.getElementById(parts[0])) {
+      activateTab(parts[0], Number(parts[1]) || 1, false);
+    } else {
+      activateTab('php1', 1, false);
+    }
+  }
+  window.addEventListener('hashchange', initFromHash);
+  initFromHash();
+})();
+</script>
+</body>
+</html>

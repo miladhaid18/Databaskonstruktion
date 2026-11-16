@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MVC-fuskblad - IT429G</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,sans-serif;padding:24px 16px 60px}
+main{max-width:820px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+h1 span{color:var(--blue)}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 20px}
+.chain b{color:var(--green)}
+.chain .arrow{color:var(--muted);padding:0 4px}
+h2{font-size:.8rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.92rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#1d212a;color:var(--muted);font-size:.75rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+.ln{background:#2b2438;color:var(--purple)}
+ul{margin:8px 0 0;padding-left:20px}
+li{margin:6px 0}
+li b{color:var(--yellow)}
+footer{margin-top:26px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{
+ body{background:#fff;color:#111;padding:0;font-size:12px}
+ .card,.chain,table{background:#fff;border-color:#bbb}
+ th{background:#eee;color:#111}
+ .sub,footer,h2{color:#444}
+ code{background:#eee;color:#000}
+ .ln{background:#eee}
+ a{color:#111}
+}
+</style></head><body><main>
+<h1>MVC-<span>fuskblad</span></h1>
+<p class="sub">Det enda du behover: 1 kedja + 6 rader. Täck hoger kolumn och saga hogt.</p>
+
+<div class="chain">
+<b>Formulär</b> (View) <span class="arrow">→</span>
+<b>Controller</b> <span class="arrow">→</span>
+<b>Model</b> <span class="arrow">→</span>
+<b>SQL</b> <span class="arrow">→</span>
+RedirectToAction <span class="arrow">→</span>
+<b>View</b> (ritar HTML)
+</div>
+
+<h2>Peka ratt - vad lararen klickar</h2>
+<p class="sub" style="margin:-2px 0 8px"><b>vy</b> = View = <code>.cshtml</code>-filen i <code>Views/</code> som ritar HTML-sidan.</p>
+<table>
+<tr><th>Funktion</th><th>Var det finns (fil + rad)</th></tr>
+<tr><td>Tabellen</td><td><code>ObservationController.cs</code> <code class="ln">18-24</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">19-27</code> &rarr; <code>Views/Observation/Index.cshtml</code> <code class="ln">20-55</code></td></tr>
+<tr><td>Filtrera per plats<br><span style="font-weight:400;color:var(--muted)">(sök observation)</span></td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">6-18</code> &rarr; <code>ObservationController.cs</code> <code class="ln">26-30</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">101-110</code></td></tr>
+<tr><td>Sok person</td><td><code>Views/Person/Index.cshtml</code> <code class="ln">5-12</code> &rarr; <code>PersonController.cs</code> <code class="ln">25-29</code> &rarr; <code>PersonModel.cs</code> <code class="ln">39-47</code></td></tr>
+<tr><td>Lagg till</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">67-101</code> &rarr; <code>ObservationController.cs</code> <code class="ln">32-44</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">49-79</code> (SQL <code class="ln">68</code>)</td></tr>
+<tr><td>Ändra säkerhet</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">105-117</code> &rarr; <code>ObservationController.cs</code> <code class="ln">46-50</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">81-90</code></td></tr>
+<tr><td>Arkivera</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">46</code> &rarr; <code>ObservationController.cs</code> <code class="ln">52-56</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">92-99</code> (CALL <code class="ln">96</code>)</td></tr>
+<tr><td>Dropdowns</td><td><code>ObservationController.cs</code> <code class="ln">18-24</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">29-37</code> (plats), <code class="ln">39-47</code> (handlaggare)</td></tr>
+</table>
+
+<h2>Så kopplar du skärmen till koden (live-appen)</h2>
+<p class="sub" style="margin:-2px 0 8px">Peka på skärmen, säg fil + metod, förklara i en mening. Appen skriver "Andra sakerhet" = ändra säkerhet.</p>
+<table>
+<tr><th>Sida / element</th><th>Kod + en mening</th></tr>
+<tr><td>Person: Sök person</td><td><code>Views/Person/Index.cshtml</code> <code class="ln">5-12</code> &rarr; <code>PersonController.cs</code> <code class="ln">25-29</code> &rarr; <code>PersonModel.cs</code> <code class="ln">39-47</code> — "Formuläret postar namnet; modellen filtrerar med WHERE Namn LIKE."</td></tr>
+<tr><td>Person: Personer</td><td><code>PersonController.cs</code> <code class="ln">18-23</code> &rarr; <code>PersonModel.cs</code> <code class="ln">19-27</code> &rarr; <code>Views/Person/Index.cshtml</code> <code class="ln">14-30</code> — "Index hämtar hela tabellen; vyn loopar Columns/Rows."</td></tr>
+<tr><td>Person: Medelsäkerhet</td><td><code>PersonModel.cs</code> <code class="ln">29-37</code> &rarr; <code>Views/Person/Index.cshtml</code> <code class="ln">34-50</code> — "Proceduren GETAVGSAKERHET ger medelvärdet."</td></tr>
+<tr><td>Observation: Filtrera per plats</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">6-18</code> &rarr; <code>ObservationController.cs</code> <code class="ln">26-30</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">101-110</code> — "Platskoden filtrerar med WHERE PlatsKod."</td></tr>
+<tr><td>Observation: tabellen</td><td><code>ObservationController.cs</code> <code class="ln">18-24</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">19-27</code> &rarr; <code>Views/Observation/Index.cshtml</code> <code class="ln">20-55</code> — "Join + yttre rad per incident, inre tabell per ObsId."</td></tr>
+<tr><td>Observation: Arkivera</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">46</code> &rarr; <code>ObservationController.cs</code> <code class="ln">52-56</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">92-99</code> — "Länken skickar radens ObsId till proceduren."</td></tr>
+<tr><td>Observation: Lägg till</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">67-101</code> &rarr; <code>ObservationController.cs</code> <code class="ln">32-44</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">49-79</code> — "8 fält; parameteriserad INSERT rad 68."</td></tr>
+<tr><td>Observation: Ändra säkerhet</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">105-117</code> &rarr; <code>ObservationController.cs</code> <code class="ln">46-50</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">81-90</code> — "Dropdownens ObsId + nytt värde; UPDATE WHERE ObsId."</td></tr>
+<tr><td>Observation: dropdownar</td><td><code>ObservationController.cs</code> <code class="ln">18-24</code> &rarr; <code>ObservationModel.cs</code> <code class="ln">29-37</code>, <code class="ln">39-47</code> — "Index fyller AllPlats/AllHandlaggare; vyn loopar till option."</td></tr>
+<tr><td>Båda: Link back to home</td><td><code>Views/Observation/Index.cshtml</code> <code class="ln">119</code>, <code>Views/Person/Index.cshtml</code> <code class="ln">52</code> — "Url.Content('~/') respekterar PathBase."</td></tr>
+</table>
+
+<h2>Tre meningar som raddar dig</h2>
+<ul>
+<li><b>View()</b> ritar vyn direkt. <b>RedirectToAction()</b> gor en ny request, sa F5 inte skickar om formularet.</li>
+<li>All SQL anvander <b>parametrar</b> (@NAMN + AddWithValue) - ingen SQL-injektion.</li>
+<li><b>PathBase</b> (<code>Program.cs</code> <code class="ln">8</code>) gor att appen kan ligga under <code>/databaskonstruktion/a25milha/app</code>.</li>
+</ul>
+
+<h2>Filer att peka pa</h2>
+<ul>
+<li>Controllers: <code>ObservationController.cs</code>, <code>PersonController.cs</code>, <code>HomeController.cs</code></li>
+<li>Modeller: <code>ObservationModel.cs</code>, <code>PersonModel.cs</code></li>
+<li>Vyer: <code>Views/Observation/Index.cshtml</code>, <code>Views/Person/Index.cshtml</code></li>
+</ul>
+
+<footer>Radnummer ar fran din kod nu. Stammer de inte: sok pa metodnamnet (Ctrl+F) och forklara i stallet.</footer>
+</main></body></html>

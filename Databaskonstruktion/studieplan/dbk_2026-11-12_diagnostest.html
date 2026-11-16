@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Databaskonstruktion – diagnostest</title>
+<style>
+  @page { size: A4; margin: 15mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html { background: #0d1117; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 10.3pt; line-height: 1.4; color: #e6edf3; background: #0d1117; margin: 0; }
+  .topline { font-size: 8.8pt; color: #8b949e; letter-spacing: .4px; margin-bottom: 4px; }
+  .tag { display: inline-block; background: #1f6feb; color: #fff; padding: 1px 7px; border-radius: 3px; font-size: 8.2pt; margin-right: 6px; }
+  h1 { font-size: 19pt; color: #79c0ff; margin: 4px 0 4px; line-height: 1.15; }
+  .lead { font-size: 10.4pt; color: #c9d1d9; margin: 0 0 8px; }
+  h2 { font-size: 13pt; color: #79c0ff; border-bottom: 2px solid #1f6feb; padding-bottom: 2px; margin: 14px 0 8px; }
+  p { margin: 4px 0; }
+  .box { border: 1.4px solid #1f6feb; background: #161b22; padding: 8px 11px; border-radius: 6px; margin: 8px 0 12px; color: #e6edf3; }
+  .box.warn { border-color: #d29922; background: #2d1a10; color: #ffd7b0; }
+  .box.green { border-color: #3fb950; background: #0f2a1a; color: #d7f5e0; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  th { background: #1f3a5f; color: #e6edf3; text-align: left; font-size: 9.3pt; }
+  th, td { border: 1px solid #30363d; padding: 5px 7px; vertical-align: top; }
+  td { font-size: 9.4pt; }
+  tr { break-inside: avoid; page-break-inside: avoid; }
+  h2 { break-after: avoid; page-break-after: avoid; }
+  ul, ol { margin: 3px 0 5px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .q { margin: 13px 0 12px; page-break-inside: avoid; }
+  .qhead { font-size: 10.8pt; margin: 0 0 5px; }
+  .qnum { display: inline-block; background: #1f6feb; color: #fff; min-width: 22px; height: 22px; border-radius: 50%; text-align: center; font-weight: 600; font-size: 9.8pt; line-height: 22px; margin-right: 5px; }
+  .type { font-size: 8.2pt; color: #fff; background: #484f58; padding: 1px 6px; border-radius: 3px; margin-left: 5px; vertical-align: 2px; }
+  .type.multi { background: #b35900; }
+  .alt { margin: 2px 0 2px 28px; }
+  .alt b { color: #79c0ff; }
+  .motlabel { margin: 8px 0 0 28px; font-size: 9pt; color: #8b949e; font-weight: 600; }
+  .mot { border-bottom: 1px solid #30363d; height: 21px; margin: 3px 28px 0 28px; }
+  pre { background: #161b22; border: 1px solid #30363d; border-radius: 5px; padding: 8px 10px; font-family: Consolas, "Courier New", monospace; font-size: 8.9pt; line-height: 1.35; white-space: pre-wrap; margin: 6px 0 6px 28px; color: #e6edf3; }
+  .small { font-size: 8.7pt; color: #8b949e; }
+  .facit { page-break-before: always; }
+  .answer { color: #3fb950; font-weight: 700; }
+  .stop { border: 2px dashed #d29922; background: #2d1a10; padding: 8px 10px; border-radius: 6px; text-align: center; font-weight: 600; color: #ffd7b0; margin: 10px 0; }
+  .model { background: #0f2a1a; border-left: 3px solid #3fb950; padding: 6px 9px; margin: 5px 0 8px; font-size: 9.4pt; color: #d7f5e0; }
+  .why { font-size: 8.9pt; color: #8b949e; margin: 2px 0 8px; }
+  .emptyrow td { height: 25px; }
+  .pagebreak { page-break-before: always; }
+  .words { font-size: 8.2pt; color: #8b949e; margin-left: 28px; }
+  code { background: #161b22; color: #ffa657; padding: 1px 3px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="topline"><span class="tag">IT429G</span> Databaskonstruktion · Omtenta 18 december 2026 · Diagnostest</div>
+<h1>Diagnostest – 10 frågor i det nya formatet</h1>
+<p class="lead">Gör detta på 30 minuter, utan hjälpmedel, helst på papper. Svara på alla frågor och skriv en kort motivering till varje.</p>
+
+<div class="box">
+  <strong>Regler:</strong> Fråga <strong>1–7</strong> har exakt ett korrekt alternativ. Fråga <strong>8–10</strong> kan ha flera korrekta alternativ.
+  Motiveringen ska vara <strong>2–4 meningar, 30–50 ord</strong>, och förklara varför valet är korrekt.
+  <br><strong>Poäng:</strong> 1 p för rätt alternativ + 1 p för korrekt motivering. Minst ett fel i alternativen = 0 p på frågan.
+  Totalt 20 p: <strong>G = 12 p</strong>, <strong>VG = 16 p</strong>.
+</div>
+
+<div class="box warn">
+  <strong>Innan du börjar:</strong> Lägg undan anteckningar och facit. Skriv ned tankegången även när du är osäker – det är så vi hittar dina luckor. Facit börjar efter en tydlig stopp-sida längre fram.
+</div>
+
+<h2>Del 1 – Databasimplementation</h2>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">1</span><strong>Vilket påstående om merge är korrekt?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> Merge delar upp en tabell i två tabeller med samma primärnyckel.</div>
+  <div class="alt"><b>b)</b> Merge slår ihop två relaterade tabeller (1:1 eller 1:N) och eliminerar JOIN-frågor, men ökar redundansen.</div>
+  <div class="alt"><b>c)</b> Merge ersätter återkommande textsträngar med numeriska koder.</div>
+  <div class="alt"><b>d)</b> Merge delar upp rader i aktiva och arkiverade tabeller.</div>
+  <div class="alt"><b>e)</b> Merge kräver alltid en N:M-relation.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">2</span><strong>Vilket påstående om vertikal split är korrekt?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> Vertikal split delar upp rader i aktiva och arkiverade tabeller.</div>
+  <div class="alt"><b>b)</b> Vertikal split slår ihop två tabeller för att undvika JOIN.</div>
+  <div class="alt"><b>c)</b> Vertikal split ersätter textvärden med numeriska koder.</div>
+  <div class="alt"><b>d)</b> Vertikal split flyttar stora eller sällan använda kolumner till en egen tabell med samma primärnyckel.</div>
+  <div class="alt"><b>e)</b> Vertikal split skapar ett index på en kolumn.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">3</span><strong>Vilken kolumndefinition garanterar att <code>custno</code> lagras som exakt 12 siffror?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> <code>custno INT(12)</code></div>
+  <div class="alt"><b>b)</b> <code>custno CHAR(12)</code></div>
+  <div class="alt"><b>c)</b> <code>custno CHAR(12) NOT NULL CHECK (custno REGEXP '^[0-9]{12}$')</code></div>
+  <div class="alt"><b>d)</b> <code>custno VARCHAR(12)</code></div>
+  <div class="alt"><b>e)</b> <code>custno DECIMAL(12,2)</code></div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">4</span><strong>Vad är skillnaden mellan en stored procedure och en trigger?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> En trigger exekveras automatiskt vid händelser (BEFORE/AFTER INSERT, UPDATE, DELETE), medan en stored procedure anropas explicit med CALL.</div>
+  <div class="alt"><b>b)</b> En trigger anropas alltid med CALL, medan en procedur körs automatiskt.</div>
+  <div class="alt"><b>c)</b> Både triggers och procedurer körs automatiskt vid INSERT.</div>
+  <div class="alt"><b>d)</b> En trigger kan inte användas för validering.</div>
+  <div class="alt"><b>e)</b> En stored procedure kan inte ta emot parametrar.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<h2>Del 2 – Applikation PHP</h2>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">5</span><strong>Vilket påstående om GET och POST är korrekt?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> GET skickar data i request-body och POST i URL:en.</div>
+  <div class="alt"><b>b)</b> GET och POST är lika säkra för lösenord.</div>
+  <div class="alt"><b>c)</b> POST-data syns alltid i URL:en.</div>
+  <div class="alt"><b>d)</b> GET kan bara skicka numeriska värden.</div>
+  <div class="alt"><b>e)</b> GET skickar data i URL:en och passar för sökningar; POST skickar data i request-body och passar för ändringar och känslig data.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">6</span><strong>Vilket påstående om PDO och fetch-lägen är korrekt?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> FETCH_BOTH returnerar bara kolumnnamn som nycklar.</div>
+  <div class="alt"><b>b)</b> FETCH_ASSOC ger kolumnnamn som nycklar, FETCH_NUM numeriska index och FETCH_BOTH båda.</div>
+  <div class="alt"><b>c)</b> bindParam binder alltid ett värde, aldrig en referens.</div>
+  <div class="alt"><b>d)</b> Prepared statements klistrar in värdena direkt i SQL-strängen.</div>
+  <div class="alt"><b>e)</b> execute() måste alltid få de bundna värdena som argument.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<h2>Del 3 – Applikation MVC (C#)</h2>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">7</span><strong>Vilket påstående beskriver MVC-flödet korrekt?</strong><span class="type">Ett svar</span></p>
+  <div class="alt"><b>a)</b> Vyn anropar databasen och skickar data till controllern.</div>
+  <div class="alt"><b>b)</b> Modellen renderar HTML och controllern lagrar data.</div>
+  <div class="alt"><b>c)</b> Requesten går via routingen till controllern, som anropar modellen; modellen frågar databasen och returnerar data, som controllern skickar till vyn.</div>
+  <div class="alt"><b>d)</b> Controllern är en del av databasen.</div>
+  <div class="alt"><b>e)</b> Modellen tar emot requesten och renderar vyn.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<h2>Del 4 – Flera korrekta svar</h2>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">8</span><strong>Vilka påståenden om SQL-injection och skydd är korrekta?</strong><span class="type multi">Flera svar</span></p>
+  <div class="alt"><b>a)</b> SQL-injection kan uppstå när användarinput klistras in direkt i en SQL-sträng.</div>
+  <div class="alt"><b>b)</b> Prepared statements med platshållare gör att input behandlas som data, inte som SQL-kod.</div>
+  <div class="alt"><b>c)</b> Stored procedures med parametrar och begränsade rättigheter kan minska risken för SQL-injection.</div>
+  <div class="alt"><b>d)</b> <code>mysql_real_escape_string</code> ensamt garanterar alltid full säkerhet.</div>
+  <div class="alt"><b>e)</b> Triggers är det primära skyddet mot SQL-injection.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">9</span><strong>Vilka fel finns i denna C#-kod?</strong><span class="type multi">Flera svar</span></p>
+<pre>public DataTable SearchCustomers(string name)
+{
+    MySqlConnection dbcon = new MySqlConnection(_connectionString);
+    dbcon.Open();
+    MySqlDataAdapter adapter =
+        new MySqlDataAdapter("SELECT * FROM CUSTOMER WHERE name = @NAME;", dbcon);
+    adapter.SelectCommand.Parameters.AddWithValue("@NAM", "%" + name + "%");
+    DataSet ds = new DataSet();
+    adapter.Fill(ds, "result");
+    DataTable CustomerTable = ds.Tables["result"];
+    dbcon.Close();
+    return CustomerTable;
+}</pre>
+  <div class="alt"><b>a)</b> Parameternamnet i SQL (<code>@NAME</code>) matchar inte namnet i <code>AddWithValue</code> (<code>@NAM</code>).</div>
+  <div class="alt"><b>b)</b> <code>=</code> används i stället för <code>LIKE</code>, så <code>%</code>-jokertecknen i värdet fungerar inte.</div>
+  <div class="alt"><b>c)</b> <code>MySqlDataAdapter</code> kan inte fylla en <code>DataSet</code>.</div>
+  <div class="alt"><b>d)</b> <code>AddWithValue</code> får inte användas tillsammans med <code>MySqlDataAdapter</code>.</div>
+  <div class="alt"><b>e)</b> <code>dbcon.Close()</code> tömmer <code>DataTable</code> innan den returneras.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="q">
+  <p class="qhead"><span class="qnum">10</span><strong>Vilka fel finns i denna PHP-kod som ska uppdatera en specifik fakturarad?</strong><span class="type multi">Flera svar</span></p>
+<pre>$stmt = $pdo-&gt;prepare("UPDATE INVOICEROW SET DATEPAID=:datepaid, COST=:co");
+$stmt-&gt;bindParam(':datepaid', $POST['paiddate']);
+$stmt-&gt;bindParam(':co', $POST['cost']);
+$stmt-&gt;bindParam('customernumber', $POST['custno']);
+$stmt-&gt;execute();</pre>
+  <div class="alt"><b>a)</b> SQL saknar WHERE-sats.</div>
+  <div class="alt"><b>b)</b> <code>customernumber</code> binds men finns inte i SQL-strängen.</div>
+  <div class="alt"><b>c)</b> Superglobalen är felstavad (<code>$POST</code> i stället för <code>$_POST</code>).</div>
+  <div class="alt"><b>d)</b> <code>FROM</code> saknas i frågan.</div>
+  <div class="alt"><b>e)</b> <code>execute()</code> saknar de parametrar som ska skickas med.</div>
+  <div class="motlabel">Motivering (30–50 ord):</div>
+  <div class="mot"></div><div class="mot"></div><div class="mot"></div>
+</div>
+
+<div class="facit">
+  <div class="stop">STOPP – rätta inte förrän du svarat på alla tio frågor och skrivit klart alla motiveringar.</div>
+  <h2>Facit och modellmotiveringar</h2>
+
+  <table>
+    <tr><th style="width:8%">Fråga</th><th style="width:16%">Rätt svar</th><th>Modellmotivering (30–50 ord)</th></tr>
+    <tr><td>1</td><td class="answer">b</td><td><div class="model">Merge slår ihop två relaterade tabeller (1:1 eller 1:N) till en tabell, vilket eliminerar kostsamma JOIN-frågor och snabbar upp läsningar. I caset kan Spel och Utgivare slås ihop eftersom en utgivare har många spel. Nackdelen är ökad redundans och risk för inkonsistens.</div><div class="why">a = vertikal split, c = kodifiering, d = horisontell split. Merge är inte reserverat för N:M – tvärtom passar det bäst för 1:1 och 1:N.</div></td></tr>
+    <tr><td>2</td><td class="answer">d</td><td><div class="model">Vertikal split delar upp en tabell efter kolumner: stora eller sällan använda fält flyttas till en egen tabell med samma primärnyckel. I caset kan informationOmMig flyttas från BadJB_medlemmar till MedlemInfo. Huvudtabellen blir mindre och snabbare, men frågor över båda tabellerna kräver JOIN.</div><div class="why">a = horisontell split, b = merge, c = kodifiering, e = index.</div></td></tr>
+    <tr><td>3</td><td class="answer">c</td><td><div class="model">CHAR(12) ger fast längd och CHECK med REGEXP '^[0-9]{12}$' säkerställer exakt tolv siffror. NOT NULL gör värdet obligatoriskt och UNIQUE förhindrar dubbletter. INT(12) anger bara visningsbredd, och VARCHAR(12) tillåter kortare värden och bokstäver.</div><div class="why">a = visningsbredd, ingen kontroll; b = tillåter bokstäver/blanksteg; d = variabel längd; e = decimaltal, inte exakt 12 siffror. CHECK kräver MySQL 8.0.16+; i äldre versioner kan en trigger med SIGNAL SQLSTATE '45000' användas.</div></td></tr>
+    <tr><td>4</td><td class="answer">a</td><td><div class="model">En trigger exekveras automatiskt av databasmotorn vid BEFORE eller AFTER INSERT, UPDATE och DELETE, medan en stored procedure anropas explicit med CALL. I caset kan en trigger validera Svårighet vid insert, och en procedur beräkna statistik som applikationen anropar.</div><div class="why">b = omvänd ordning; c = bara triggers körs automatiskt; d = triggers kan validera; e = procedurer kan ta parametrar.</div></td></tr>
+    <tr><td>5</td><td class="answer">e</td><td><div class="model">GET skickar data i URL:en och passar för sökningar som ska kunna bokmärkas, medan POST skickar data i request-body och passar för ändringar och känslig information. I caset kan spelsökning använda GET och registrering av ett nytt spel använda POST.</div><div class="why">a = omvänd; b = falskt; c = falskt; d = falskt (GET kan skicka text).</div></td></tr>
+    <tr><td>6</td><td class="answer">b</td><td><div class="model">FETCH_ASSOC returnerar rader med kolumnnamn som nycklar, FETCH_NUM med numeriska index och FETCH_BOTH med båda. FETCH_ASSOC är minnessnålt och tydligt. Prepared statements skickar fråga och värden separat, så input behandlas som data och inte som SQL-kod.</div><div class="why">a = fel om FETCH_BOTH; c = bindParam binder by reference; d = prepared statements klistrar inte in värden; e = execute() behöver inga argument när värden bundits.</div></td></tr>
+    <tr><td>7</td><td class="answer">c</td><td><div class="model">Requesten går via routingen till controllern, som anropar modellen. Modellen frågar databasen och returnerar en DataTable, som controllern lägger i ViewBag och skickar till vyn. Vyn renderar HTML. Ansvaren är separerade: controller styr flödet, modell data och vy presentation.</div><div class="why">a, b, d och e blandar ansvaren: vyn ska inte fråga databasen, modellen ska inte rendera HTML och controllern är inte en del av databasen.</div></td></tr>
+    <tr><td>8</td><td class="answer">a, b, c</td><td><div class="model">SQL-injection uppstår när input klistras in direkt i SQL. Prepared statements med platshållare skickar fråga och värden separat, så input alltid blir data. Stored procedures med parametrar och begränsade rättigheter minskar också risken. Triggers är inte ett skydd, och escape-funktioner ensamma garanterar inte säkerhet.</div><div class="why">d = escape ensamt är inte fullgott skydd; e = triggers är inte primärt skydd.</div></td></tr>
+    <tr><td>9</td><td class="answer">a, b</td><td><div class="model">Två fel: parameternamnet @NAM matchar inte @NAME i SQL-frågan, och WHERE använder = i stället för LIKE, så %-jokertecknen inte fungerar. DataSet, DataTable och AddWithValue är korrekt använda. Rätt parameter och LIKE krävs för delmatchning.</div><div class="why">c, d och e är felaktiga påståenden: adaptern kan fylla en DataSet, AddWithValue fungerar och Close() tömmer inte tabellen.</div></td></tr>
+    <tr><td>10</td><td class="answer">a, b, c</td><td><div class="model">Tre fel: UPDATE saknar WHERE och skulle uppdatera alla fakturarader, parametern customernumber binds men finns inte i SQL-strängen, och superglobalen $POST är felstavad; den ska vara $_POST. FROM behövs inte i UPDATE, och execute() behöver inga argument när bindParam använts.</div><div class="why">d och e är inte fel: UPDATE har ingen FROM-sats, och bundna värden skickas inte till execute().</div></td></tr>
+  </table>
+
+  <h2>Tolkning av resultatet</h2>
+  <table>
+    <tr><th style="width:22%">Poäng</th><th>Nivå och nästa steg</th></tr>
+    <tr><td><strong>18–20</strong></td><td>VG-säker. Fokus: motiveringar och flervalsfrågor.</td></tr>
+    <tr><td><strong>16–17</strong></td><td>VG-nivå. Täpp små luckor och träna på tid.</td></tr>
+    <tr><td><strong>12–15</strong></td><td>G-nivå. Följ planen och prioritera de svagaste delarna.</td></tr>
+    <tr><td><strong>8–11</strong></td><td>Nära G. Kör grundligt igenom veckorna 1–3.</td></tr>
+    <tr><td><strong>0–7</strong></td><td>Börja från grunden. Det är helt normalt efter ett U – planen är byggd för det.</td></tr>
+  </table>
+
+  <div class="box green">
+    <strong>Räkna så här:</strong> För varje fråga: 1 p om alternativen är exakt rätt, + 1 p om motiveringen är korrekt och håller sig inom 30–50 ord.
+    Har du valt minst ett felaktigt alternativ på en fråga får du 0 p på den frågan, även om motiveringen är bra.
+  </div>
+</div>
+
+<div class="pagebreak">
+  <h2>Felanalys efter rättning</h2>
+  <p>Fyll i efter att du rättat. Kategorier: <strong>K</strong> = kunskapslucka, <strong>L</strong> = felläsning, <strong>D</strong> = distraktor, <strong>M</strong> = motivationsfel, <strong>O</strong> = ordgräns.</p>
+  <table>
+    <tr><th style="width:8%">Fråga</th><th style="width:10%">Poäng</th><th style="width:10%">Kategori</th><th>Vad behöver jag repetera?</th></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="box" style="margin-top:12px">
+    <strong>Nästa pass:</strong> fredag 13 november – rättning och feldagbok. Ta med dig:
+    <ul>
+      <li>dina svar och poäng per fråga,</li>
+      <li>vilka alternativ du valde fel och varför,</li>
+      <li>om motiveringarna blev för korta, för långa eller saknade case-exempel.</li>
+    </ul>
+  </div>
+</div>
+
+</body>
+</html>

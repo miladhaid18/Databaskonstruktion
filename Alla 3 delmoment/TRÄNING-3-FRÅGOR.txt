@@ -1,0 +1,206 @@
+================================================================================
+TRÄNINGSGUIDE — 3 EXEMPELFRÅGOR FRÅN LÄRAREN
+================================================================================
+
+Mål: Du ska kunna hitta koden på git.webug.se på < 30 sek och förklara på 2-3 min.
+
+================================================================================
+FRÅGA 1: "Visa din komplexa tabell för PHP"
+================================================================================
+
+VAD DU VISAR PÅ WWWLAB.WEBUG.SE
+-------------------------------
+1. Öppna PHPApplikation.php i webbläsaren
+2. Scrolla till "3. Observationer med vittnen (Radlayout)"
+3. Visa: yttre rad per observation, inre tabell med vittnen
+4. Klicka "Filtrera" / "Sök" → visa att det fungerar
+
+VAD DU VISAR PÅ GIT.WEBUG.SE (fil: PHPApplikation.php)
+------------------------------------------------------
+RAD 168-214  ← Öppna denna fil, scrolla hit
+
+VAD DU SÄGER (manus — läs inte, tala fritt)
+-------------------------------------------
+"Här är min komplexa tabell för PHP. Den visar observationer med vittnen — en
+observation kan ha flera vittner (1:N), därför valde jag RADLAYOUT.
+
+Koden börjar rad 168. Nyckeln är jämförelsevariabeln $prevObs rad 182.
+
+FÖRKLARING RAD FÖR RAD:
+- Rad 183: SQL med LEFT JOIN Observation → Rapporterat → Person + JOIN Plats.
+  Sorterat på ObsId så samma observation kommer i följd.
+- Rad 185-186: Loopen kör varje rad från frågan.
+- Rad 186-188: Om $prevObs != nuvarande ObsId → ny observation.
+  Stänger föregående inre tabell (</table></td></tr>) om inte första.
+- Rad 190-197: Skriver yttre radens celler (ObsId, Datum, Grad, Säkerhet,
+  Incident, Plats, Handläggare) — sedan öppnar <td><table> för vittnerna.
+- Rad 198-199: Header i inre tabell (PersonId, Namn, Kodnamn).
+- Rad 201-206: Om PersonId finns (inte NULL) → skriv en rad i inre tabell.
+- Rad 208: Uppdatera $prevObs = nuvarande ObsId.
+- Rad 210-212: Efter loopen stänger sista inre tabell.
+
+VARFÖR RADLAYOUT HÄR?
+En observation har N vittner → vittnerna hör till ENA observationen.
+De visas som en nästlad tabell INNE I observationens rad (kolumn 8).
+Detta är radlayout: yttre loop = observationer, inre loop = vittner per observation."
+
+NYCKELORD ATT NÄMNA: "LEFT JOIN", "jämförelsevariabel $prevObs", "nä stlad tabell", "1:N relation"
+
+================================================================================
+FRÅGA 2: "Visa din update / delete i dotnet"
+================================================================================
+
+VAD DU VISAR PÅ WWWLAB.WEBUG.SE
+-------------------------------
+1. Öppna Observation-sidan (Index)
+2. UPDATE: Fyll i "Andra säkerhet" → välj observation → ny säkerhet → "Update"
+   Visa att tabellen uppdateras.
+3. DELETE (Arkivera): Klicka "Arkivera"-länken på en observation i kolumnlayouten.
+   Visa att observationen försvinner från aktiva listan.
+
+VAD DU VISAR PÅ GIT.WEBUG.SE — 4 FILER (MVC-kedja)
+---------------------------------------------------
+
+FIL 1: Views/Observation/Index.cshtml
+  RAD 96-109  (UPDATE-formulär)
+  RAD 46      (ARKIVERA-länk)
+
+FIL 2: Controllers/ObservationController.cs
+  RAD 38-42   (UpdateSakerhet action)
+  RAD 44-48   (ArkiveraObservation action)
+
+FIL 3: Models/ObservationModel.cs
+  RAD 71-81   (UpdateSakerhet metod)
+  RAD 83-91   (ArkiveraObservation metod)
+
+FIL 4: database.sql (för SQL-kunskap)
+  RAD 251-259 (ARKIVERAOBSERVATION procedur)
+
+VAD DU SÄGER — UPDATE (manus)
+-----------------------------
+"Här är UPDATE-kedjan — fyra filer, View → Controller → Model → SQL.
+
+VIEW (Index.cshtml:96-109):
+Dropdown hämtar alla observationer från ViewBag.ObsTable.
+Användaren väljer ObsId och fyller i ny Säkerhet.
+POST till UpdateSakerhet-action.
+
+CONTROLLER (ObservationController.cs:38-42):
+Tar obsid och sakerhet som strängar.
+Anropar _observationModel.UpdateSakerhet(obsid, sakerhet).
+Redirect till Index (PRG-mönster).
+
+MODEL (ObservationModel.cs:71-81):
+Öppnar connection med SchoolConnection från appsettings.json.
+SQL: 'UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID;'
+Parameters.AddWithValue för BÅDA — ingen strängkonkatenering, skydd mot injection.
+ExecuteNonQuery → stänger connection.
+
+SQL: Enkel UPDATE på primärnyckel ObsId. Snabbt, säkert."
+
+VAD DU SÄGER — DELETE / ARKIVERA (manus)
+----------------------------------------
+"DELETE görs via arkivering — en lagrad procedur som är atomär.
+
+VIEW (Index.cshtml:46):
+@Html.ActionLink skapar länk: /Observation/ArkiveraObservation?obsid=501
+GET-request (länk) → anropar action direkt.
+
+CONTROLLER (ObservationController.cs:44-48):
+Tar obsid, anropar modell.ArkiveraObservation(obsid), redirect Index.
+
+MODEL (ObservationModel.cs:83-91):
+SQL: 'CALL ARKIVERAOBSERVATION(@OBSID);'
+Parameter @OBSID via AddWithValue.
+ExecuteNonQuery.
+
+DATABASE.SQL (Procedur, rad 251-259):
+CREATE PROCEDURE ARKIVERAOBSERVATION(IN p_ObsId INTEGER)
+BEGIN
+  DELETE FROM Rapporterat WHERE ObsId = p_ObsId;     -- 1. Rensa FK-kopplingar
+  INSERT INTO ARKIVERADObservation SELECT * FROM Observation WHERE ObsId = p_ObsId;  -- 2. Kopiera
+  DELETE FROM Observation WHERE ObsId = p_ObsId;     -- 3. Radera original
+END;
+
+VARFÖR PROCEDUR? Atomärt — antingen alla tre steg lyckas, eller inget.
+Används i BÅDE PHP (CALL) och .NET (CALL) — DRY-princip."
+
+NYCKELORD ATT NÄMNA: "MVC-kedja", "Parameters.AddWithValue", "PRG-mönster", "atomär procedur", "FK-kopplingar rensas först"
+
+================================================================================
+FRÅGA 3: "Visa en av dina constraints i databasen"
+================================================================================
+
+VAD DU VISAR PÅ GIT.WEBUG.SE — database.sql
+-------------------------------------------
+
+BÄSTA EXEMPEL — CHECK + FK KOMBINATION (Observation-tabell):
+RAD 63-70  ← Öppna hit, visa hela blocket
+
+ANDRA BRA EXEMPEL:
+- Agent-tabell CHECK (lön, agentnr)        rad 15-19
+- Plats UNIQUE på PlatsNamn                rad 41
+- FK från Observation till Handlaggare     rad 68
+- FK från Rapporterat till Person/Obs      rad 104-106
+
+VAD DU SÄGER — MANUS (för Observation CHECK + FK)
+-------------------------------------------------
+"Här är Observation-tabellen, rad 53-71. Jag visar constraints på rad 63-70.
+
+PRIMARY KEY (rad 63):
+ObsId är PK — unikt ID för varje observation.
+
+CHECK 1 (rad 64-65):
+'CHECK (GradKod >= 1 AND GradKod <= 4)'
+Syfte: Domänintegritet — närkontaktsgrad enbart 1-4.
+Fungerar även om FK till GradBeskrivning inaktiveras.
+Dubbelsäkerhet tillsammans med triggern CHECKOBSGRAD (BEFORE INSERT).
+
+CHECK 2 (rad 66-67):
+'CHECK (Sakerhet >= 1.00 AND Sakerhet <= 114.00)'
+Syfte: Säkerhet i procent måste vara 1-114%.
+Fångar felaktiga värden vid INSERT/UPDATE direkt i databasen.
+
+FK 1 (rad 68):
+'FOREIGN KEY (RegistreradAvNamn, RegistreradAvNr)
+ REFERENCES Handlaggare(AgentNamn, AgentNr)'
+Syfte: Referensintegritet — bara handläggare får registrera.
+Sammansatt FK matchar sammansatt PK i Handlaggare.
+
+FK 2 (rad 69):
+'FOREIGN KEY (PlatsKod) REFERENCES Plats(PlatsKod)'
+Syfte: Endast kända platser från kodtabell Plats.
+
+FK 3 (rad 70):
+'FOREIGN KEY (GradKod) REFERENCES GradBeskrivning(GradKod)'
+Syfte: Endast kända grader från kodtabell GradBeskrivning.
+
+SAMMANFATTNING:
+CHECK = domänregler (värden), FK = referensregler (kopplingar).
+Båda körs av databasen — skyddar även om applikationen glömmer validera."
+
+NYCKELORD ATT NÄMNA: "domänintegritet", "referensintegritet", "dubbelsäkerhet med trigger", "sammansatt FK"
+
+================================================================================
+SNABBKOMLANDO (kom ihåg dessa 3 fil:rad-kombinationer)
+================================================================================
+
+| Fråga | Fil | Rad | Sökord på git |
+|-------|-----|-----|---------------|
+| Komplex tabell PHP | PHPApplikation.php | 168-214 | "$prevObs" |
+| Update .NET | ObservationModel.cs | 71-81 | "UpdateSakerhet" |
+| Delete/Arkivera .NET | ObservationModel.cs | 83-91 | "ArkiveraObservation" |
+| Constraints | database.sql | 63-70 | "CHECK (GradKod" |
+
+================================================================================
+ÖVA NU — 5 MIN PER FRÅGA
+================================================================================
+
+1. Öppna git.webug.se i webbläsaren (din repo)
+2. Sätt timer 5 min
+3. Fråga 1: Hitta PHPApplikation.php:168 → förklara högt
+4. Fråga 2: Hitta de 4 filerna → peka och förklara kedjan
+5. Fråga 3: Hitta database.sql:63 → förklara CHECK + FK
+
+Upprepa tills du gör det på < 3 min per fråga utan att titta på papper.
+================================================================================

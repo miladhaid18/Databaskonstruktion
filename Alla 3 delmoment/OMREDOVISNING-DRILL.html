@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Omredovisning - rattade svar och plan</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--red:#f7768e;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,sans-serif;padding:24px 16px 70px}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.55rem;margin:0 0 4px}
+h1 span{color:var(--blue)}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 22px}
+h2{font-size:1.05rem;margin:26px 0 8px;color:var(--blue)}
+h3{font-size:.9rem;margin:16px 0 6px;color:var(--yellow);text-transform:uppercase;letter-spacing:.6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 16px}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 4px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--card2);color:var(--muted);font-size:.72rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+pre{background:#11141a;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;color:#d5dae6}
+.ln{background:#2b2438;color:var(--purple)}
+.ok{color:var(--green);font-weight:600}
+.bad{color:var(--red);font-weight:600}
+blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--green);background:#162019;border-radius:0 8px 8px 0}
+ul,ol{margin:8px 0 2px;padding-left:22px}
+li{margin:5px 0}
+details{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:7px 0}
+summary{cursor:pointer;color:var(--text)}
+details p{margin:8px 0 2px;color:#cfd6e2}
+.small{color:var(--muted);font-size:.85rem}
+footer{margin-top:28px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{body{background:#fff;color:#111}.card,details,table,pre{background:#fff;border-color:#bbb;color:#111}h2,h3{color:#111}code{background:#eee;color:#000}.ln{background:#eee}.sub,footer,.small{color:#444}details{page-break-inside:avoid}}
+</style></head><body><main>
+
+<h1>Omredovisning – <span>rattade svar</span></h1>
+<p class="sub">Byggt pa lärarnas kommentarer: triggers, parametrar (PDO + ADO.NET) och de tre frågorna du fick. Las en sektion i taget och säg svaren högt.</p>
+
+<div class="card">
+<h3>Detta gick fel – och varför</h3>
+<ul>
+<li><span class="bad">Trigger:</span> du beskrev en INSERT som en SELECT. Triggern <b>skriver</b> en loggrad, den hämtar inget data.</li>
+<li><span class="bad">Parametrar:</span> du kunde inte förklara hur <code>@NAMN</code>/<code>?</code> binds till ett värde och varför det skyddar mot SQL-injektion.</li>
+<li><span class="bad">Tabellerna:</span> förklaringen stannade vid "den visar data" i stället för flödet vy → kontroller → modell → SQL.</li>
+</ul>
+<p class="small">Allt nedan är samma kod som du redan har – inget nytt att bygga.</p>
+</div>
+
+<h2>1. Triggers – rätt svar</h2>
+<div class="card">
+<p>En trigger är kod som databasen kör <b>automatiskt</b> när en händelse sker på en tabell (INSERT, UPDATE eller DELETE). Man anropar den inte själv.</p>
+
+<h3>LOGGOBSERVATION (database.sql rad 222–228)</h3>
+<pre>CREATE TRIGGER LOGGOBSERVATION AFTER INSERT ON Observation
+FOR EACH ROW BEGIN
+  INSERT INTO ObservationLog(Operation, Anvandare, ObsId, Tidpunkt)
+  VALUES ('INS', USER(), NEW.ObsId, NOW());
+END;</pre>
+<ul>
+<li><b>När:</b> AFTER INSERT på <code>Observation</code> – alltså efter att en observation sparats.</li>
+<li><b>Vad:</b> den <b>skriver en ny rad</b> i <code>ObservationLog</code>.</li>
+<li><code>'INS'</code> = operationen, <code>USER()</code> = databasanvändaren, <code>NEW.ObsId</code> = det nya radens ObsId, <code>NOW()</code> = tidpunkten.</li>
+<li>Det finns <b>ingen SELECT</b> i triggern. <code>NEW.ObsId</code> läser ett fält från den nya raden, men satsen är fortfarande en INSERT.</li>
+</ul>
+<blockquote>Säg: "LOGGOBSERVATION körs automatiskt efter en insert på Observation och skriver en loggpost i ObservationLog med operation INS, användare, ObsId och tid. Den hämtar inget data."</blockquote>
+
+<h3>CHECKOBSGRAD (database.sql rad 232–239)</h3>
+<pre>CREATE TRIGGER CHECKOBSGRAD BEFORE INSERT ON Observation
+FOR EACH ROW BEGIN
+  IF (NEW.GradKod &lt; 1 OR NEW.GradKod &gt; 4) THEN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = '...';
+  END IF;
+END;</pre>
+<ul>
+<li><b>När:</b> BEFORE INSERT – innan raden sparas.</li>
+<li><b>Vad:</b> den <b>kontrollerar</b> graden och avbryter med ett fel om den inte är 1–4. Den skriver ingen data.</li>
+</ul>
+
+<h3>Minnesregel</h3>
+<table>
+<tr><th>Kod</th><th>Betyder</th></tr>
+<tr><td><code>INSERT INTO ... VALUES</code></td><td>skriver ny rad</td></tr>
+<tr><td><code>SELECT ... FROM</code></td><td>läser rader</td></tr>
+<tr><td><code>UPDATE ... SET</code></td><td>ändrar rader</td></tr>
+<tr><td><code>DELETE FROM</code></td><td>tar bort rader</td></tr>
+<tr><td><code>NEW.fält</code></td><td>värdet i den nya raden (inte en fråga)</td></tr>
+</table>
+<p class="small">Procedurer är inte triggers: <code>GETAVGSAKERHET</code> läser (SELECT), <code>ARKIVERAOBSERVATION</code> flyttar rader (DELETE + INSERT + DELETE).</p>
+</div>
+
+<h2>2. Parametrar – rätt svar</h2>
+<div class="card">
+<p>SQL är kod. Användarens input är data. Om man klistrar in input i SQL-strängen blandas de ihop – då kan input bli kod (SQL-injektion). Med parametrar skickas SQL-mallen först och värdet separat; databasen binder värdet som <b>data</b>.</p>
+
+<h3>PDO (PHP)</h3>
+<pre>$sql = "SELECT PersonId, Namn, Kodnamn FROM Person WHERE Namn LIKE ?";
+$stmt = $pdo-&gt;prepare($sql);          // 1. skicka SQL-mallen med platshållare
+$stmt-&gt;bindValue(1, "%" . $soknamn . "%"); // 2. bind värdet till plats 1
+$stmt-&gt;execute();                      // 3. kör</pre>
+<ul>
+<li><code>?</code> är en platshållare. <code>bindValue(1, ...)</code> säger "värdet till första ?".</li>
+<li>Kortformen <code>$ins-&gt;execute([$ny_obsid, ...])</code> (rad 70) binder alla värden på en gång.</li>
+<li>Samma sak för <code>CALL ARKIVERAOBSERVATION(?)</code> (rad 85–88) och <code>UPDATE ... WHERE ObsId = ?</code> (rad 105–108).</li>
+</ul>
+
+<h3>ADO.NET (C#)</h3>
+<pre>var adapter = new MySqlDataAdapter(
+    "SELECT * FROM Person WHERE Namn LIKE @NAME;", dbcon);
+adapter.SelectCommand.Parameters.AddWithValue("@NAME", "%" + name + "%");
+var ds = new DataSet();
+adapter.Fill(ds, "result");</pre>
+<ul>
+<li><code>@NAME</code> är platshållaren (namngiven). <code>AddWithValue</code> kopplar värdet <code>"%namn%"</code> till den.</li>
+<li><code>adapter.SelectCommand</code> är den SELECT-kommandon adaptern kör. <code>Fill</code> kör den och lägger raderna i DataSet.</li>
+<li><code>%</code> före och efter = "innehåller" – söker del av namn.</li>
+<li>INSERT i C#: <code>new MySqlCommand(insertString, dbcon)</code> + <code>sqlCmd.Parameters.AddWithValue("@OBSID", obsid)</code> ... + <code>ExecuteNonQuery()</code> (rad 68–78).</li>
+<li>UPDATE: samma mönster med <code>@SAKERHET</code> och <code>@OBSID</code> (rad 85–89).</li>
+</ul>
+
+<blockquote>Säg: "SQL med platshållare skickas först. Värdet skickas separat och binds som data, därför kan det aldrig tolkas som SQL-kod. I PDO är platshållaren ? och bindValue knyter värdet; i C# är den @NAME och AddWithValue knyter värdet."</blockquote>
+
+<h3>Varför det spelar roll</h3>
+<p>Om <code>name</code> är <code>' OR 1=1 --</code> och man klistrar in det i SQL:en ändras frågan. Med parameter söks i stället bokstavligen efter den strängen. Parametrar ger också rätt typning och återanvändbara kommandon.</p>
+</div>
+
+<h2>3. De tre frågorna du fick</h2>
+<div class="card">
+<h3>A. Triggers (60 sek)</h3>
+<p>"LOGGOBSERVATION är en AFTER INSERT-trigger på Observation. När en observation sparas skriver den automatiskt en rad i ObservationLog med operation 'INS', användare, ObsId och tidpunkt. CHECKOBSGRAD är BEFORE INSERT och stoppar en grad utanför 1–4 med SIGNAL. Ingen av dem läser data."</p>
+
+<h3>B. PHP – komplex tabell / radlayout (60 sek)</h3>
+<p>Fil: <code>PHPApplikation.php</code> rad <code class="ln">168-214</code>. Säg:</p>
+<p>"Rubriken är 'Observationer med vittnen (Radlayout)'. SQL:en på rad 183 joinar Observation med kopplingstabellen Rapporterat, Person och Plats. <code>$prevObs</code> på rad 182 håller koll på föregående ObsId. När ObsId byts stänger jag föregående nästlade tabell och skriver den yttre raden med ObsId, datum, grad, säkerhet, incident, plats och handläggare. Sedan startar jag en ny nästlad tabell för vittnena. Varje personrad skrivs bara om PersonId inte är NULL, eftersom LEFT JOIN behåller observationer som saknar vittnen. Efter loopen stänger jag sista tabellen."</p>
+
+<h3>C. .NET – enkel tabell (60 sek)</h3>
+<p>Fil: <code>Views/Person/Index.cshtml</code> rad <code class="ln">14-30</code>. Säg:</p>
+<p>"Detta är en enkel tabell utan joins. <code>PersonController.Index</code> rad 18–23 anropar <code>GetAllPersons</code> rad 19–27, som kör <code>SELECT * FROM Person</code> med en MySqlDataAdapter och fyller en DataSet. Resultatet läggs i ViewBag.PersonTable. Vyn bygger först rubrikerna från Columns och loopar sedan Rows för att skriva varje cell. Samma sida visar också medelsäkerhet från proceduren GETAVGSAKERHET."</p>
+
+<h3>D. Rader som läraren pekade på</h3>
+<pre>using var adapter = new MySqlDataAdapter("SELECT * FROM Person WHERE Namn LIKE @NAME;", dbcon);
+adapter.SelectCommand.Parameters.AddWithValue("@NAME", "%" + name + "%");</pre>
+<p>"Den första raden skapar en adapter med en parameteriserad SELECT och kopplar den till den öppna anslutningen. Den andra raden lägger till värdet <code>%namn%</code> för platshållaren <code>@NAME</code> på adapterns SelectCommand. När Fill körs skickas SQL och värde separat, så sökordet behandlas som data."</p>
+</div>
+
+<h2>4. Plan fram till december</h2>
+<div class="card">
+<table>
+<tr><th>Vecka</th><th>Fokus</th><th>Bevis på att du kan det</th></tr>
+<tr><td>1</td><td>Triggers + procedurer + constraints</td><td>Förklara alla fyra (2 triggers, 2 procedurer) utan kod</td></tr>
+<tr><td>2</td><td>Parametrar: PDO + ADO.NET</td><td>Skriv en parameteriserad SELECT och INSERT ur minnet i båda</td></tr>
+<tr><td>3</td><td>Logisk/fysisk design: normalisering, denormalisering, index, rättigheter</td><td>Rita och motivera de fyra denormaliseringarna</td></tr>
+<tr><td>4</td><td>PHP-appen: alla flöden</td><td>60-sekundersmanus för sök, komplex tabell, insert, arkiv, update</td></tr>
+<tr><td>5</td><td>.NET-appen: alla flöden</td><td>Samma manus för MVC + peka i git och live</td></tr>
+<tr><td>6</td><td>Bara mock-redovisningar och svaga punkter</td><td>3 slumpade frågor på 15 min, utan anteckningar</td></tr>
+</table>
+<p><b>Daglig rutin, 25 min:</b> 5 min recall av gårdagen → 15 min en fråga högt med koden framme → 5 min skriv svaret ur minnet. Repetera på dag 1, 3, 7 och 21.</p>
+<p><b>Regel:</b> memorera operationer och metodnamn, inte radnummer. Radnummer får du slå upp.</p>
+</div>
+
+<h2>5. Self-test</h2>
+<div class="card">
+<details><summary>1. Vad gör LOGGOBSERVATION?</summary><p>Efter en insert på Observation skriver den en loggpost i ObservationLog (INS, USER(), NEW.ObsId, NOW()).</p></details>
+<details><summary>2. Läser eller skriver CHECKOBSGRAD?</summary><p>Varken läser eller skriver data – den kontrollerar graden före insert och avbryter med SIGNAL om den är utanför 1–4.</p></details>
+<details><summary>3. Vad betyder NEW.ObsId?</summary><p>Värdet på ObsId i raden som just ska infogas/är infogad. Det är inte en SELECT.</p></details>
+<details><summary>4. Varför parametrar i stället för strängkonkatenering?</summary><p>Värdet skickas separat och binds som data, så det kan inte bli SQL-kod (SQL-injektion).</p></details>
+<details><summary>5. Vad är skillnaden mellan ? och @NAME?</summary><p>? är PDO:s positionella platshållare; @NAME är ADO.NET:s namngivna. Båda binds till ett värde före exekvering.</p></details>
+<details><summary>6. Vad gör AddWithValue?</summary><p>Lägger till en parameter med ett värde på kommandot, t.ex. @NAME = "%Erik%".</p></details>
+<details><summary>7. Vad gör Fill?</summary><p>Kör adapterns SELECT och fyller DataSet/DataTable med resultatet.</p></details>
+<details><summary>8. Varför LEFT JOIN i PHP-tabellen?</summary><p>En observation kan sakna vittnen; LEFT JOIN behåller observationen och ger NULL för personen.</p></details>
+<details><summary>9. Vad gör $prevObs?</summary><p>Jämför aktuellt ObsId med föregående; när det ändras stängs den nästlade tabellen och en ny yttre rad startas.</p></details>
+<details><summary>10. Var hämtas Person-tabellen i .NET?</summary><p>PersonController.Index rad 18–23 → PersonModel.GetAllPersons rad 19–27 (SELECT * FROM Person) → ViewBag.PersonTable → vyn rad 14–30.</p></details>
+<details><summary>11. Vad gör GETAVGSAKERHET?</summary><p>Returnerar AVG(Sakerhet) från Observation; anropas med CALL i både PHP (rad 161) och C# (rad 33 i PersonModel).</p></details>
+<details><summary>12. Vad gör ARKIVERAOBSERVATION?</summary><p>Tar bort kopplingar i Rapporterat, kopierar raden till ARKIVERADObservation och tar bort den från Observation (database.sql rad 252–258).</p></details>
+</div>
+
+<footer>Radnummer är från din nuvarande kod. Om de skiljer sig: sök på metod-/triggernamn i git. Träna högt – tyst läsning räcker inte för muntlig examen.</footer>
+</main></body></html>

@@ -1,0 +1,230 @@
+================================================================================
+KUPP-KORT MUNTLIG REDOVISNING — IT429G HT26
+================================================================================
+
+=======================
+1. DATABASE (database.sql)
+=======================
+
+LOGISK DESIGN
+-------------
+Relationer (10 tabeller)          database.sql:9-107
+  Agent, AgentKommentar, Handlaggare, Plats, GradBeskrivning,
+  Observation, ARKIVERADObservation, Person, Rapporterat, ObservationLog
+  PK/FK korrekta överallt
+
+Datyper                             database.sql:9-107
+  CHAR, INTEGER, VARCHAR, DATETIME, DECIMAL(5,2) per kolumn
+
+Constraints                         database.sql:9-107
+  PK, FK, CHECK (lön 12-25k, agentnr 1-99, grad 1-4, säkerhet 1-114)
+  NOT NULL, DEFAULT, UNIQUE
+
+DENORMALISERING
+---------------
+Merge                               database.sql:59
+  IncidentNamn i Observation (undviker join)
+
+Kodifiering                         database.sql:39-50, 56, 60
+  PlatsKod -> Plats, GradKod -> GradBeskrivning (kodtabeller)
+
+Horisontell                         database.sql:22-29
+  AgentKommentar utflyttad (stor textkolumn separat)
+
+Vertikal                            database.sql:73-92
+  ARKIVERADObservation separat tabell för arkiv
+
+INDEXERING (2 st)                   database.sql:173-177
+  OBSDATUM  (Datum DESC)   BTREE
+  PERSONNAMN (Namn ASC)    BTREE
+  -- båda med kommentarer
+
+RÄTTIGHETER (11 GRANT)              database.sql:183-214
+  EXECUTE på databas
+  SELECT på: GradBeskrivning, ARKIVERADObservation, Handlaggare, Plats,
+             Rapporterat, Person, ObservationLog, Agent
+  SELECT/INSERT/UPDATE/DELETE på Observation
+
+TRIGGERS (2)                        database.sql:221-239
+  LOGGOBSERVATION  AFTER INSERT  -> loggar 'INS', USER(), NEW.ObsId, NOW()
+                                     till ObservationLog
+  CHECKOBSGRAD     BEFORE INSERT -> SIGNAL om GradKod ej 1-4 (dubbelsäkerhet)
+
+PROCEDURER (2)                      database.sql:241-259
+  GETAVGSAKERHET()        -> SELECT AVG(Sakerhet) FROM Observation
+  ARKIVERAOBSERVATION(p)  -> DELETE Rapporterat -> INSERT ARKIVERAD -> DELETE Observation
+
+
+=======================
+2. PHP (PHPApplikation.php)
+=======================
+
+Enkel tabell (Person)               rader 115-156
+  Sök på namn + dropdown Kodnamn (inkl "Saknar kodnamn")
+
+Komplex tabell (Radlayout)          rader 168-214
+  Observation + vittnen via Rapporterat+Person
+  $prevObs skapar inre tabell per ObsId
+
+Sökning / Dropdown / Länkning       rader 122-137, 221-247
+  4 dropdownar: Kodnamn-filter, Grad, Plats, Handlaggare (AgentNamn|AgentNr)
+  + sökfält
+
+INSERT                              rader 48-76, 216-249
+  Registrera ny observation, validering, prepared INSERT 9 parametrar
+
+DELETE (via procedur)               rader 78-94, 251-263
+  CALL ARKIVERAOBSERVATION(?), bindValue
+
+UPDATE                              rader 96-111, 265-279
+  Uppdatera Sakerhet, prepared UPDATE
+
+Lagrad procedur i vy                rader 158-166
+  CALL GETAVGSAKERHET() visar medelsäkerhet
+
+
+=======================
+3. .NET MVC
+=======================
+
+CONTROLLERS
+-----------
+ObservationController.cs
+  Index()                      18-24   -> hämtar alla + platser + handläggare
+  SearchObservations(plats)    26-30   -> filtrera per plats
+  InsertObservation(8 params)  32-36   -> modell -> redirect Index
+  UpdateSakerhet(obsid, sak)   38-42   -> modell -> redirect Index
+  ArkiveraObservation(obsid)   44-48   -> modell (CALL) -> redirect Index
+
+PersonController.cs
+  Index()              18-23   -> alla personer + medelsäkerhet
+  SearchPersons(name)  25-29   -> sök på namn
+
+MODELS
+------
+ObservationModel.cs
+  GetObservationsWithDetails()  17-27   JOIN Obs, Plats, Grad, Agent
+  GetAllPlats()                 29-39   SELECT * FROM Plats
+  GetAllHandlaggare()           41-51   JOIN Agent+Handlaggare (sammansatt PK)
+  InsertObservation()           53-69   INSERT 9 parametrar (NOW() för Datum)
+  UpdateSakerhet()              71-81   UPDATE Sakerhet WHERE ObsId
+  ArkiveraObservation()         83-91   CALL ARKIVERAOBSERVATION(@OBSID)
+  SearchObservationsByPlats()   93-104  JOIN Obs+Plats WHERE PlatsKod=@PLATSKOD
+
+PersonModel.cs
+  GetAllPersons()     17-27   SELECT * FROM Person
+  GetAvgSakerhet()    29-39   CALL GETAVGSAKERHET()
+  SearchPersons()     41-52   WHERE Namn LIKE @NAME  (@NAME = "%"+name+"%")
+
+VIEWS
+-----
+Observation/Index.cshtml
+  5-17    Dropdown filtrera per plats -> POST SearchObservations
+  26-55   KOLUMNLAYOUT: yttre IncidentId -> inre observationer -> nästlad tabell
+  58-93   Insert-form: fält + 2 dropdownar handläggare (regnamn + regnr)
+  96-109  Update-form: dropdown ObsId + säkerhet
+  46      Arkivera-länk: @Html.ActionLink("Arkivera", ..., new { obsid })
+
+Person/Index.cshtml
+  4-11    Sökformulär name -> POST SearchPersons
+  13-30   Enkel tabell Person (auto-header från Columns)
+  33-50   Medelsäkerhet via procedur
+
+CONFIG
+------
+appsettings.json:9  SchoolConnection = anslutningssträng (används i båda modeller)
+
+
+=======================
+4. MVC-KEDJOR (4 filer per funktion)
+=======================
+
+Visa alla (kolumnlayout)
+  View:   Views/Observation/Index.cshtml:26-55
+  Ctrl:   ObservationController.Index:18-24
+  Model:  ObservationModel.GetObservationsWithDetails:17-27
+  SQL:    JOIN Observation, Plats, GradBeskrivning, Agent
+
+Filtrera per plats
+  View:   Views/Observation/Index.cshtml:5-17
+  Ctrl:   ObservationController.SearchObservations:26-30
+  Model:  ObservationModel.SearchObservationsByPlats:93-104
+  SQL:    WHERE PlatsKod = @PLATSKOD
+
+Insert observation
+  View:   Views/Observation/Index.cshtml:58-93
+  Ctrl:   ObservationController.InsertObservation:32-36
+  Model:  ObservationModel.InsertObservation:53-69
+  SQL:    INSERT 9 parametrar
+
+Update säkerhet
+  View:   Views/Observation/Index.cshtml:96-109
+  Ctrl:   ObservationController.UpdateSakerhet:38-42
+  Model:  ObservationModel.UpdateSakerhet:71-81
+  SQL:    UPDATE Sakerhet WHERE ObsId
+
+Arkivera (procedur)
+  View:   Views/Observation/Index.cshtml:46
+  Ctrl:   ObservationController.ArkiveraObservation:44-48
+  Model:  ObservationModel.ArkiveraObservation:83-91
+  SQL:    CALL ARKIVERAOBSERVATION
+
+Sök person
+  View:   Views/Person/Index.cshtml:4-11
+  Ctrl:   PersonController.SearchPersons:25-29
+  Model:  PersonModel.SearchPersons:41-52
+  SQL:    WHERE Namn LIKE @NAME (parametriserad)
+
+ALLA SQL: Parameters.AddWithValue — INGEN strängkonkatenering
+
+
+=======================
+5. PERSONLIGA FRÅGOR (vanliga)
+=======================
+
+Varför SchoolConnection?
+  Models/*Model.cs:14  Skolans miljövariabel, undviker kollision
+
+Varför 2 dropdownar handläggare?
+  Views/Observation/Index.cshtml:74-91  PK i Handlaggare = sammansatt (AgentNamn, AgentNr)
+
+Varför radlayout PHP, kolumnlayout .NET?
+  PHP: 1 obs -> N vittner (bredvid rad)
+  .NET: 1 incident -> N obs (i kolumn) — kravspec
+
+Vad gör CHECKOBSGRAD?
+  database.sql:231-238  BEFORE INSERT, SIGNAL om GradKod ej 1-4 (dubbelsäkerhet)
+
+Varför ARKIVERAOBSERVATION som procedur?
+  database.sql:251-259  Atomärt: DELETE Rapporterat -> INSERT ARKIVERAD -> DELETE Observation
+
+Vad om ObservationLog saknas?
+  Trigger LOGGOBSERVATION kraschar — tabellen finns i database.sql:110-117
+
+
+=======================
+6. GIT-HITTA-SNABBT
+=======================
+
+Läraren säger...                    Bläddra till...
+---------------------------------------------------------------
+"Visa logisk design"                database.sql:9-107
+"Visa denormalisering"              database.sql:22-29 (horisontell)
+                                     database.sql:39-50 (kodifiering)
+                                     database.sql:59 (merge)
+                                     database.sql:73-92 (vertikal)
+"Visa index"                        database.sql:173-177
+"Visa grants"                       database.sql:183-214
+"Visa triggers"                     database.sql:221-239
+"Visa procedurer"                   database.sql:241-259
+"Visa komplex tabell PHP"           PHPApplikation.php:168-214
+"Visa INSERT PHP"                   PHPApplikation.php:48-76, 216-249
+"Visa DELETE/UPDATE PHP"            PHPApplikation.php:78-111, 251-279
+"Visa kolumnlayout .NET"            Views/Observation/Index.cshtml:26-55
+"Visa MVC-kedja Insert"             Se tabell ovan (4 filer)
+"Visa parameter-säkerhet"           Models/*Model.cs: alla AddWithValue-rader
+
+================================================================================
+TIP: Öppna fil på git.webug.se, scrolla till rad, läs 3-5 rader högt, förklara.
+     Max 5 min/fråga.
+================================================================================

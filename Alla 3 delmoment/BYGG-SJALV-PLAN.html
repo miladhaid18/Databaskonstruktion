@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bygg själv - plan till december</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,sans-serif;padding:24px 16px 70px}
+main{max-width:900px;margin:0 auto}
+h1{font-size:1.55rem;margin:0 0 4px}
+h1 span{color:var(--yellow)}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 22px}
+h2{font-size:1.05rem;margin:26px 0 8px;color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 16px}
+ol,ul{margin:8px 0 2px;padding-left:22px}
+li{margin:6px 0}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+pre{background:#11141a;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;color:#d5dae6}
+blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--yellow);background:#241f14;border-radius:0 8px 8px 0}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 4px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--card2);color:var(--muted);font-size:.72rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+.week{color:var(--green);font-weight:700;margin:14px 0 4px}
+.check{list-style:none;padding-left:0}
+.check li{display:flex;gap:9px;align-items:flex-start}
+.check input{margin-top:5px;accent-color:#7aa2f7}
+.small{color:var(--muted);font-size:.85rem}
+footer{margin-top:28px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{body{background:#fff;color:#111}.card,table,pre{background:#fff;border-color:#bbb;color:#111}h2,.week{color:#111}code{background:#eee;color:#000}.sub,footer,.small{color:#444}}
+</style></head><body><main>
+
+<h1>Bygg själv – <span>plan till december</span></h1>
+<p class="sub">Om AI skrev koden är det inte konstigt att den känns främmande. Muskelminnet byggs genom att skriva själv, i små steg som körs – inte genom att läsa en färdig app.</p>
+
+<div class="card">
+<h2 style="margin-top:0">Samma sak som 7×8</h2>
+<p>Du lärde dig gångertabellen genom att göra den många gånger, inte genom att läsa om den. Här är motsvarigheten:</p>
+<ul>
+<li><b>Skriv, kör, förstör, laga.</b> Varje steg ska vara så litet att du kan testa det direkt.</li>
+<li><b>Förklara högt efter varje steg.</b> Kan du inte förklara det äger du det inte.</li>
+<li><b>Skriv om från minnet dagen efter.</b> Det är repetitionen som gör det snabbt.</li>
+<li><b>AI först efteråt:</b> skriv själv först, be sedan om rättning – inte färdig kod.</li>
+</ul>
+<blockquote>Följ samma ordning som uppgifterna: struktur → enkel tabell → komplex tabell → sök/dropdown → insert/update/procedur. Varje steg bygger på det förra.</blockquote>
+</div>
+
+<h2>6 veckor, 30–45 min/dag</h2>
+<div class="card">
+<p class="small">Bocka av efterhand. Kryssen sparas i webbläsaren.</p>
+
+<p class="week">Vecka 1 – Databasen från noll</p>
+<ul class="check">
+<li><input type="checkbox">1. <code>CREATE DATABASE ovning</code>; skapa Person; INSERT 3 rader; SELECT; WHERE; UPDATE; DELETE.</li>
+<li><input type="checkbox">2. Två tabeller med FK; JOIN; LEFT JOIN; COUNT/AVG.</li>
+<li><input type="checkbox">3. PK/FK/UNIQUE/CHECK – testa att bryta varje constraint.</li>
+<li><input type="checkbox">4. Loggtabell + AFTER INSERT-trigger; testa att den skriver en rad.</li>
+<li><input type="checkbox">5. Procedur som flyttar en rad (DELETE/INSERT/DELETE) eller räknar AVG; CALL.</li>
+<li><input type="checkbox">6. Index + EXPLAIN; skapa användare + GRANT SELECT.</li>
+<li><input type="checkbox">7. Skriv trigger + procedur ur minnet; förklara högt.</li>
+</ul>
+
+<p class="week">Vecka 2 – PHP från Hello World</p>
+<ul class="check">
+<li><input type="checkbox">1. <code>hello.php</code>: echo + lite HTML.</li>
+<li><input type="checkbox">2. PDO-anslutning; SELECT ett värde; sätt felmode exception.</li>
+<li><input type="checkbox">3. Person-tabell med <code>foreach</code> över resultatet.</li>
+<li><input type="checkbox">4. Sökformulär + <code>prepare/bindValue/execute</code> med LIKE.</li>
+<li><input type="checkbox">5. Dropdown som fylls från databasen + filtrering.</li>
+<li><input type="checkbox">6. INSERT-formulär med validering och <code>execute([...])</code>.</li>
+<li><input type="checkbox">7. Skriv sök + insert ur minnet.</li>
+</ul>
+
+<p class="week">Vecka 3 – PHP komplex tabell + CRUD</p>
+<ul class="check">
+<li><input type="checkbox">1. JOIN-fråga till en platt tabell.</li>
+<li><input type="checkbox">2. Nästlad tabell med <code>$prev</code>/<code>$prevObs</code>.</li>
+<li><input type="checkbox">3. UPDATE med prepared statement.</li>
+<li><input type="checkbox">4. <code>CALL</code> + <code>closeCursor()</code>.</li>
+<li><input type="checkbox">5. Allt i en självrefererande sida (som PHP-appen).</li>
+<li><input type="checkbox">6. 60-sekundersmanus för varje flöde, högt.</li>
+<li><input type="checkbox">7. Mock: 3 slumpade frågor.</li>
+</ul>
+
+<p class="week">Vecka 4 – MVC från noll</p>
+<ul class="check">
+<li><input type="checkbox">1. <code>dotnet new mvc</code>; kör; lägg till controller + vy som visar "Hello".</li>
+<li><input type="checkbox">2. Modell med anslutning + <code>SELECT 1</code>; visa värdet i vyn.</li>
+<li><input type="checkbox">3. Person-tabell: DataAdapter → DataSet → ViewBag → foreach.</li>
+<li><input type="checkbox">4. Sökformulär + parameteriserad LIKE.</li>
+<li><input type="checkbox">5. INSERT: MySqlCommand + AddWithValue + RedirectToAction.</li>
+<li><input type="checkbox">6. UPDATE + dropdowns från databasen.</li>
+<li><input type="checkbox">7. Skriv sök + insert ur minnet.</li>
+</ul>
+
+<p class="week">Vecka 5 – MVC komplex tabell + helhet</p>
+<ul class="check">
+<li><input type="checkbox">1. JOIN-fråga med flera tabeller.</li>
+<li><input type="checkbox">2. Nästlad tabell med <code>prev</code>.</li>
+<li><input type="checkbox">3. Arkivera: ActionLink → controller → modell → CALL.</li>
+<li><input type="checkbox">4. Layout, länkar, PathBase, TempData.</li>
+<li><input type="checkbox">5. PHP vs MVC: samma databas, olika struktur.</li>
+<li><input type="checkbox">6. Mock 1.</li>
+<li><input type="checkbox">7. Mock 2.</li>
+</ul>
+
+<p class="week">Vecka 6 – bara mock och svaga punkter</p>
+<ul class="check">
+<li><input type="checkbox">3 slumpade frågor per dag, 5 min var, utan anteckningar.</li>
+<li><input type="checkbox">Spela in dig själv och lyssna – var var det luddigt?</li>
+<li><input type="checkbox">Repetera bara det som var fel; inget nytt material.</li>
+</ul>
+</div>
+
+<h2>12 mönster du ska kunna skriva ur minnet</h2>
+<div class="card">
+<p>Det här är din "gångertabell". Skriv varje mönster 3 gånger från minnet, olika dagar.</p>
+<ol>
+<li>PDO-anslutning + felmode.</li>
+<li><code>prepare</code> + <code>bindValue</code> + <code>execute</code> för SELECT.</li>
+<li><code>foreach</code> över resultat → HTML-tabell.</li>
+<li>INSERT med <code>execute([...])</code>.</li>
+<li><code>CALL</code> + <code>closeCursor()</code>.</li>
+<li>MySqlConnection + Open + <code>using</code>.</li>
+<li>MySqlDataAdapter + DataSet + Fill + returnera DataTable.</li>
+<li>MySqlCommand + AddWithValue + ExecuteNonQuery.</li>
+<li>Controller Index: hämta data → ViewBag → return View().</li>
+<li>Vy: form med <code>Url.Action</code>, tabell med <code>foreach</code>.</li>
+<li><code>RedirectToAction</code> efter insert/update.</li>
+<li>Trigger AFTER INSERT som loggar + procedur som flyttar en rad.</li>
+</ol>
+</div>
+
+<h2>Första 30 minuterna – gör nu</h2>
+<div class="card">
+<pre>CREATE DATABASE ovning;
+USE ovning;
+CREATE TABLE Person(
+  PersonId INT PRIMARY KEY,
+  Namn VARCHAR(50) NOT NULL
+);
+INSERT INTO Person VALUES (1, 'Erik'), (2, 'Maria'), (3, 'Olof');
+SELECT * FROM Person;
+SELECT * FROM Person WHERE Namn LIKE '%ar%';
+UPDATE Person SET Namn = 'Maria L' WHERE PersonId = 2;
+DELETE FROM Person WHERE PersonId = 3;</pre>
+<p>Efter varje rad, säg högt vad den gör: skapar struktur, skriver, läser, filtrerar, ändrar, tar bort. Det är grunden allt annat bygger på.</p>
+<p class="small">Imorgon: lägg till en till tabell med FK och en JOIN. Dagen efter: en trigger. Ett steg per dag.</p>
+</div>
+
+<h2>Regler för AI-hjälp</h2>
+<div class="card">
+<ul>
+<li><b>Skriv först</b> – även om det blir fel. Fråga sedan: "varför är detta fel?".</li>
+<li><b>Be om ledtråd, inte lösning:</b> "vilket nyckelord saknas?" i stället för "skriv koden".</li>
+<li><b>Skriv om från minnet</b> dagen efter. AI:s kod räknas inte som din förrän du kan återskapa den.</li>
+<li><b>Förklara högt innan du frågar</b> – då ser du själv var det tar stopp.</li>
+</ul>
+</div>
+
+<footer>Sparas lokalt i webbläsaren. Ett litet steg per dag slår tio långa pluggdagar i december.</footer>
+<script>
+document.querySelectorAll('input[type=checkbox]').forEach((c,i)=>{const k='bygg-'+i;c.checked=localStorage.getItem(k)==='1';c.addEventListener('change',()=>localStorage.setItem(k,c.checked?'1':'0'))});
+</script>
+</main></body></html>

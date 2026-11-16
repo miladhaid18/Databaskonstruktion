@@ -1,0 +1,23 @@
+@{
+    ViewBag.Title = "SearchObservations";
+}
+<h2>Sokresultat observationer</h2>
+<table border="1">
+    <tr>
+        @foreach (var dataColumn in ViewBag.SearchResults.Columns)
+        {
+            <th>@dataColumn.ColumnName</th>
+        }
+    </tr>
+    @foreach (var obsRow in ViewBag.SearchResults.Rows)
+    {
+        <tr>
+        @for (int i = 0; i < ViewBag.SearchResults.Columns.Count; ++i)
+        {
+            <td>@obsRow[i]</td>
+        }
+        </tr>
+    }
+</table>
+<br />
+@Html.ActionLink("Link back to observations", "Index", "Observation")

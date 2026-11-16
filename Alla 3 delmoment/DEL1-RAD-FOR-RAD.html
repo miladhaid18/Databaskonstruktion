@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Del 1 - databasen rad for rad</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--card2:#1d212a;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 "Segoe UI",system-ui,sans-serif;padding:24px 16px 70px}
+main{max-width:940px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+h1 span{color:var(--blue)}
+.sub{color:var(--muted);font-size:.92rem;margin:0 0 22px}
+h2{font-size:1.05rem;margin:28px 0 8px;color:var(--blue)}
+h3{font-size:.9rem;margin:16px 0 6px;color:var(--yellow);text-transform:uppercase;letter-spacing:.6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 16px}
+pre{background:#11141a;border:1px solid var(--line);border-radius:10px;padding:12px 14px;overflow-x:auto;font:13.5px/1.55 Consolas,"Cascadia Mono",monospace;color:#d5dae6;margin:8px 0}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+pre code{background:none;padding:0;color:inherit}
+table{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 4px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:var(--card2);color:var(--muted);font-size:.72rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap;color:var(--purple);font-family:Consolas,monospace}
+blockquote{margin:10px 0;padding:10px 14px;border-left:3px solid var(--green);background:#162019;border-radius:0 8px 8px 0}
+ul,ol{margin:8px 0 2px;padding-left:22px}
+li{margin:5px 0}
+details{background:var(--card2);border:1px solid var(--line);border-radius:8px;padding:9px 12px;margin:7px 0}
+summary{cursor:pointer}
+details p{margin:8px 0 2px;color:#cfd6e2}
+.small{color:var(--muted);font-size:.85rem}
+.warn{border-left-color:var(--yellow);background:#241f14}
+footer{margin-top:28px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{body{background:#fff;color:#111}.card,details,table,pre{background:#fff;border-color:#bbb;color:#111}h2,h3{color:#111}code{background:#eee;color:#000}.sub,footer,.small{color:#444}details{page-break-inside:avoid}}
+</style></head><body><main>
+
+<h1>Del 1 – databasen <span>rad för rad</span></h1>
+<p class="sub">Alla exempel är från din <code>database.sql</code> (260 rader). Vi hoppar över upprepade rader och förklarar mönstren en gång.</p>
+
+<div class="card">
+<h3>Så läser du varje rad</h3>
+<ol>
+<li><b>Typ:</b> skapar struktur, skriver data, läser, ändrar, ger rättighet, kör automatiskt?</li>
+<li><b>Objekt:</b> vilken tabell/kolumn/parameter?</li>
+<li><b>Varför:</b> vilken regel eller vilket krav uppfylls?</li>
+<li><b>Koppling:</b> vilken annan tabell/app-del hör den ihop med?</li>
+</ol>
+<blockquote>Läs högt: "Den här raden <b>[gör X]</b> på <b>[tabell]</b> därför att <b>[regel]</b>."</blockquote>
+</div>
+
+<h2>1. Rad 1–3: skapa en fräsch databas</h2>
+<pre>1  DROP DATABASE IF EXISTS a25milha;
+2  CREATE DATABASE a25milha;
+3  USE a25milha;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>1</td><td>Tar bort databasen om den finns. Gör filen körbar flera gånger utan "already exists". <b>Destruktivt</b> – all data försvinner.</td></tr>
+<tr><td>2</td><td>Skapar en tom databas med namnet <code>a25milha</code>.</td></tr>
+<tr><td>3</td><td>Väljer databasen så att alla följande <code>CREATE TABLE</code> hamnar i den.</td></tr>
+</table>
+
+<h2>2. Agent (rad 9–20): tabell med sammansatt primärnyckel och CHECK</h2>
+<pre>9   CREATE TABLE Agent(
+10    AgentNamn CHAR(1) NOT NULL,
+11    AgentNr INTEGER NOT NULL,
+12    Fornamn VARCHAR(50) NOT NULL,
+13    Efternamn VARCHAR(50) NOT NULL,
+14    Lon INTEGER DEFAULT 13000,
+15    PRIMARY KEY (AgentNamn, AgentNr),
+16    /* Restriktion: Lonen maste ligga mellan 12000 och 25000 kr for handlaggare */
+17    CHECK (Lon &gt;= 12000 AND Lon &lt;= 25000),
+18    /* Restriktion: Agentnumret maste vara mellan 1 och 99 */
+19    CHECK (AgentNr &gt; 0 AND AgentNr &lt;= 99)
+20  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>9</td><td>Börjar skapa tabellen <code>Agent</code>. Varje rad = en agent.</td></tr>
+<tr><td>10</td><td><code>AgentNamn</code> är en bokstavskod (J, K, A, L). <code>CHAR(1)</code> = alltid exakt ett tecken. <code>NOT NULL</code> = får inte saknas.</td></tr>
+<tr><td>11</td><td><code>AgentNr</code> är ett heltal. Tillsammans med bokstaven identifierar det agenten.</td></tr>
+<tr><td>12–13</td><td>För- och efternamn som text upp till 50 tecken, obligatoriska.</td></tr>
+<tr><td>14</td><td>Lön som heltal. Om värdet utelämnas vid insert blir det <b>13000</b> (<code>DEFAULT</code>).</td></tr>
+<tr><td>15</td><td><b>Sammansatt primärnyckel</b>: kombinationen (AgentNamn, AgentNr) är unik. Bokstaven ensam är inte unik, inte heller numret.</td></tr>
+<tr><td>17</td><td><code>CHECK</code> = regel som databasen alltid kontrollerar: lönen måste vara 12 000–25 000.</td></tr>
+<tr><td>19</td><td>Agentnumret måste vara 1–99.</td></tr>
+<tr><td>20</td><td><code>ENGINE=INNODB</code> = lagringsmotor som stödjer främmande nycklar och transaktioner.</td></tr>
+</table>
+<blockquote>Säg: "Agent har en sammansatt primärnyckel och två CHECK-constraints som skyddar lön och agentnummer."</blockquote>
+
+<h2>3. AgentKommentar (rad 22–29): horisontell denormalisering</h2>
+<pre>22  /* HORISONTELL DENORMALISERING: Utlyft av stor textkolumn (Kommentar) */
+23  CREATE TABLE AgentKommentar(
+24    AgentNamn CHAR(1) NOT NULL,
+25    AgentNr INTEGER NOT NULL,
+26    Kommentar VARCHAR(1024) NOT NULL,
+27    PRIMARY KEY (AgentNamn, AgentNr),
+28    FOREIGN KEY (AgentNamn, AgentNr) REFERENCES Agent(AgentNamn, AgentNr)
+29  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>23</td><td>Skapar en egen tabell för agentens stora textkommentar.</td></tr>
+<tr><td>24–25</td><td>Samma nyckel som Agent – det finns <b>max en kommentar per agent</b> (1:1).</td></tr>
+<tr><td>26</td><td><code>VARCHAR(1024)</code> = upp till 1024 tecken. Stor text som inte behövs vid varje agentfråga.</td></tr>
+<tr><td>27</td><td>Primärnyckeln är samma par → ingen agent kan få två kommentarer.</td></tr>
+<tr><td>28</td><td><code>FOREIGN KEY</code> → kommentaren kan inte finnas utan en agent. <b>Referentiell integritet.</b></td></tr>
+</table>
+<p><b>Varför:</b> om kommentaren låg i <code>Agent</code> skulle varje agentrad bära upp till 1024 tecken i onödan. Nu är huvudtabellen liten och snabb; texten hämtas bara vid behov.</p>
+
+<h2>4. Handlaggare (rad 31–36): rolltabell (delmängd)</h2>
+<pre>31  CREATE TABLE Handlaggare(
+32    AgentNamn CHAR(1) NOT NULL,
+33    AgentNr INTEGER NOT NULL,
+34    PRIMARY KEY (AgentNamn, AgentNr),
+35    FOREIGN KEY (AgentNamn, AgentNr) REFERENCES Agent(AgentNamn, AgentNr)
+36  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>31</td><td>Tabell för de agenter som också är handläggare.</td></tr>
+<tr><td>32–34</td><td>Samma nyckel som Agent; primärnyckeln gör att en agent bara kan registreras en gång som handläggare.</td></tr>
+<tr><td>35</td><td>FK till Agent: en handläggare måste vara en befintlig agent.</td></tr>
+</table>
+<p><b>Varför:</b> alla handläggare är agenter, men alla agenter är inte handläggare. Att raden finns i <code>Handlaggare</code> är själva rollen. Testdatan visar det: agent <code>L</code> finns i Agent men inte i Handlaggare.</p>
+
+<h2>5. Plats (38–43) och GradBeskrivning (45–50): kodtabeller</h2>
+<pre>38  /* KODTABELL 1: Uppslagstabell för platser (Kodifiering 1) */
+39  CREATE TABLE Plats(
+40    PlatsKod INTEGER NOT NULL,
+41    PlatsNamn VARCHAR(100) NOT NULL UNIQUE,
+42    PRIMARY KEY (PlatsKod)
+43  ) ENGINE=INNODB;
+
+45  /* KODTABELL 2: Uppslagstabell för närkontaktsgrader (Kodifiering 2) */
+46  CREATE TABLE GradBeskrivning(
+47    GradKod INTEGER NOT NULL,
+48    Beskrivning VARCHAR(100) NOT NULL,
+49    PRIMARY KEY (GradKod)
+50  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>39–43</td><td><code>Plats</code> kopplar en sifferkod till ett platsnamn. <code>UNIQUE</code> på namnet förhindrar två koder för samma plats.</td></tr>
+<tr><td>46–50</td><td><code>GradBeskrivning</code> kopplar grad 1–4 till en förklaring. Används i apparnas dropdowns.</td></tr>
+</table>
+<p><b>Kodifiering:</b> i stället för att upprepa långa texter i varje observation sparar <code>Observation</code> bara <code>PlatsKod</code> och <code>GradKod</code>. Det sparar plats och gör ändringar enkla.</p>
+
+<h2>6. Observation (rad 52–71): merge + kodifiering + constraints</h2>
+<pre>52  /* DENORMALISERAD TABELL 1 (AKTIVA OBSERVATIONER - MERGE + KODIFIERING 1 &amp; 2) */
+53  CREATE TABLE Observation(
+54    ObsId INTEGER NOT NULL,
+55    Datum DATETIME NOT NULL,
+56    GradKod INTEGER NOT NULL,
+57    Sakerhet DECIMAL(5,2) NOT NULL,
+58    IncidentId INTEGER NOT NULL,
+59    IncidentNamn VARCHAR(100) NOT NULL,
+60    PlatsKod INTEGER NOT NULL,
+61    RegistreradAvNamn CHAR(1) NOT NULL,
+62    RegistreradAvNr INTEGER NOT NULL,
+63    PRIMARY KEY (ObsId),
+64    /* Restriktion: Narkontaktsgraden maste vara ett heltal fran 1 till 4 */
+65    CHECK (GradKod &gt;= 1 AND GradKod &lt;= 4),
+66    /* Restriktion: Sakerheten i procent maste vara mellan 1.00 och 114.00 */
+67    CHECK (Sakerhet &gt;= 1.00 AND Sakerhet &lt;= 114.00),
+68    FOREIGN KEY (RegistreradAvNamn, RegistreradAvNr) REFERENCES Handlaggare(AgentNamn, AgentNr),
+69    FOREIGN KEY (PlatsKod) REFERENCES Plats(PlatsKod),
+70    FOREIGN KEY (GradKod) REFERENCES GradBeskrivning(GradKod)
+71  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>53–54</td><td>Tabellen för aktiva observationer. <code>ObsId</code> är unikt för varje observation.</td></tr>
+<tr><td>55</td><td><code>DATETIME</code> = datum + tid. <code>NOW()</code> i appen fyller i aktuell tid.</td></tr>
+<tr><td>56</td><td><code>GradKod</code> = kod som pekar på <code>GradBeskrivning</code>.</td></tr>
+<tr><td>57</td><td><code>DECIMAL(5,2)</code> = totalt 5 siffror, 2 decimaler (t.ex. 114.00). Exakt tal, inte flyttal.</td></tr>
+<tr><td>58–59</td><td>Incidentens id och namn ligger <b>direkt i tabellen</b> – det är <b>merge</b>: ingen separat Incident-tabell, färre joins.</td></tr>
+<tr><td>60</td><td><code>PlatsKod</code> = kod som pekar på <code>Plats</code>.</td></tr>
+<tr><td>61–62</td><td>Vem som registrerade observationen, som ett sammansatt par.</td></tr>
+<tr><td>63</td><td>Primärnyckel på <code>ObsId</code>.</td></tr>
+<tr><td>65</td><td>Graden måste vara 1–4 (domänregel).</td></tr>
+<tr><td>67</td><td>Säkerheten måste vara 1.00–114.00.</td></tr>
+<tr><td>68</td><td>Sammansatt FK: registreraren måste finnas i <code>Handlaggare</code>.</td></tr>
+<tr><td>69–70</td><td>FK till <code>Plats</code> och <code>GradBeskrivning</code> – inga påhittade koder.</td></tr>
+</table>
+<p><b>Varför både CHECK och trigger?</b> CHECK är en deklarativ regel som alltid gäller. Triggern <code>CHECKOBSGRAD</code> ger dessutom ett tydligt felmeddelande. Dubbelt skydd är avsiktligt.</p>
+
+<h2>7. ARKIVERADObservation (rad 73–92): vertikal denormalisering</h2>
+<pre>73  /* VERTIKAL DENORMALISERING: Tabell för arkiverade/mörklagda observationer */
+74  CREATE TABLE ARKIVERADObservation(
+75    ... samma kolumner och constraints som Observation ...
+92  ) ENGINE=INNODB;</pre>
+<p>Tabellen har <b>exakt samma kolumner</b> som <code>Observation</code> (ObsId, Datum, GradKod, Sakerhet, IncidentId, IncidentNamn, PlatsKod, RegistreradAvNamn, RegistreradAvNr, PK, CHECK, FK). Därför hoppar vi över de upprepade raderna.</p>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>73</td><td>Kommentaren säger syftet: arkiverade observationer.</td></tr>
+<tr><td>74</td><td>Egen tabell för gamla rader. Aktiv tabell hålls liten och snabb.</td></tr>
+<tr><td>84–91</td><td>Samma PK/CHECK/FK som Observation – arkivet har samma datakvalitet.</td></tr>
+</table>
+<p><b>Vertikal:</b> rader delas upp efter användning (aktiva vs arkiverade), inte kolumner. Proceduren <code>ARKIVERAOBSERVATION</code> flyttar raden hit.</p>
+<p class="small">Notera: proceduren tar bort kopplingarna i <code>Rapporterat</code> innan raden flyttas – arkivet sparar alltså inte vittnen. Det är ett medvetet designval i den här lösningen.</p>
+
+<h2>8. Person (rad 94–99)</h2>
+<pre>94   CREATE TABLE Person(
+95     PersonId CHAR(13) NOT NULL,
+96     Namn VARCHAR(100) NOT NULL,
+97     Kodnamn VARCHAR(50),
+98     PRIMARY KEY (PersonId)
+99   ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>95</td><td><code>CHAR(13)</code> = fast längd, t.ex. <code>19850512-1234</code>. Varför inte heltal? Bindestreck och inledande siffror ska bevaras exakt.</td></tr>
+<tr><td>96</td><td>Namn, obligatoriskt.</td></tr>
+<tr><td>97</td><td><code>Kodnamn</code> får vara <b>NULL</b> – en person kan sakna kodnamn. Appen filtrerar på "SAKNAS".</td></tr>
+<tr><td>98</td><td>Primärnyckel på personnumret.</td></tr>
+</table>
+
+<h2>9. Rapporterat (rad 101–107): många-till-många</h2>
+<pre>101  CREATE TABLE Rapporterat(
+102    PersonId CHAR(13) NOT NULL,
+103    ObsId INTEGER NOT NULL,
+104    PRIMARY KEY (PersonId, ObsId),
+105    FOREIGN KEY (PersonId) REFERENCES Person(PersonId),
+106    FOREIGN KEY (ObsId) REFERENCES Observation(ObsId)
+107  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>101</td><td>Kopplingstabell: vilka personer som rapporterat/vittnat om vilka observationer.</td></tr>
+<tr><td>102–103</td><td>De två nycklarna till Person och Observation.</td></tr>
+<tr><td>104</td><td>Sammansatt PK: samma person kan inte kopplas till samma observation två gånger.</td></tr>
+<tr><td>105–106</td><td>FK till båda tabellerna – kopplingen kan inte peka på något som inte finns.</td></tr>
+</table>
+<p><b>Varför:</b> en person kan vittna om flera observationer och en observation kan ha flera vittnen → M:N. Apparna visar detta med <code>LEFT JOIN</code>; observationer utan vittnen får NULL.</p>
+
+<h2>10. ObservationLog (rad 109–117): loggtabell</h2>
+<pre>109  /* LOGGTABELL: lagrar loggraden fran triggern LOGGOBSERVATION */
+110  CREATE TABLE ObservationLog(
+111    LogId INTEGER NOT NULL AUTO_INCREMENT,
+112    Operation VARCHAR(10) NOT NULL,
+113    Anvandare VARCHAR(100) NOT NULL,
+114    ObsId INTEGER NOT NULL,
+115    Tidpunkt DATETIME NOT NULL,
+116    PRIMARY KEY (LogId)
+117  ) ENGINE=INNODB;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>110–111</td><td>Loggtabell. <code>AUTO_INCREMENT</code> ger varje loggrad ett unikt id automatiskt.</td></tr>
+<tr><td>112</td><td>Vilken operation, t.ex. <code>'INS'</code>.</td></tr>
+<tr><td>113</td><td>Vilken databasanvändare som gjorde det (<code>USER()</code>).</td></tr>
+<tr><td>114</td><td>Vilken observation det gäller.</td></tr>
+<tr><td>115</td><td>När det hände (<code>NOW()</code>).</td></tr>
+</table>
+<p><b>Varför ingen FK på ObsId?</b> Loggen ska finnas kvar även om observationen arkiveras eller tas bort. En FK skulle kunna blockera eller radera historiken.</p>
+
+<h2>11. Testdata (rad 119–167): mönstret, inte varje rad</h2>
+<table>
+<tr><th>Rader</th><th>Vad som läggs in och varför</th></tr>
+<tr><td>123–127</td><td>4 agenter. <code>L</code> är agent men inte handläggare – testar rolltabellen.</td></tr>
+<tr><td>129–132</td><td>3 kommentarer – <code>A</code> saknar kommentar, testar 1:1 och NULL/avsaknad.</td></tr>
+<tr><td>134–137</td><td>3 handläggare (J, K, A) – delmängd av agenterna.</td></tr>
+<tr><td>139–142</td><td>3 platser.</td></tr>
+<tr><td>144–148</td><td>4 grader, 1–4, med beskrivningar.</td></tr>
+<tr><td>150–153</td><td>3 aktiva observationer med giltiga koder och registrerare.</td></tr>
+<tr><td>155–156</td><td>1 arkiverad observation (509).</td></tr>
+<tr><td>158–162</td><td>4 personer, varav en med <code>NULL</code> i Kodnamn (<code>ANON-999999-1</code>).</td></tr>
+<tr><td>164–167</td><td>3 kopplingar i Rapporterat.</td></tr>
+</table>
+<p><b>Ordningen är viktig:</b> föräldrar först (Agent, Plats, Grad, Person), sedan Observation, sist Rapporterat. Annars bryts FK.</p>
+
+<h2>12. Index (rad 169–177)</h2>
+<pre>173  -- INDEX FOR QUERY SELECT * FROM Observation ORDER BY Datum DESC;
+174  CREATE INDEX OBSDATUM ON Observation(Datum DESC) USING BTREE;
+176  -- INDEX FOR QUERY SELECT * FROM Person ORDER BY Namn ASC;
+177  CREATE INDEX PERSONNAMN ON Person(Namn ASC) USING BTREE;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>174</td><td>Index på <code>Datum</code> i fallande ordning – snabbar upp sortering på datum.</td></tr>
+<tr><td>177</td><td>Index på <code>Namn</code> – snabbar upp sortering på namn.</td></tr>
+</table>
+<p><b>Varför:</b> utan index måste databasen läsa hela tabellen och sortera. Index är som en innehållsförteckning. Kostnad: tar plats och gör inserts lite långsammare.</p>
+<p class="small">Notera: appens sökning <code>LIKE '%namn%'</code> med % först kan inte använda indexet fullt ut – indexet hjälper främst sortering och prefix/exakta sökningar.</p>
+
+<h2>13. Rättigheter (rad 179–214)</h2>
+<pre>184  CREATE USER IF NOT EXISTS 'handlaggare_app'@'localhost' IDENTIFIED BY '<REDACTED>';
+187  GRANT EXECUTE ON a25milha.* TO 'handlaggare_app'@'localhost';
+190  GRANT SELECT ON a25milha.GradBeskrivning TO 'handlaggare_app'@'localhost';
+...  (fler SELECT)
+202  GRANT SELECT, DELETE ON a25milha.Rapporterat TO 'handlaggare_app'@'localhost';
+214  GRANT SELECT, INSERT, UPDATE, DELETE ON a25milha.Observation TO 'handlaggare_app'@'localhost';</pre>
+<table>
+<tr><th>Rader</th><th>Vad de gör</th></tr>
+<tr><td>184</td><td>Skapar en egen databasanvändare, bara åtkomlig från <code>localhost</code>.</td></tr>
+<tr><td>187</td><td><code>EXECUTE</code> = får anropa lagrade procedurer i databasen.</td></tr>
+<tr><td>190–211</td><td><code>SELECT</code> på kodtabeller, arkiv, handläggare, person, logg och agent – läsning räcker.</td></tr>
+<tr><td>202</td><td><code>SELECT, DELETE</code> på Rapporterat – arkiveringsproceduren måste kunna ta bort kopplingar.</td></tr>
+<tr><td>214</td><td>Full CRUD på Observation – appen ska kunna söka, infoga, ändra och arkivera.</td></tr>
+</table>
+<p><b>Minsta rättighet:</b> användaren får bara det appen behöver – ingen <code>DROP</code>, <code>ALTER</code> eller rättighet på hela servern. Tio GRANT-rader uppfyller kravet på minst tre.</p>
+<p class="small">Anslutningarna i PHP/C# använder användaren <code>dbkonstruktion</code>; <code>handlaggare_app</code> är den separata användare som demonstrerar rättighetskravet.</p>
+
+<h2>14. Triggers (rad 220–239)</h2>
+<h3>LOGGOBSERVATION – skriver logg</h3>
+<pre>221  DELIMITER //
+222  CREATE TRIGGER LOGGOBSERVATION AFTER INSERT ON Observation
+223  FOR EACH ROW BEGIN
+224    INSERT INTO ObservationLog(Operation, Anvandare, ObsId, Tidpunkt)
+225    VALUES ('INS', USER(), NEW.ObsId, NOW());
+226  END;
+227  //
+228  DELIMITER ;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>221</td><td><code>DELIMITER //</code> byter tillfälligt sluttecken så att semikolon inuti <code>BEGIN...END</code> inte avslutar hela satsen.</td></tr>
+<tr><td>222</td><td>Skapar triggern. <code>AFTER INSERT</code> = körs automatiskt <b>efter</b> en insert på Observation. <code>FOR EACH ROW</code> = en gång per infogad rad.</td></tr>
+<tr><td>224–225</td><td><b>Skriver</b> en ny rad i ObservationLog: operation <code>INS</code>, användare, den nya radens ObsId (<code>NEW.ObsId</code>) och tid.</td></tr>
+<tr><td>226–228</td><td>Avslutar triggern och återställer <code>;</code> som sluttecken.</td></tr>
+</table>
+<blockquote>Säg: "Det här är en INSERT i triggern – den skriver en loggpost. NEW.ObsId läser bara ett fält från den nya raden; det finns ingen SELECT."</blockquote>
+
+<h3>CHECKOBSGRAD – kontrollerar före insert</h3>
+<pre>232  CREATE TRIGGER CHECKOBSGRAD BEFORE INSERT ON Observation
+233  FOR EACH ROW BEGIN
+234    IF (NEW.GradKod &lt; 1 OR NEW.GradKod &gt; 4) THEN
+235      SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Narkontaktsgraden maste vara mellan 1 och 4.';
+236    END IF;
+237  END;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>232</td><td><code>BEFORE INSERT</code> = körs <b>innan</b> raden sparas, så den kan stoppa den.</td></tr>
+<tr><td>234</td><td>Om den nya graden är utanför 1–4 …</td></tr>
+<tr><td>235</td><td>… avbryts inserten med ett eget felmeddelande (<code>SIGNAL SQLSTATE '45000'</code>).</td></tr>
+</table>
+
+<h2>15. Procedurer (rad 241–260)</h2>
+<h3>GETAVGSAKERHET – läser medelvärde</h3>
+<pre>243  CREATE PROCEDURE GETAVGSAKERHET()
+244  BEGIN
+245    SELECT AVG(Sakerhet) AS MedelSakerhet FROM Observation;
+246  END;</pre>
+<p>Returnerar en rad med medelvärdet av <code>Sakerhet</code>. Anropas med <code>CALL GETAVGSAKERHET()</code> i båda apparna. <code>AS MedelSakerhet</code> ger kolumnen ett namn.</p>
+
+<h3>ARKIVERAOBSERVATION – flyttar en rad</h3>
+<pre>252  CREATE PROCEDURE ARKIVERAOBSERVATION(IN p_ObsId INTEGER)
+253  BEGIN
+254    DELETE FROM Rapporterat WHERE ObsId = p_ObsId;
+255    INSERT INTO ARKIVERADObservation
+256    SELECT * FROM Observation WHERE ObsId = p_ObsId;
+257    DELETE FROM Observation WHERE ObsId = p_ObsId;
+258  END;</pre>
+<table>
+<tr><th>Rad</th><th>Vad den gör</th></tr>
+<tr><td>252</td><td>Tar en parameter <code>IN</code> = indata: vilket ObsId som ska arkiveras.</td></tr>
+<tr><td>254</td><td>Tar bort kopplingarna i Rapporterat först – annars blockeras borttagningen av FK.</td></tr>
+<tr><td>255–256</td><td>Kopierar raden till arkivtabellen. <code>SELECT *</code> fungerar eftersom båda tabellerna har samma kolumnordning.</td></tr>
+<tr><td>257</td><td>Tar bort raden från den aktiva tabellen.</td></tr>
+</table>
+<p><b>Tre steg i ordning:</b> kopplingar → arkiv → aktiv tabell. Anropas från apparna med <code>CALL ARKIVERAOBSERVATION(?)</code>.</p>
+
+<h2>16. Hur allt hänger ihop</h2>
+<div class="card">
+<table>
+<tr><th>Relation</th><th>Typ</th><th>Var i koden</th></tr>
+<tr><td>Agent – AgentKommentar</td><td>1:1 (0..1)</td><td>rad 23–29</td></tr>
+<tr><td>Agent – Handlaggare</td><td>1:0..1 (roll)</td><td>rad 31–36</td></tr>
+<tr><td>Handlaggare – Observation</td><td>1:N</td><td>rad 68</td></tr>
+<tr><td>Plats – Observation</td><td>1:N</td><td>rad 69</td></tr>
+<tr><td>GradBeskrivning – Observation</td><td>1:N</td><td>rad 70</td></tr>
+<tr><td>Person – Observation</td><td>M:N via Rapporterat</td><td>rad 101–107</td></tr>
+<tr><td>Observation – ObservationLog</td><td>1:N (logisk)</td><td>rad 110–117</td></tr>
+</table>
+<p><b>Fyra denormaliseringar:</b> horisontell (AgentKommentar), vertikal (ARKIVERADObservation), merge (Observation) och kodifiering (Plats + GradBeskrivning).</p>
+</div>
+
+<h2>17. Self-test</h2>
+<div class="card">
+<details><summary>1. Varför DROP DATABASE först?</summary><p>För att filen ska kunna köras om från början utan att tabeller redan finns. All data raderas.</p></details>
+<details><summary>2. Vad betyder sammansatt primärnyckel i Agent?</summary><p>Kombinationen AgentNamn + AgentNr är unik; ingen av kolumnerna behöver vara unik ensam.</p></details>
+<details><summary>3. Varför CHAR(1) för AgentNamn?</summary><p>Det är en fast ett-teckens kod; CHAR ger exakt längd.</p></details>
+<details><summary>4. Vad kontrollerar CHECK (Lon ...)?</summary><p>Att lönen ligger mellan 12 000 och 25 000.</p></details>
+<details><summary>5. Varför egen tabell för AgentKommentar?</summary><p>Horisontell denormalisering: stor text flyttas ut så huvudtabellen blir liten och snabb.</p></details>
+<details><summary>6. Vad skiljer Handlaggare från Agent?</summary><p>Handlaggare är en delmängd av Agent – bara de som har rollen handläggare finns i tabellen.</p></details>
+<details><summary>7. Varför UNIQUE på PlatsNamn?</summary><p>Förhindrar två olika koder för samma platsnamn.</p></details>
+<details><summary>8. Vad är merge i Observation?</summary><p>IncidentId/IncidentNamn och registrerare ligger direkt i tabellen i stället för i egna tabeller – färre joins.</p></details>
+<details><summary>9. Varför ingen FK på ObservationLog.ObsId?</summary><p>Loggen ska överleva även om observationen arkiveras eller tas bort.</p></details>
+<details><summary>10. Varför DELETE Rapporterat först i proceduren?</summary><p>FK från Rapporterat till Observation hindrar annars borttagningen av observationsraden.</p></details>
+<details><summary>11. Varför index på Datum?</summary><p>Sorteringen ORDER BY Datum DESC blir snabbare än att läsa och sortera hela tabellen.</p></details>
+<details><summary>12. Vad gör DELIMITER //?</summary><p>Byter sluttecken tillfälligt så att semikolon inuti BEGIN...END inte avslutar satsen för tidigt.</p></details>
+</div>
+
+<footer>Ett block per dag räcker. Läs koden, täck förklaringen, säg den högt, skriv om raden ur minnet nästa dag.</footer>
+</main></body></html>

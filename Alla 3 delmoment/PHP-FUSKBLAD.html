@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PHP-fuskblad - IT429G</title>
+<style>
+:root{--bg:#0f1115;--card:#171a21;--line:#2a3040;--text:#e6e9f0;--muted:#9aa3af;--blue:#7aa2f7;--green:#7bd88f;--yellow:#e0af68;--purple:#c0a8ff;--code:#9ecbff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Segoe UI",system-ui,sans-serif;padding:24px 16px 60px}
+main{max-width:860px;margin:0 auto}
+h1{font-size:1.5rem;margin:0 0 4px}
+h1 span{color:var(--green)}
+.sub{color:var(--muted);font-size:.9rem;margin:0 0 20px}
+.chain{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:0 0 20px}
+.chain b{color:var(--green)}
+.chain .arrow{color:var(--muted);padding:0 4px}
+h2{font-size:.8rem;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin:22px 0 8px}
+table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:.92rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{background:#1d212a;color:var(--muted);font-size:.75rem;letter-spacing:.8px;text-transform:uppercase}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap;font-weight:600}
+code{font-family:Consolas,"Cascadia Mono",monospace;font-size:.88em;background:#233052;color:var(--code);border-radius:4px;padding:1px 4px}
+.ln{background:#2b2438;color:var(--purple)}
+ul{margin:8px 0 0;padding-left:20px}
+li{margin:6px 0}
+li b{color:var(--yellow)}
+footer{margin-top:26px;color:var(--muted);font-size:.82rem;border-top:1px solid var(--line);padding-top:12px}
+@media print{
+ body{background:#fff;color:#111;padding:0;font-size:12px}
+ .card,.chain,table{background:#fff;border-color:#bbb}
+ th{background:#eee;color:#111}
+ .sub,footer,h2{color:#444}
+ code{background:#eee;color:#000}
+ .ln{background:#eee}
+ a{color:#111}
+}
+</style></head><body><main>
+<h1>PHP-<span>fuskblad</span></h1>
+<p class="sub">Samma upplägg: 1 kedja + rader. Allt ligger i EN fil: <code>PHPApplikation.php</code> (281 rader).</p>
+
+<div class="chain">
+<b>Formulär</b> (POST, samma fil) <span class="arrow">→</span>
+<b>PHP högst upp</b> ($_POST) <span class="arrow">→</span>
+<b>PDO + SQL</b> (prepare/execute) <span class="arrow">→</span>
+<b>HTML längre ner</b> (foreach/echo)
+</div>
+
+<h2>Peka rätt - vad läraren klickar</h2>
+<p class="sub" style="margin:-2px 0 8px">Alla formulär postar till samma fil: <code>action="PHPApplikation.php"</code>. PHP-koden (rad 17-112) körs FÖRE HTML:en (rad 115-281).</p>
+<table>
+<tr><th>Funktion</th><th>Var det finns (rad i PHPApplikation.php)</th></tr>
+<tr><td>Anslutning</td><td><code>PDO</code> med mysql-host, db <code>a25milha</code> <code class="ln">18</code>; felmode exception <code class="ln">19</code></td></tr>
+<tr><td>Sök person</td><td>formulär <code class="ln">116-119</code> &rarr; <code>$_POST['soknamn']</code> <code class="ln">22</code> &rarr; SQL <code class="ln">25-31</code> &rarr; prepare/bind/execute <code class="ln">32-37</code> &rarr; tabell <code class="ln">141-156</code></td></tr>
+<tr><td>Filtrera kodnamn</td><td>formulär <code class="ln">123-137</code> &rarr; <code>$_POST['filter_kod']</code> <code class="ln">23</code> &rarr; SQL-villkor <code class="ln">26-30</code> &rarr; dropdown fylls <code class="ln">24</code> + <code class="ln">127-134</code></td></tr>
+<tr><td>Lägg till</td><td>formulär <code class="ln">218-249</code> &rarr; hantering <code class="ln">49-76</code> (validering <code class="ln">59-66</code>, INSERT <code class="ln">69-70</code>) &rarr; meddelande <code class="ln">217</code></td></tr>
+<tr><td>Arkivera</td><td>formulär <code class="ln">253-263</code> &rarr; hantering <code class="ln">79-94</code> &rarr; <code>CALL ARKIVERAOBSERVATION(?)</code> <code class="ln">85</code></td></tr>
+<tr><td>Ändra säkerhet</td><td>formulär <code class="ln">267-279</code> &rarr; hantering <code class="ln">97-111</code> &rarr; <code>UPDATE ... WHERE ObsId</code> <code class="ln">105</code></td></tr>
+<tr><td>Medelsäkerhet</td><td><code>CALL GETAVGSAKERHET()</code> <code class="ln">161</code> &rarr; skrivs ut <code class="ln">163</code></td></tr>
+<tr><td>Komplex tabell</td><td>JOIN-SQL <code class="ln">183</code> &rarr; loop <code class="ln">185-209</code>; jämförelsevariabel <code>$prevObs</code> <code class="ln">182</code>, <code class="ln">186</code>, <code class="ln">208</code>; nästlad tabell <code class="ln">198-199</code></td></tr>
+<tr><td>Dropdowns</td><td>listor hämtas <code class="ln">39-42</code>; platser <code class="ln">233-239</code>, grader <code class="ln">222-228</code>, handläggare <code class="ln">241-247</code>, obs-listor <code class="ln">255-261</code> + <code class="ln">269-276</code></td></tr>
+</table>
+
+<h2>Så kopplar du skärmen till koden (PHP-appen)</h2>
+<p class="sub" style="margin:-2px 0 8px">Peka på skärmen, säg rad + vad den gör. Allt ligger i samma fil.</p>
+<table>
+<tr><th>På skärmen</th><th>Kod + en mening</th></tr>
+<tr><td>Sök personer</td><td>formulär <code class="ln">116-119</code> &rarr; <code>$_POST['soknamn']</code> <code class="ln">22</code> &rarr; SQL <code class="ln">25-31</code> &rarr; prepare/bind/execute <code class="ln">32-37</code> — "Namnet filtrerar med LIKE ?."</td></tr>
+<tr><td>Filtrera personer (Kodnamn)</td><td>formulär <code class="ln">123-137</code> &rarr; <code>$_POST['filter_kod']</code> <code class="ln">23</code> &rarr; listan <code class="ln">24</code>, villkor <code class="ln">26-30</code> — "Dropdownen lägger till AND Kodnamn = ? (eller IS NULL för SAKNAS)."</td></tr>
+<tr><td>Personer-tabellen</td><td>loop <code class="ln">148-154</code>, tabell <code class="ln">141-156</code> — "Samma tabell visar alla personer eller sökresultatet."</td></tr>
+<tr><td>Statistik över Observationer</td><td><code>CALL GETAVGSAKERHET()</code> <code class="ln">161</code> &rarr; fetch <code class="ln">162</code> &rarr; skrivs ut <code class="ln">163</code> &rarr; closeCursor <code class="ln">164</code>.</td></tr>
+<tr><td>Observationer med vittnen (Radlayout)</td><td>JOIN-SQL <code class="ln">183</code> &rarr; loop <code class="ln">185-209</code>; <code>$prevObs</code> <code class="ln">182</code>, <code class="ln">186</code>, <code class="ln">208</code>; inre tabell <code class="ln">198-207</code> — "En yttre rad per ObsId, vittnen i nästlad tabell."</td></tr>
+<tr><td>Registrera ny observation (INSERT)</td><td>formulär <code class="ln">218-249</code> &rarr; hantering <code class="ln">49-76</code> (validering <code class="ln">59-66</code>, prepare <code class="ln">69</code>, execute <code class="ln">70</code>) — "9 parametrar med ?, meddelande skrivs vid <code class="ln">217</code>."</td></tr>
+<tr><td>Arkivera observation (Procedur)</td><td>formulär <code class="ln">253-263</code> &rarr; hantering <code class="ln">79-94</code> &rarr; <code>CALL ARKIVERAOBSERVATION(?)</code> <code class="ln">85</code>.</td></tr>
+<tr><td>Uppdatera säkerhet (UPDATE)</td><td>formulär <code class="ln">267-279</code> &rarr; hantering <code class="ln">97-111</code> &rarr; <code>UPDATE ... WHERE ObsId</code> <code class="ln">105</code>.</td></tr>
+<tr><td>Alla dropdownar</td><td>listor <code class="ln">39-42</code>; grad <code class="ln">222-228</code>, plats <code class="ln">233-239</code>, handläggare <code class="ln">241-247</code>, arkiv <code class="ln">255-261</code>, update <code class="ln">269-276</code> — "Fylls med foreach från databasen."</td></tr>
+</table>
+
+<h2>Tre meningar som räddar dig</h2>
+<ul>
+<li><b>Samma fil gör allt:</b> formulären postar till <code>PHPApplikation.php</code>, PHP-koden högst upp läser <code>$_POST</code> och kör SQL, sedan skrivs HTML:en ut längre ner.</li>
+<li><b>All SQL använder prepared statements</b> med <code>?</code> + <code>bindValue</code>/<code>execute</code> - skyddar mot SQL-injektion.</li>
+<li><b>Arkivering och statistik går via lagrade procedurer:</b> <code>CALL ...</code> (rad 85 och 161) och <code>closeCursor()</code> efter anropet.</li>
+</ul>
+
+<h2>Filer att peka på</h2>
+<ul>
+<li>Allt: <code>PHPApplikation.php</code> (en enda fil, 281 rader)</li>
+<li>Databasen: <code>database.sql</code> - procedurerna <code>ARKIVERAOBSERVATION</code> och <code>GETAVGSAKERHET</code></li>
+<li>Jämför med MVC: samma databas, men uppdelat i controller/modell/vy i stället för en fil</li>
+</ul>
+
+<footer>Radnummer är från din kod nu. Stammer de inte: sök på <code>registrera</code>, <code>arkivera</code>, <code>uppdatera</code> eller <code>INSERT</code> (Ctrl+F).</footer>
+</main></body></html>

@@ -1,0 +1,313 @@
+=====================================================================
+ MVC-SNABBKURS - NATTEN INNAN (IT429G HT26)
+ Fokus: det du behover kunna for den muntliga delen i .NET/MVC
+=====================================================================
+Sa anvander du filen:
+1. Las avsnitt 1-2 en gang (10 min) - mental modell + en hel kedja
+2. Trada igenom avsnitt 3 och saga hogt (10 min) - peka ratt
+3. Las avsnitt 4 hogt (10 min) - 60-sekundersmanus per fraga
+4. Kor quizzen i avsnitt 6 (10 min)
+5. Imorgon bitti: repetition av avsnitt 3 + 4 (10 min)
+
+VIKTIGT: radnummer nedan ar fran din kod NU. Om de skiljer sig efter
+en commit - sok pa METODNAMN i stallet (Ctrl+F), inte pa radnummer.
+
+=====================================================================
+ 1. MENTAL MODELL - SA HANGER MVC IHOP (60 sekunder)
+=====================================================================
+En HTTP-request gar alltid samma vag:
+
+  URL -> Program.cs (routing) -> Controller -> Model -> Databas
+                                      |
+                                      v
+                                    View (HTML)
+
+- Program.cs rad 24: MapControllerRoute "{controller}/{action}"
+  => /Observation/InsertObservation hamnar i ObservationController.
+- Controller = TAR EMOT formulardata, anropar modellen och valjer
+  vad som ska returneras (View eller RedirectToAction).
+- Model = PRATAR MED DATABASEN (MySqlConnection, MySqlCommand,
+  DataAdapter, DataTable). Ingen HTML har.
+- View = VISAR data (Razor: @, foreach, ViewBag) och bygger formulär.
+- ViewBag = en väska som controllern stoppar data i och vyn laser.
+
+Tre controllers:
+  HomeController         startsida (tva lankar)
+  ObservationController  tabell, sok, insert, update, arkivera
+  PersonController       personlista, medelsakerhet, soksida
+Tva modeller:
+  ObservationModel       all SQL for observationer
+  PersonModel            all SQL for personer
+
+=====================================================================
+ 2. KEDJAN DU MASTE KUNNA UTANTILL - INSERT AV OBSERVATION
+=====================================================================
+Folj en insert fran klick till databas och tillbaka:
+
+1) VYN - formularet
+   Views/Observation/Index.cshtml rad 67-101
+   - action="@Url.Action("InsertObservation", "Observation")"
+     => postar till ObservationController.InsertObservation
+   - faltens name=obsid, incidentid, incidentnamn, platskod,
+     gradkod, sakerhet, regnamn, regnr
+   - Plats och Handlaggare ar <select> som byggs fran ViewBag
+     (rad 73-83 och 84-101)
+
+2) CONTROLLERN - tar emot
+   Controllers/ObservationController.cs rad 32-44
+   - metodens parametrar har SAMMA namn som faltens name
+   - anropar _observationModel.InsertObservation(...)
+   - try/catch: ArgumentException => TempData["Error"]
+   - vid lyckat: TempData["Success"] + RedirectToAction("Index")
+
+3) MODELLEN - kor SQL
+   Models/ObservationModel.cs rad 49-79
+   - validering rad 51-64 (heltal, intervall, obligatoriska falt)
+   - SQL rad 68: INSERT INTO Observation(...) VALUES(@OBSID, NOW(), ...)
+   - parametrar rad 69-78 (AddWithValue) - skyddar mot SQL-injektion
+   - ExecuteNonQuery() = ingen rad tillbaka, bara antal drabbade rader
+
+4) DATABASEN - regler (bonus om de fragar)
+   database.sql rad 232-239 CHECKOBSGRAD stoppar GradKod utanfor 1-4
+   database.sql rad 222-228 LOGGOBSERVATION loggar insert i ObservationLog
+
+5) TILLBAKA - redirect till Index
+   ObservationController.cs rad 18-24 fyller ViewBag:
+   - ObsTable = GetObservationsWithDetails()
+   - AllPlats = GetAllPlats()
+   - AllHandlaggare = GetAllHandlaggare()
+   Vyn Views/Observation/Index.cshtml rad 20-55 ritar tabellen.
+   TempData-felen visas rad 59-66.
+
+SA HAR SAGER DU DET HOGT (60 sek):
+"Formularet i Index.cshtml rad 67 postar via Url.Action till
+InsertObservation i ObservationController. Controllern tar emot
+falten som strangar och anropar modellen. I ObservationModel rad 49
+valideras indata och sedan kors en parameteriserad INSERT pa rad 68.
+Efter det redirectar controllern till Index, som hamtar tabellerna
+via ViewBag och renderar vyn. Triggers i databasen loggar inserten
+och kontrollerar graden."
+
+=====================================================================
+ 3. PEKA-RATT-TABELL (det lararen klickar -> detta visar du)
+=====================================================================
+Sok observation (= "Filtrera per plats" i appen):
+  View:       Views/Observation/Index.cshtml rad 6-18 (formular)
+  Controller: ObservationController.cs rad 26-30
+  Model:      ObservationModel.cs rad 101-110 (WHERE PlatsKod = @PLATSKOD)
+  Svarssida:  Views/Observation/SearchObservations.cshtml rad 5-23
+
+Sok person:
+  View:       Views/Person/Index.cshtml rad 5-12
+  Controller: PersonController.cs rad 25-29
+  Model:      PersonModel.cs rad 39-47 (WHERE Namn LIKE @NAME)
+  Svarssida:  Views/Person/SearchPersons.cshtml rad 5-23
+
+Lagg till observation (INSERT):
+  View:       Views/Observation/Index.cshtml rad 67-101
+  Controller: ObservationController.cs rad 32-44
+  Model:      ObservationModel.cs rad 49-79 (SQL rad 68)
+
+Ändra säkerhet (UPDATE):
+  View:       Views/Observation/Index.cshtml rad 105-117
+  Controller: ObservationController.cs rad 46-50
+  Model:      ObservationModel.cs rad 81-90 (SQL rad 85)
+
+Arkivera (PROCEDUR):
+  Lank:       Views/Observation/Index.cshtml rad 46 (ActionLink)
+  Controller: ObservationController.cs rad 52-56
+  Model:      ObservationModel.cs rad 92-99 (CALL rad 96)
+
+Enkel tabell - personer:
+  Controller: PersonController.cs rad 18-23
+  Model:      PersonModel.cs rad 19-27 (SELECT * FROM Person, SQL rad 23)
+  View:       Views/Person/Index.cshtml rad 14-31
+
+Medelsakerhet (procedur):
+  Model:      PersonModel.cs rad 29-37 (CALL rad 33)
+  View:       Views/Person/Index.cshtml rad 34-51
+
+Komplex tabell (joins + nastlad):
+  Model:      ObservationModel.cs rad 19-27 (SQL rad 23: JOIN Plats,
+              GradBeskrivning, Agent)
+  View:       Views/Observation/Index.cshtml rad 20-55
+              (yttre loop 28, ny rad per IncidentId 31, inre loop 35-50,
+               nastlad tabell 39-48, Arkivera-lank 46)
+
+Dropdowns:
+  Controller: ObservationController.cs rad 18-24 (fyller ViewBag)
+  Model:      ObservationModel.cs rad 29-37 (Plats), 39-47 (Handlaggare)
+  View:       Views/Observation/Index.cshtml rad 9-17 (sok),
+              73-83 (plats i insert), 84-101 (handlaggare),
+              108-116 (obsid i update)
+
+Startsida/lankar:
+  Views/Home/Index.cshtml rad 6-7 (ActionLink till Person/Observation)
+  Tillbaka-lankar: Observation/Index.cshtml rad 119,
+                   Person/Index.cshtml rad 52
+
+Routing/anslutning:
+  Program.cs rad 8 (UsePathBase), rad 18 (UseStaticFiles), rad 24 (route)
+  appsettings.json rad 9 (SchoolConnection)
+  Modellernas konstruktor: ObservationModel.cs rad 11-17,
+                            PersonModel.cs rad 11-17
+
+=====================================================================
+ 4. 60-SEKUNDERSMANUS PER FRAGA (sag hogt, inte tyst)
+=====================================================================
+A1 - Applikationens struktur:
+"Det har ar en MVC-applikation. Program.cs rad 24 mappar URL:er till
+controller och action. Controllers tar emot formulärdata, Models kor
+SQL mot MySQL och Views renderar HTML med Razor. Vi har tre
+controllers och tva modeller. Formulären anvander Url.Action sa att
+lankarna foljer routingen. Appen ligger under en PathBase, rad 8."
+
+A2 - Enkla tabeller:
+"PersonController.Index rad 18-23 hamtar tva DataTables: alla personer
+med SELECT * FROM Person i PersonModel rad 19-27, och medelsakerhet
+via proceduren GETAVGSAKERHET i rad 29-37. De laggs i ViewBag och
+skrivs ut i Views/Person/Index.cshtml rad 14-51 med foreach over
+Columns och Rows. Ingen join - hela tabellen visas."
+
+A3 - Komplexa tabeller:
+"ObservationModel rad 19-27 joinar Observation med Plats,
+GradBeskrivning och Agent. I vyn rad 20-55 finns en yttre loop over
+incidenter och en inre loop som bygger en nastlad tabell med
+observationerna for samma incident. Variabeln prev rad 26, 31 och 52
+gor att den yttre raden bara skrivs nar IncidentId andras. Varje
+observation har en Arkivera-lank pa rad 46."
+
+A4 - Sokning / lankning / dropdown:
+"Sokningen borjar i formularet rad 6-18 som postar platskod till
+SearchObservations i controllern rad 26-30. Modellen rad 101-110
+filtrerar med WHERE PlatsKod = @PLATSKOD och resultatet visas i
+SearchObservations.cshtml. Personsokningen ar samma monster: rad 5-12,
+PersonController rad 25-29, PersonModel rad 39-47 med LIKE.
+Dropdowns fylls i Index-action rad 18-24 med GetAllPlats och
+GetAllHandlaggare, och i vyn loopas Rows till option-element.
+Arkivera ar en lank till en action som anropar en procedur."
+
+A5 - Insert / Update / procedur:
+"Vi uppdaterar databasen pa tre stallen. INSERT: formularet rad 67-101
+till controller rad 32-44 till modellen rad 49-79 dar INSERT kor pa
+rad 68 med parametrar. UPDATE: formularet rad 105-117 till controller
+rad 46-50 till modellen rad 81-90 med UPDATE ... WHERE ObsId.
+Arkiveringen gar via proceduren ARKIVERAOBSERVATION som anropas i
+modellen rad 96 och flyttar raden till arkivtabellen. Allt anvander
+parametrar, inte strangkonkatenering."
+
+=====================================================================
+ 5. OM LARAREN FRAGAR - KORTA SVAR
+=====================================================================
+Fraga: Vad ar skillnaden mellan View() och RedirectToAction()?
+Svar: View() renderar en vy direkt. RedirectToAction() skickar en ny
+HTTP-request till en action (Post-Redirect-Get), sa att F5 inte
+skickar om formularet.
+
+Fraga: Varför ViewBag istallet for en modellklass?
+Svar: Det foljer lararens kodexempel for den har uppgiften. ViewBag
+racker nar vi bara ska skicka en DataTable till vyn; ingen extra
+modellklass behovs.
+
+Fraga: Vad gor @Url.Action?
+Svar: Genererar en URL till en controller/action utifran routingen och
+PathBase, sa lankarna fungerar aven nar appen ligger under /app.
+
+Fraga: Vad gor ActionLink("Arkivera", ...)?
+Svar: Skapar en lank till actionen ArkiveraObservation med obsid som
+route-varde. Det ar en GET-lank, inte ett formulär.
+
+Fraga: Hur vet modellen vilken databas den ska ansluta till?
+Svar: Konstruktorn laser SchoolConnection fran appsettings.json rad 9
+(annars miljovariabel), se ObservationModel rad 11-17.
+
+Fraga: Vad betyder parameteriserad SQL?
+Svar: Vi anvander @NAMN och AddWithValue i stallet for att klistra in
+varden i SQL-strangen. Det skyddar mot SQL-injektion och skoter
+typning.
+
+Fraga: Vad hander i databasen vid en insert?
+Svar: CHECKOBSGRAD (BEFORE INSERT) stoppar ogiltig grad och
+LOGGOBSERVATION (AFTER INSERT) skriver en loggrad. Se database.sql
+rad 222-239.
+
+Fraga: Varför ar dropdowns fyllda fran databasen?
+Svar: Annars kan man valja en plats/handlaggare som inte finns och fa
+FK-fel. Nu kommer listan alltid fran Plats/Agent-tabellerna.
+
+Fraga: Vad gor UsePathBase?
+Svar: Talar om att appen ligger under /databaskonstruktion/a25milha/app
+sa att routing och genererade lankar blir ratt.
+
+Fraga: Vad gor UseStaticFiles?
+Svar: Serverar filer fran wwwroot (css/js) utan att ga via en
+controller.
+
+Fraga: Vad ar skillnaden mot PHP-appen?
+Svar: PHP-appen ar sjalv-refererande: en fil tar emot POST och skriver
+HTML. MVC delar upp i controller, modell och vy. Bada anvander samma
+databas och samma procedurer.
+
+Fraga: Vad hander vid RedirectToAction("Index")?
+Svar: Webblasaren far en ny request till Index-actionen, som fyller
+ViewBag pa nytt och renderar vyn med uppdaterad data.
+
+=====================================================================
+ 6. QUIZ - 10 FRAGOR (svara hogt innan du tittar)
+=====================================================================
+1. Vilken fil mappar en URL till controller/action?
+   Svar: Program.cs rad 24.
+
+2. Var ligger formularet for att lagga till en observation?
+   Svar: Views/Observation/Index.cshtml rad 67.
+
+3. Vilken controller-action tar emot insert?
+   Svar: ObservationController.InsertObservation rad 32.
+
+4. Var kor sjalva INSERT-SQL:en?
+   Svar: ObservationModel.cs rad 68.
+
+5. Hur skickas felmeddelanden tillbaka till vyn?
+   Svar: TempData["Error"] i controllern rad 41, visas i vyn rad 59.
+
+6. Vilken metod hamtar alla personer?
+   Svar: PersonModel.GetAllPersons rad 19 (SQL rad 23).
+
+7. Vilken metod anropar proceduren for medelsakerhet?
+   Svar: PersonModel.GetAvgSakerhet rad 29 (CALL rad 33).
+
+8. Var byggs den nastlade tabellen i observationsvyn?
+   Svar: Views/Observation/Index.cshtml rad 20-55 (inre tabell 39-48).
+
+9. Vilken action anropas nar man klickar Arkivera?
+   Svar: ObservationController.ArkiveraObservation rad 52, som
+   anropar modellen rad 92 (CALL rad 96).
+
+10. Vad gor RedirectToAction efter en lyckad insert?
+    Svar: Skickar en ny request till Index sa listan laddas om utan
+    att formularet skickas igen.
+
+=====================================================================
+ 7. FALLOR - SAG INTE DETTA
+=====================================================================
+- SAG INTE "modellen ar en databastabell". Modellen ar C#-klassen som
+  kor SQL och returnerar DataTable.
+- SAG INTE att ViewBag ar en modellklass. Det ar en dictionary i vyn.
+- SAG INTE att Arkivera ar ett formulär. Det ar en ActionLink (GET).
+- SAG INTE att RedirectToAction renderar en vy. Den gor en ny request.
+- SAG INTE att appen anvander SQL Server. Det ar MySQL (MySql.Data).
+- SAG INTE att du oppnar Visual Studio. Du visar allt pa git.
+- Om radnumret inte stammer: sok pa metodnamnet och forklara i stallet.
+
+=====================================================================
+ 8. 10-MINUTERSREPETITION IMORGON BITTI
+=====================================================================
+1. Rita kedjan pa papper: form -> controller -> model -> SQL -> view.
+2. Saga A5-manuset hogt tva ganger utan att titta.
+3. Oppna git och hitta: InsertObservation (controller + model),
+   Index.cshtml formularet, SearchObservations-kedjan.
+4. Kor quizzen i avsnitt 6.
+5. Las fallorna i avsnitt 7.
+
+LYCKA TILL - du kan mer an du tror. Borja varje svar med:
+"Jag visar fil X, rad Y" och forklara sedan vad koden gor.

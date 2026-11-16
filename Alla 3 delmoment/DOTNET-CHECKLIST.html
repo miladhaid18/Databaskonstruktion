@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>.NET MVC Checklista — Muntlig Redovisning (Utförlig)</title>
+<style>
+  body { font-family: Consolas, 'Courier New', monospace; max-width: 1200px; margin: 20px auto; padding: 20px; background: #1e1e1e; color: #d4d4d4; line-height: 1.6; }
+  h1 { color: #4ec9b0; border-bottom: 2px solid #4ec9b0; padding-bottom: 10px; }
+  h2 { color: #569cd6; margin-top: 30px; background: #252526; padding: 10px 15px; border-radius: 4px; border-left: 5px solid #569cd6; }
+  h3 { color: #dcdcaa; margin-top: 20px; }
+  .section { background: #252526; padding: 20px; margin: 20px 0; border-radius: 4px; border-left: 4px solid #4ec9b0; }
+  .file { color: #9cdcfe; font-weight: bold; background: #2d2d2d; padding: 2px 6px; border-radius: 3px; }
+  .line { color: #b5cea8; background: #2d2d2d; padding: 2px 4px; border-radius: 3px; }
+  .code { background: #2d2d2d; border-left: 3px solid #569cd6; padding: 12px 15px; margin: 12px 0; overflow-x: auto; color: #d4d4d4; font-size: 12px; white-space: pre-wrap; }
+  .speech { background: #1e2a2e; border-left: 3px solid #4ec9b0; padding: 15px; margin: 15px 0; color: #b5e6c7; font-style: italic; font-size: 13px; white-space: pre-wrap; }
+  .keywords { background: #2d2d2d; border: 1px solid #3c3c3c; padding: 12px 15px; border-radius: 4px; margin: 15px 0; }
+  .keywords span { background: #4ec9b0; color: #1e1e1e; padding: 2px 8px; border-radius: 3px; margin: 2px; display: inline-block; font-size: 11px; }
+  table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+  th, td { padding: 8px 10px; border: 1px solid #3c3c3c; text-align: left; vertical-align: top; }
+  th { background: #2d2d2d; color: #4ec9b0; }
+  tr:nth-child(even) { background: #252526; }
+  tr:hover { background: #2a2d2e; }
+  .col-num { width: 5%; text-align: center; color: #dcdcaa; }
+  .col-file { width: 22%; color: #9cdcfe; }
+  .col-line { width: 8%; color: #b5cea8; text-align: center; }
+  .col-desc { width: 65%; }
+  .chain-table { font-size: 11px; }
+  .chain-table td { padding: 6px 8px; }
+  .highlight { background: #3a3d41; padding: 2px 6px; border-radius: 3px; color: #ce9178; }
+  .tip { background: #2d2d2d; border-left: 4px solid #ce9178; padding: 15px; margin: 20px 0; }
+  .tip strong { color: #ce9178; }
+  .badge { display: inline-block; background: #4ec9b0; color: #1e1e1e; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; margin-right: 4px; }
+  .manus { background: #1e2a2e; border: 1px solid #3c3c3c; padding: 15px; margin: 10px 0; border-radius: 4px; color: #b5e6c7; font-family: inherit; font-size: 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+
+<h1>.NET MVC — Komplett Checklista för Muntlig Redovisning (Utförlig)</h1>
+<p>Alla nummerade punkter = möjliga examensfrågor. <strong>Fil + Rad + Utförlig förklaring.</strong></p>
+
+<div class="section">
+<h2>1. STRUKTUR & KONFIGURATION</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>1.1</td><td class="col-file">Program.cs</td><td class="col-line">1–30</td><td>Startup-fil. Registrerar MVC-tjänster (builder.Services.AddControllersWithViews()), lägger till IConfiguration för dependency injection, bygger app-pipeline med UseStaticFiles, UseRouting, MapControllerRoute. Här startar applikationen.</td></tr>
+<tr><td>1.2</td><td class="col-file">appsettings.json</td><td class="col-line">9</td><td>SchoolConnection = anslutningssträng (Server=localhost;Port=3308;Database=a25milha;User ID=dbkonstruktion;Password=<REDACTED>;Pooling=false;SslMode=Required;convert zero datetime=True;). Används av BÅDA modellerna via _configuration["SchoolConnection"]. Namnet "SchoolConnection" valdes för att undvika kollision med standardnamnet "ConnectionString".</td></tr>
+<tr><td>1.3</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">1–16</td><td>Konstruktor tar IConfiguration via DI. Skapar ObservationModel och skickar config. Alla actions använder _observationModel för dataloggik.</td></tr>
+<tr><td>1.4</td><td class="col-file">Controllers/PersonController.cs</td><td class="col-line">1–16</td><td>Samma mönster: DI IConfiguration → PersonModel. Actions använder _personModel.</td></tr>
+<tr><td>1.5</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">11–15</td><td>Privat fält _connectionString = _configuration["SchoolConnection"]. Hämtas en gång i konstruktorn, återanvänds i alla metoder.</td></tr>
+<tr><td>1.6</td><td class="col-file">Models/PersonModel.cs</td><td class="col-line">11–15</td><td>Identisk struktur som ObservationModel — DRY-princip.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>2. ENKLA TABELLER (utan join) — Person</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>2.1</td><td class="col-file">Views/Person/Index.cshtml</td><td class="col-line">13–30</td><td>Visar en enkel HTML-tabell för Person. Header genereras automatiskt: foreach (var dataColumn in ViewBag.PersonTable.Columns) { <th>@dataColumn.ColumnName</th> }. Rader: foreach (var personRow in ViewBag.PersonTable.Rows) { for i=0 to Columns.Count { <td>@personRow[i]</td> } }. Ingen hårdkodad kolumn — fungerar för vilken tabell som helst.</td></tr>
+<tr><td>2.2</td><td class="col-file">Models/PersonModel.cs</td><td class="col-line">17–27</td><td>GetAllPersons(): MySqlConnection → MySqlDataAdapter("SELECT * FROM Person;") → Fill DataSet → Return DataTable. Använder _connectionString från konstruktorn. Connection öppnas/stängs inom metoden.</td></tr>
+<tr><td>2.3</td><td class="col-file">Controllers/PersonController.cs</td><td class="col-line">18–23</td><td>Index(): ViewBag.PersonTable = _personModel.GetAllPersons(); ViewBag.AvgSakerhet = _personModel.GetAvgSakerhet(); Return View() → Views/Person/Index.cshtml.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>3. KOMPLEXA TABELLER (med join / merge-tabell) — Observation <span class="badge">KOLUMNLAYOUT</span></h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>3.1</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">20–55</td><td><strong>KOLUMNLAYOUT</strong> (kravspec: "kolumnlayout när kolumnlayout efterfrågas"). Yttre loop: foreach (var obsRow in ViewBag.ObsTable.Rows) — en rad per unik IncidentId. Inre loop: foreach (var obsInnerRow in ViewBag.ObsTable.Rows) where IncidentId matchar. Nästlad tabell i kolumn 3: visar alla observationer för den incidenten (ObsId, Datum, Säkerhet, Grad, Handläggare, Arkivera-länk). Logik: string prev = "None"; if (prev != obsRow["IncidentId"]) { ny yttre rad } prev = obsRow["IncidentId"].</td></tr>
+<tr><td>3.2</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">26–52</td><td>Detaljerad logik: Rad 26: prev = "None" initieras före loop. Rad 31: if (prev != obsRow["IncidentId"].ToString()) — ny incident. Rad 33–34: Skriver IncidentNamn och PlatsNamn i första två celler. Rad 35–50: Inre loop som filtrerar på samma IncidentId, bygger <table> i tredje cellen. Rad 52: prev = obsRow["IncidentId"].ToString() uppdateras.</td></tr>
+<tr><td>3.3</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">17–27</td><td>GetObservationsWithDetails(): SQL med JOIN 4 tabeller: Observation (merge-tabell med IncidentNamn), Plats, GradBeskrivning, Agent. ORDER BY IncidentId, ObsId avgörande för kolumnlayout-logiken i vyn. Returnerar DataTable.</td></tr>
+<tr><td>3.4</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">18–24</td><td>Index(): Hämtar tre ViewBag-värden: ObsTable = GetObservationsWithDetails() (för kolumnlayout), AllPlats = GetAllPlats() (för dropdown i filtrera + insert), AllHandlaggare = GetAllHandlaggare() (för 2 dropdownar i insert).</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>4. SÖKNING / LÄNKNING / DROPDOWN</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>4.1</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">5–17</td><td>Formulär: method="post" action="@Url.Action("SearchObservations", "Observation")". Dropdown: <select name="platskod"> fylls från ViewBag.AllPlats.Rows (PlatsKod, PlatsNamn). Submit-knapp "Search". POST till SearchObservations-action.</td></tr>
+<tr><td>4.2</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">26–30</td><td>SearchObservations(string platskod): ViewBag.SearchResults = _observationModel.SearchObservationsByPlats(platskod); Return View("SearchObservations") — separat vy för resultat.</td></tr>
+<tr><td>4.3</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">93–104</td><td>SearchObservationsByPlats(string platskod): SQL med JOIN Observation+Plats WHERE PlatsKod = @PLATSKOD. Parametriserad: adapter.SelectCommand.Parameters.AddWithValue("@PLATSKOD", platskod). Returnerar DataTable.</td></tr>
+<tr><td>4.4</td><td class="col-file">Views/Person/Index.cshtml</td><td class="col-line">4–11</td><td>Sökformulär: method="post" action="@Url.Action("SearchPersons", "Person")". Input: <input type="text" name="name" placeholder="Personnamn" />. POST till SearchPersons-action.</td></tr>
+<tr><td>4.5</td><td class="col-file">Controllers/PersonController.cs</td><td class="col-line">25–29</td><td>SearchPersons(string name): ViewBag.SearchResults = _personModel.SearchPersons(name); Return View("SearchPersons") — separat vy.</td></tr>
+<tr><td>4.6</td><td class="col-file">Models/PersonModel.cs</td><td class="col-line">41–52</td><td>SearchPersons(string name): SQL "SELECT * FROM Person WHERE Namn LIKE @NAME;". Parametriserad: adapter.SelectCommand.Parameters.AddWithValue("@NAME", "%" + name + "%"). Wildcards läggs till i C#-koden, inte i SQL — säkert.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>5. INSERT — Ny observation</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>5.1</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">58–93</td><td>Formulär: method="post" action="@Url.Action("InsertObservation", "Observation")". Fält: ObsId, Incidentnr, Incidentnamn, Dropdown Plats, Grad (1-4), Säkerhet (1-114). <strong>VIKTIGT — 2 dropdownar för Handläggare:</strong> regnamn (AgentNamn) + regnr (AgentNr). Varför 2? Handläggare har sammansatt PK (AgentNamn, AgentNr) — båda krävs för FK i Observation. Submit "Add".</td></tr>
+<tr><td>5.2</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">32–36</td><td>InsertObservation(8 sträng-parametrar från formulär): _observationModel.InsertObservation(...); RedirectToAction("Index") — PRG-mönster (Post-Redirect-Get) förhindrar dubbelpost vid refresh.</td></tr>
+<tr><td>5.3</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">53–69</td><td>InsertObservation(): SQL INSERT 9 värden (ObsId, NOW(), Grad, Säkerhet, IncidentId, IncidentNamn, PlatsKod, RegNamn, RegNr). Datum sätts av DB med NOW(). Alla via Parameters.AddWithValue — skydd mot SQL-injection. ExecuteNonQuery().</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>6. UPDATE — Ändra säkerhet</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>6.1</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">96–109</td><td>Formulär: method="post" action="@Url.Action("UpdateSakerhet", "Observation")". Dropdown Observation (från ViewBag.ObsTable), Input säkerhet (number step=0.01 min=1 max=114). Submit "Update".</td></tr>
+<tr><td>6.2</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">38–42</td><td>UpdateSakerhet(string obsid, string sakerhet): _observationModel.UpdateSakerhet(obsid, sakerhet); RedirectToAction("Index") — PRG-mönster.</td></tr>
+<tr><td>6.3</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">71–81</td><td>UpdateSakerhet(): SQL "UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID;". Parameters.AddWithValue för båda. WHERE på PK (ObsId) = snabbt, exakt en rad. ExecuteNonQuery().</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>7. DELETE / ARKIVERA — Via lagrad procedur</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>7.1</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">46</td><td>I kolumnlayoutens nästlade tabell: @Html.ActionLink("Arkivera", "ArkiveraObservation", "Observation", new { obsid = obsInnerRow["ObsId"] }, null). Genererar GET-länk: /Observation/ArkiveraObservation?obsid=501.</td></tr>
+<tr><td>7.2</td><td class="col-file">Controllers/ObservationController.cs</td><td class="col-line">44–48</td><td>ArkiveraObservation(string obsid): _observationModel.ArkiveraObservation(obsid); RedirectToAction("Index").</td></tr>
+<tr><td>7.3</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">83–91</td><td>ArkiveraObservation(): SQL "CALL ARKIVERAOBSERVATION(@OBSID);" med Parameters.AddWithValue("@OBSID", obsid). ExecuteNonQuery().</td></tr>
+<tr><td>7.4</td><td class="col-file">database.sql</td><td class="col-line">251–259</td><td><code>CREATE PROCEDURE ARKIVERAOBSERVATION(IN p_ObsId INTEGER) BEGIN DELETE FROM Rapporterat WHERE ObsId = p_ObsId; INSERT INTO ARKIVERADObservation SELECT * FROM Observation WHERE ObsId = p_ObsId; DELETE FROM Observation WHERE ObsId = p_ObsId; END;</code> ATOMÄRT: 3 steg (FK-rensa, kopiera, radera) — all-eller-ingen. Används i BÅDE PHP och .NET — DRY.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>8. LAGRAD PROCEDUR I VY — Medelsäkerhet</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>8.1</td><td class="col-file">Views/Person/Index.cshtml</td><td class="col-line">33–50</td><td>Tabell för medelsäkerhet: auto-header från ViewBag.AvgSakerhet.Columns, rader från Rows. Samma generiska tabellkod som Person-tabellen.</td></tr>
+<tr><td>8.2</td><td class="col-file">Models/PersonModel.cs</td><td class="col-line">29–39</td><td>GetAvgSakerhet(): SQL "CALL GETAVGSAKERHET();" → MySqlDataAdapter → Fill DataSet → Return DataTable. Proceduren returnerar en rad en kolumn: MedelSakerhet.</td></tr>
+<tr><td>8.3</td><td class="col-file">Controllers/PersonController.cs</td><td class="col-line">18–23</td><td>Index(): ViewBag.AvgSakerhet = _personModel.GetAvgSakerhet(); Skickas till samma vy som Person-tabellen.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>9. PARAMETER-SÄKERHET (alla SQL-anrop)</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Vad det gör</th></tr>
+<tr><td>9.1</td><td class="col-file">Models/ObservationModel.cs</td><td class="col-line">59–66, 77–78, 88, 98</td><td>Alla metoder använder Parameters.AddWithValue: Insert (@OBSID, @GRAD, @SAKERHET, @INCID, @INCNAMN, @PLATS, @REGNAMN, @REGNR), Update (@SAKERHET, @OBSID), Arkivera (@OBSID), Search (@PLATSKOD). <strong>INGEN strängkonkatenering</strong> — värden skickas separat till databasen.</td></tr>
+<tr><td>9.2</td><td class="col-file">Models/PersonModel.cs</td><td class="col-line">46, 47</td><td>SearchPersons: adapter.SelectCommand.Parameters.AddWithValue("@NAME", "%" + name + "%"). Wildcards hanteras i C#, inte i SQL — säkert mot injection.</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>10. DESIGNVAL — MOTIVERINGAR (personliga frågor)</h2>
+<table>
+<tr><th>#</th><th class="col-file">Fil</th><th class="col-line">Rad</th><th>Motivering (svar du ger)</th></tr>
+<tr><td>10.1</td><td class="col-file">Models/*Model.cs</td><td class="col-line">14</td><td><strong>Varför SchoolConnection?</strong> "Skolans miljövariabel heter 'SchoolConnection'. Om jag använde 'ConnectionString' så skulle standardkonfigurationen krocka. Jag läser config["SchoolConnection"] i konstruktorn."</td></tr>
+<tr><td>10.2</td><td class="col-file">Views/Observation/Index.cshtml</td><td class="col-line">74–91</td><td><strong>Varför 2 dropdownar Handläggare?</strong> "Handläggare har sammansatt primärnyckel (AgentNamn CHAR(1), AgentNr INTEGER). För att sätta FK i Observation (RegistreradAvNamn, RegistreradAvNr) måste båda värden väljas. Därför två dropdownar: en för namn, en för nummer."</td></tr>
+<tr><td>10.3</td><td class="col-file">—</td><td class="col-line">—</td><td><strong>Varför kolumnlayout .NET, radlayout PHP?</strong> ".NET: En incident har N observationer (1:N). Kravspec: 'kolumnlayout när kolumnlayout efterfrågas'. Yttre rad = incident, inre tabell = observationer i kolumn 3. PHP: En observation har N vittner (1:N via Rapporterat). Radlayout: yttre rad = observation, inre tabell = vittner i kolumn 8. Olika relationer → olika layout."</td></tr>
+<tr><td>10.4</td><td class="col-file">database.sql</td><td class="col-line">251–259</td><td><strong>Varför procedur för arkivering?</strong> "Tre steg måste ske atomärt: 1) Radera FK-rader i Rapporterat, 2) Kopiera till ARKIVERADObservation, 3) Radera från Observation. Om steg 2 misslyckas ska inte steg 3 köras. Procedur garanterar all-eller-ingen. Används i båda applikationer — DRY."</td></tr>
+<tr><td>10.5</td><td class="col-file">—</td><td class="col-line">—</td><td><strong>MVC-kedja förklaring</strong> "Varje funktion följer View → Controller → Model → SQL. View: formulär/länk skickar data. Controller: tar emot, anropar modell, redirect. Model: öppnar connection, kör parametriserad SQL, returnerar DataTable/void. SQL: körs i databasen. Alla 6 funktioner har denna kedja (se block 11)."</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>11. MVC-KEDJOR — 6 FUNKTIONER × 4 FILER <span class="badge">KÄNNA UTANTILL</span></h2>
+<table class="chain-table">
+<tr><th>#</th><th>Funktion</th><th>View (Vad användaren ser)</th><th>Controller (Tar emot, anropar modell)</th><th>Model (SQL + connection)</th><th>SQL (Vad databasen gör)</th></tr>
+<tr><td>11.1</td><td>Visa alla (kolumn)</td><td>Views/Obs/Index.cshtml:26–55 — kolumnlayout med nested tabell</td><td>ObsCtrl.Index:18–24 — hämtar 3 ViewBag-listor</td><td>ObsModel.GetObservationsWithDetails:17–27 — JOIN 4 tabeller</td><td>SELECT med JOIN Observation, Plats, GradBeskrivning, Agent</td></tr>
+<tr><td>11.2</td><td>Filtrera per plats</td><td>Views/Obs/Index.cshtml:5–17 — dropdown plats → POST</td><td>ObsCtrl.SearchObservations:26–30 — anropar modell</td><td>ObsModel.SearchObservationsByPlats:93–104 — WHERE PlatsKod=@PLATSKOD</td><td>SELECT JOIN Obs+Plats filtrerat på plats</td></tr>
+<tr><td>11.3</td><td>Insert observation</td><td>Views/Obs/Index.cshtml:58–93 — formulär 8 fält + 2 dropdownar</td><td>ObsCtrl.InsertObservation:32–36 — 8 params → modell</td><td>ObsModel.InsertObservation:53–69 — INSERT 9 params + NOW()</td><td>INSERT INTO Observation (9 kolumner)</td></tr>
+<tr><td>11.4</td><td>Update säkerhet</td><td>Views/Obs/Index.cshtml:96–109 — dropdown obs + säkerhet</td><td>ObsCtrl.UpdateSakerhet:38–42 — 2 params → modell</td><td>ObsModel.UpdateSakerhet:71–81 — UPDATE WHERE PK</td><td>UPDATE Observation SET Sakerhet=@SAKERHET WHERE ObsId=@OBSID</td></tr>
+<tr><td>11.5</td><td>Arkivera (proc)</td><td>Views/Obs/Index.cshtml:46 — ActionLink ?obsid=xxx</td><td>ObsCtrl.ArkiveraObservation:44–48 — 1 param → modell</td><td>ObsModel.ArkiveraObservation:83–91 — CALL procedur</td><td>CALL ARKIVERAOBSERVATION(@OBSID) (3 steg atomärt)</td></tr>
+<tr><td>11.6</td><td>Sök person</td><td>Views/Person/Index.cshtml:4–11 — input name → POST</td><td>PersonCtrl.SearchPersons:25–29 — name → modell</td><td>PersonModel.SearchPersons:41–52 — LIKE @NAME parametriserad</td><td>SELECT * FROM Person WHERE Namn LIKE @NAME</td></tr>
+</table>
+
+<div class="manus">MANUS FÖR VARJE KEDJA (säg fritt):
+"Här är MVC-kedjan för [funktion].
+View: [fil:rad] — [vad vyn gör, t.ex. 'formulär skickar obsid och sakerhet'].
+Controller: [fil:rad] — [vad controllern gör, t.ex. 'tar emot, anropar modell.UpdateSakerhet, redirect Index'].
+Model: [fil:rad] — [vad modellen gör, t.ex. 'kör parametriserad UPDATE på PK ObsId med AddWithValue'].
+SQL: [beskrivning, t.ex. 'uppdaterar Säkerhet för exakt en observation'].
+Alla parametrar via AddWithValue — ingen strängkonkatenering."</div>
+</div>
+
+<div class="section">
+<h2>12. GIT-HITTA-SNABBT — SÖKORDA</h2>
+<table>
+<tr><th>Fråga</th><th class="col-file">Fil</th><th>Sök på git (kopiera in i git-sök)</th></tr>
+<tr><td>Kolumnlayout</td><td class="col-file">Views/Observation/Index.cshtml</td><td><code>prev = "None"</code></td></tr>
+<tr><td>Insert</td><td class="col-file">Models/ObservationModel.cs</td><td><code>InsertObservation</code></td></tr>
+<tr><td>Update</td><td class="col-file">Models/ObservationModel.cs</td><td><code>UpdateSakerhet</code></td></tr>
+<tr><td>Arkivera</td><td class="col-file">Models/ObservationModel.cs</td><td><code>ArkiveraObservation</code></td></tr>
+<tr><td>Sök person</td><td class="col-file">Models/PersonModel.cs</td><td><code>SearchPersons</code></td></tr>
+<tr><td>Parameter-säkerhet</td><td class="col-file">Models/*Model.cs</td><td><code>AddWithValue</code></td></tr>
+<tr><td>SchoolConnection</td><td class="col-file">Models/*Model.cs</td><td><code>SchoolConnection</code></td></tr>
+<tr><td>Handläggare dropdownar</td><td class="col-file">Views/Observation/Index.cshtml</td><td><code>regnamn</code></td></tr>
+<tr><td>Kolumnlayout logik</td><td class="col-file">Views/Observation/Index.cshtml</td><td><code>IncidentId</code></td></tr>
+<tr><td>Medelsäkerhet procedur</td><td class="col-file">Models/PersonModel.cs</td><td><code>GETAVGSAKERHET</code></td></tr>
+</table>
+</div>
+
+<div class="tip">
+<strong>STUDIEPLAN (30 min/dag × 4 dagar):</strong><br>
+Dag 1: Block 1–4 — Struktur, enkla tabeller, <strong>KOMPLEXA TABELLER (kolumnlayout)</strong>, sökning<br>
+Dag 2: Block 5–8 — INSERT, UPDATE, DELETE/Arkivera, procedur i vy<br>
+Dag 3: Block 9–11 — Parameter-säkerhet, <strong>DESIGNVAL (personliga)</strong>, <strong>MVC-KEDJOR (viktigast!)</strong><br>
+Dag 4: <strong>MOCK-EXAMEN</strong> — Timer 5 min × 3 slumpade block → hitta på git + förklara högt
+</div>
+
+<div class="tip">
+<strong>TIPS FÖR REDOVISNINGEN:</strong><br>
+- Öppna git.webug.se i en flik, wwwlab.webug.se i en annan.<br>
+- När läraren frågar: "Visa kolumnlayout" → sök <code>prev = "None"</code> → peka → prata.<br>
+- Ha DOTNET-CHECKLIST.txt tryckt bredvid dig som backup.<br>
+- Om du blankar: "Här är [filnamn] rad [nummer]. Den här raden gör [en sak]."<br>
+- Max 5 min/fråga. Läraren leder om du hänger.
+</div>
+
+</body>
+</html>

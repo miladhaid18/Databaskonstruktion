@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="sv"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Muntlig redovisning - punktlista</title>
+<style>
+:root{--bg:#0b0e14;--bg2:#0f1420;--card:#121826;--line:#25324a;--text:#e9eef7;--muted:#9fb0c7;--D:#7cb7ff;--A:#6fe3a8;--X:#ffd166;--ln:#ffd166}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(180deg,#0b0e14,#0d1119 40%,#0b0e14);color:var(--text);font-family:'Segoe UI',system-ui,-apple-system,sans-serif;line-height:1.65}
+header{position:sticky;top:0;z-index:20;background:rgba(11,14,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:14px 22px 10px}
+.hrow{display:flex;gap:14px;align-items:center;flex-wrap:wrap;max-width:1280px;margin:0 auto}
+h1{font-size:19px;margin:0;letter-spacing:.2px}
+h1 span{color:var(--muted);font-weight:400;font-size:13px;margin-left:8px}
+#q{flex:1;min-width:240px;background:#0a0f19;border:1px solid var(--line);border-radius:10px;color:var(--text);padding:10px 14px;font-size:14px;outline:none}
+#q:focus{border-color:var(--D);box-shadow:0 0 0 3px rgba(124,183,255,.15)}
+#count{color:var(--muted);font-size:12px;white-space:nowrap}
+nav{position:sticky;top:64px;z-index:19;background:rgba(11,14,20,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);padding:9px 22px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:thin}
+nav::-webkit-scrollbar{height:6px}nav::-webkit-scrollbar-thumb{background:#243044;border-radius:6px}
+.chip{flex:0 0 auto;display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--text);background:#121a29;border:1px solid var(--line);padding:6px 11px;border-radius:999px;font-size:12.5px;transition:.15s}
+.chip b{font-size:11px;letter-spacing:.4px}
+.chip span{color:var(--muted);max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip:hover{border-color:#3a4a68;transform:translateY(-1px)}
+.chip.D b{color:var(--D)}.chip.A b{color:var(--A)}.chip.X b{color:var(--X)}
+.chip.active{border-color:var(--D);background:#16233a;box-shadow:0 0 0 1px rgba(124,183,255,.35) inset}
+main{max-width:1080px;margin:0 auto;padding:22px 18px 70px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px 22px 8px;margin:0 0 18px;box-shadow:0 10px 28px rgba(0,0,0,.28)}
+.card.D{border-left:4px solid var(--D)}.card.A{border-left:4px solid var(--A)}.card.X{border-left:4px solid var(--X)}
+.head{display:flex;gap:12px;align-items:center;margin:0 0 6px}
+.badge{font-size:12px;font-weight:700;letter-spacing:.6px;padding:3px 9px;border-radius:8px;background:#16233a;color:var(--D)}
+.badge.A{background:#122a20;color:var(--A)}.badge.X{background:#2a2410;color:var(--X)}
+h2{font-size:16.5px;margin:0;font-weight:650;letter-spacing:.15px}
+pre{white-space:pre-wrap;word-wrap:break-word;font-family:'Segoe UI',system-ui,sans-serif;font-size:14.6px;line-height:1.7;color:#dbe4f2;margin:10px 0 14px}
+code{font-family:'Cascadia Code',Consolas,monospace;font-size:13px;background:#0b1322;border:1px solid #22304a;color:#9ed0ff;padding:1px 6px;border-radius:6px}
+.ln{font-family:'Cascadia Code',Consolas,monospace;font-size:12.5px;background:#2a2410;border:1px solid #4a3d17;color:var(--ln);padding:0 6px;border-radius:6px;white-space:nowrap}
+#top{position:fixed;right:20px;bottom:20px;background:#16233a;color:#cfe2ff;border:1px solid #2c4166;border-radius:12px;padding:10px 14px;text-decoration:none;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:30}
+#top:hover{border-color:#4a6a9e}
+.card.hide{display:none}
+mark{background:#3a3110;color:#ffe08a;padding:0 2px;border-radius:3px}
+@media(max-width:640px){pre{font-size:13.6px}h1{font-size:16px}main{padding:14px 10px 60px}.card{padding:14px 14px 4px}nav{top:92px}}
+@media print{body{background:#fff;color:#111}.card{border:1px solid #ccc;box-shadow:none}header,nav,#top{display:none}pre{color:#111}code,.ln{background:#f1f3f7;color:#333;border-color:#ddd}}
+</style></head><body>
+<header><div class="hrow"><h1>Muntlig redovisning <span>IT429G HT26 - punktlista</span></h1><input id="q" placeholder="Sok: trigger, dropdown, rad 222, insert... (tryck /)"><span id="count"></span></div></header>
+<nav id="toc"><a class='chip X' href='#s1'><span>PUNKTLISTA (IT429G HT26)</span></a>
+<a class='chip X' href='#s2'><span>Sa examineras du:</span></a>
+<a class='chip D' href='#s3'><b>D1</b><span>LOGISK DESIGN: RELATIONER (forsta forebyggande steget)</span></a>
+<a class='chip D' href='#s4'><b>D2</b><span>LOGISK DESIGN: DATATYPER (forsta steget)</span></a>
+<a class='chip D' href='#s5'><b>D3</b><span>LOGISK DESIGN: CONSTRAINTS (andra steget)</span></a>
+<a class='chip D' href='#s6'><b>D4</b><span>FYSISK DESIGN: DENORMALISERING (forsta steget)</span></a>
+<a class='chip D' href='#s7'><b>D5</b><span>FYSISK DESIGN: INDEXERING (andra steget)</span></a>
+<a class='chip D' href='#s8'><b>D6</b><span>FYSISK DESIGN: RATTIGHETER (tredje steget)</span></a>
+<a class='chip D' href='#s9'><b>D7</b><span>FYSISK DESIGN: PROCEDURES / TRIGGERS (femte steget)</span></a>
+<a class='chip A' href='#s10'><b>A1</b><span>APPLIKATIONSSTRUKTUR (PHP / .NET)</span></a>
+<a class='chip A' href='#s11'><b>A2</b><span>ENKLA TABELLER (utan joins)</span></a>
+<a class='chip A' href='#s12'><b>A3</b><span>KOMPLEXA TABELLER (joins + nastlad tabell)</span></a>
+<a class='chip A' href='#s13'><b>A4</b><span>SOKNING / LANKNING / DROPDOWN</span></a>
+<a class='chip A' href='#s14'><b>A5</b><span>INSERT / UPDATE / PROCEDUR (minst 3 stallen)</span></a>
+<a class='chip X' href='#s15'><span>VALJ 2-3 ATT PRATA OM</span></a>
+<a class='chip X' href='#s16'><span>SNABB HITTA-KOD-TABELL</span></a>
+<a class='chip X' href='#s17'><span>CHECKLISTA INNAN REDOVISNINGEN</span></a>
+</nav>
+<main id="main"><section class='card X' id='s1'><div class='head'><h2>MUNTLIG REDOVISNING - PUNKTLISTA (IT429G HT26)</h2></div><pre> Byggd pa: &quot;F&#246;rtydligande fr&#229;gor pa muntlig tentamen&quot; + instruktionsfilen</pre></section>
+<section class='card X' id='s2'><div class='head'><h2>Sa examineras du:</h2></div><pre>- 3 slumpvis valda fragor fran listan nedan + 1 personlig fraga
+- Max 5 minuter per fraga (tar en delfraga &gt; 5 min = underkand)
+- Du visar appen pa wwwlab.webug.se och koden pa git.webug.se
+- ENDAST dessa tva sidor. Ingen editor/Visual Studio.
+- Du maste HITTA koden pa git och FORKLARA vad den gor.
+- Examinationen utgar fran SENASTE COMMIT i det publika repot.
+- Fungerar inte appen = ofullstandig.
+
+FRAGORNA (exakt enligt kravlistorna):
+DATABAS
+ D1. Forsta f&#246;rebyggande steget i logisk design: skapa relationer
+ D2. Forsta steget i logisk design: bestam datatyper
+ D3. Andra steget i logisk design: bestam constraints
+ D4. Forsta steget i fysisk design: denormalisering (merge, horisontell,
+     vertikal, kodifiering)
+ D5. Andra steget i fysisk design: indexering
+ D6. Tredje steget i fysisk design: rattigheter
+ D7. Femte steget i fysisk design: procedures/triggers (funktioner,
+     constraints, loggning, materialisering/flytt)
+PHP / .NET
+ A1. Bygga strukturen (sjalv-refererande PHP eller separata filer)
+ A2. Enkla tabeller (utan joins, hela tabellen i html-tabell)
+ A3. Komplexa tabeller (joins/merge, nastlad html-tabell)
+ A4. Sokning / lankning / dropdown (filtrerad tabell fran formularet)
+ A5. Uppdatering: Insert / Delete / Update (minst 3 stallen, varav
+     minst ett via procedur)
+
+SVARSMELLODI: oppna ratt fil pa git -&gt; scrolla till raden -&gt; sag VAD
+koden gor -&gt; sag VARFOR (designval) -&gt; koppla till appen pa wwwlab.
+</pre></section>
+<section class='card D' id='s3'><div class='head'><span class='badge D'>D1</span><h2>D1 - LOGISK DESIGN: RELATIONER (forsta forebyggande steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code> + ER_diagram.png + README.md
+
+Tabellerna (radnummer i <code>database.sql</code>):
+- rad   9  Agent                (AgentNamn + AgentNr = PK)
+- rad  23  AgentKommentar       (svag entity, samma PK som Agent)
+- rad  31  Handlaggare          (specialisering av Agent, 1:1)
+- rad  39  Plats                (kodtabell)
+- rad  46  GradBeskrivning      (kodtabell)
+- rad  53  Observation          (huvudtabell)
+- rad  74  ARKIVERADObservation (arkiv, samma kolumner)
+- rad  94  Person
+- <span class="ln">rad 101</span>  Rapporterat          (M:N Person &lt;-&gt; Observation)
+- <span class="ln">rad 110</span>  ObservationLog       (logg)
+
+Sag sa har:
+- &quot;Forsta steget i logisk design ar att ga fran ER-diagrammet till
+  relationer: vilka tabeller, nycklar och relationer vi behover.&quot;
+- 1:1: Agent-Handlaggare (arv) - FK <span class="ln">rad 35</span>, samma PK <span class="ln">rad 34</span>
+- 1:1: Agent-AgentKommentar - FK <span class="ln">rad 28</span>, samma PK <span class="ln">rad 27</span>
+- 1:N: Plats -&gt; Observation (FK <span class="ln">rad 69</span>)
+- 1:N: GradBeskrivning -&gt; Observation (FK <span class="ln">rad 70</span>)
+- 1:N: Handlaggare -&gt; Observation (FK <span class="ln">rad 68</span>, sammansatt nyckel)
+- M:N: Person &lt;-&gt; Observation loses med Rapporterat (<span class="ln">rad 101-106</span>)
+- Relationerna ar dokumenterade i README/ER-diagrammet, den fysiska
+  modellen ar SQL-koden i <code>database.sql</code>
+</pre></section>
+<section class='card D' id='s4'><div class='head'><span class='badge D'>D2</span><h2>D2 - LOGISK DESIGN: DATATYPER (forsta steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code>
+
+- <span class="ln">rad 10</span>  AgentNamn CHAR(1)        fast kod, alltid 1 tecken
+- <span class="ln">rad 11</span>  AgentNr INTEGER          heltal
+- <span class="ln">rad 12-13</span> Fornamn/Efternamn VARCHAR(50)
+- <span class="ln">rad 14</span>  Lon INTEGER DEFAULT 13000
+- <span class="ln">rad 26</span>  Kommentar VARCHAR(1024)  lang text
+- <span class="ln">rad 40</span>  PlatsKod INTEGER
+- <span class="ln">rad 41</span>  PlatsNamn VARCHAR(100)
+- <span class="ln">rad 48</span>  Beskrivning VARCHAR(100)
+- <span class="ln">rad 54</span>  ObsId INTEGER
+- <span class="ln">rad 55</span>  Datum DATETIME           datum + tid
+- <span class="ln">rad 57</span>  Sakerhet DECIMAL(5,2)    procent med 2 decimaler
+- <span class="ln">rad 59</span>  IncidentNamn VARCHAR(100)
+- <span class="ln">rad 95</span>  PersonId CHAR(13)        fast langd (personnummer)
+- <span class="ln">rad 111</span> LogId INTEGER AUTO_INCREMENT
+- <span class="ln">rad 112</span> Operation VARCHAR(10)
+
+Sag sa har:
+- &quot;Minst tre olika datatyper anvands: CHAR, INTEGER, VARCHAR,
+  DECIMAL och DATETIME.&quot;
+- CHAR(1)/CHAR(13) for varden med fast langd (agentnamn, personnr)
+- DECIMAL(5,2) for Sakerhet: undviker avrundningsfel som flyttal ger
+- DATETIME for Datum: bade datum och klockslag
+- AUTO_INCREMENT pa LogId: databasen skapar unikt loggnummer
+</pre></section>
+<section class='card D' id='s5'><div class='head'><span class='badge D'>D3</span><h2>D3 - LOGISK DESIGN: CONSTRAINTS (andra steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code>
+
+PRIMARY KEY: <span class="ln">rad 15</span>, 27, 34, 42, 49, 63, 84, 98, 104, 116
+FOREIGN KEY: <span class="ln">rad 28</span>, 35, 68, 69, 70, 89, 90, 91, 105, 106
+CHECK:
+- <span class="ln">rad 17</span>  CHECK (Lon &gt;= 12000 AND Lon &lt;= 25000)
+- <span class="ln">rad 19</span>  CHECK (AgentNr &gt; 0 AND AgentNr &lt;= 99)
+- <span class="ln">rad 65</span>  CHECK (GradKod &gt;= 1 AND GradKod &lt;= 4)
+- <span class="ln">rad 67</span>  CHECK (Sakerhet &gt;= 1.00 AND Sakerhet &lt;= 114.00)
+- <span class="ln">rad 86</span>, 88 samma CHECK i ARKIVERADObservation
+UNIQUE:
+- <span class="ln">rad 41</span>  PlatsNamn VARCHAR(100) NOT NULL UNIQUE
+  (ingen plats kan registreras tva ganger med samma namn)
+NOT NULL: bl.a. <span class="ln">rad 10-14</span>, 40-41, 54-62, 95-96
+
+Sag sa har:
+- &quot;Constraints ar regler som databasen sjalv uppratter: PK, FK,
+  CHECK, UNIQUE och NOT NULL.&quot;
+- CHECK hindrar ogiltig lon, agentnr, grad och sakerhet
+- UNIQUE pa PlatsNamn hindrar dubbletter av platsnamn
+- FK hindrar att en observation pekar pa en plats/grad/handlaggare
+  som inte finns
+- Varje CHECK har en enradig forklarande kommentar (kravet)
+</pre></section>
+<section class='card D' id='s6'><div class='head'><span class='badge D'>D4</span><h2>D4 - FYSISK DESIGN: DENORMALISERING (forsta steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code>
+
+Definitioner (lararens kodexempel):
+- MERGE          = sla ihop tabeller/kolumner till en tabell
+- HORISONTELL    = lyft ut stora textkolumner som sallan las
+- VERTIKAL       = dela upp rader efter anvandningsfrekvens
+- KODIFIERING    = byt ut upprepad text mot en kod + kodtabell
+
+I din databas:
+- MERGE + KODIFIERING 1 &amp; 2: Observation (<span class="ln">rad 52-71</span>)
+  * IncidentId/IncidentNamn lagras direkt i varje observationsrad
+    (ingen separat Incident-tabell) = merge
+  * PlatsKod (<span class="ln">rad 60</span>, FK <span class="ln">rad 69</span>) mot Plats (<span class="ln">rad 38-43</span>) = kod 1
+  * GradKod (<span class="ln">rad 56</span>, FK <span class="ln">rad 70</span>) mot GradBeskrivning (<span class="ln">rad 45-50</span>) = kod 2
+- HORISONTELL: AgentKommentar (<span class="ln">rad 22-29</span>)
+  * Kommentar VARCHAR(1024) lyfts ut till egen tabell med samma PK
+  * vinst: stora texten las inte in vid vanliga Agent-fragor
+- VERTIKAL: ARKIVERADObservation (<span class="ln">rad 73-92</span>)
+  * aktiva observationer (Observation) och arkiverade
+    (ARKIVERADObservation) hall isar
+  * vinst: den aktiva tabellen blir mindre och snabbare
+
+Sag sa har:
+- &quot;Kravet: merge + kodifiering minst 3 totalt (har: 1 merge + 2
+  kodifieringar) och horisontell/vertikal minst 2 totalt (har 1+1).&quot;
+- Forflyttningen mellan aktivt/arkiv sker med proceduren
+  ARKIVERAOBSERVATION (<span class="ln">rad 252-258</span>)
+</pre></section>
+<section class='card D' id='s7'><div class='head'><span class='badge D'>D5</span><h2>D5 - FYSISK DESIGN: INDEXERING (andra steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code>
+
+- <span class="ln">rad 173-174</span>  CREATE INDEX OBSDATUM ON Observation(Datum DESC) USING BTREE;
+  kommentar ovanfor visar query: SELECT * FROM Observation ORDER BY Datum DESC
+- <span class="ln">rad 176-177</span>  CREATE INDEX PERSONNAMN ON Person(Namn ASC) USING BTREE;
+  kommentar ovanfor visar query: SELECT * FROM Person ORDER BY Namn ASC
+
+Sag sa har:
+- &quot;Index ar som en sorterad katalog som gor sokning/sortering snabbare.&quot;
+- Bada ar BTREE (bra for likhet, intervall och ORDER BY)
+- Indexen ar valda utifran vanliga queries som sorterar pa Datum/Namn
+- PK far automatiskt index; dessa tva ar extra for sortering
+- Kravet: minst 2 index, en enradig kommentar per index (uppfyllt)
+</pre></section>
+<section class='card D' id='s8'><div class='head'><span class='badge D'>D6</span><h2>D6 - FYSISK DESIGN: RATTIGHETER (tredje steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code> <span class="ln">rad 180-214</span>
+
+- <span class="ln">rad 184</span>  CREATE USER IF NOT EXISTS &#39;handlaggare_app&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;Pass1234!&#39;;
+- <span class="ln">rad 187</span>  GRANT EXECUTE ON a25milha.* TO &#39;handlaggare_app&#39;@&#39;localhost&#39;;
+- <span class="ln">rad 190</span>  GRANT SELECT ON a25milha.GradBeskrivning ...
+- <span class="ln">rad 193</span>  GRANT SELECT ON a25milha.ARKIVERADObservation ...
+- <span class="ln">rad 196</span>  GRANT SELECT ON a25milha.Handlaggare ...
+- <span class="ln">rad 199</span>  GRANT SELECT ON a25milha.Plats ...
+- <span class="ln">rad 202</span>  GRANT SELECT, DELETE ON a25milha.Rapporterat ...
+- <span class="ln">rad 205</span>  GRANT SELECT ON a25milha.Person ...
+- <span class="ln">rad 208</span>  GRANT SELECT ON a25milha.ObservationLog ...
+- <span class="ln">rad 211</span>  GRANT SELECT ON a25milha.Agent ...
+- <span class="ln">rad 214</span>  GRANT SELECT, INSERT, UPDATE, DELETE ON a25milha.Observation ...
+
+Sag sa har:
+- &quot;Rattigheter styr vad en anvandare/app far gora i databasen.&quot;
+- Egen app-anvandare i stallet for root = minsta ratts princip
+- Appen far lasa kodtabellerna och registren, och nar observationer
+  bade lasa, skapa, andra och radera (<span class="ln">rad 214</span>)
+- EXECUTE (<span class="ln">rad 187</span>) kravs for att appen skall fa anropa procedurerna
+- Kravet: minst 3 GRANT/REVOKE med kommentar per kommando
+  (har: 10 GRANTs, <span class="ln">rad 187-214</span>, uppfyllt)
+</pre></section>
+<section class='card D' id='s9'><div class='head'><span class='badge D'>D7</span><h2>D7 - FYSISK DESIGN: PROCEDURES / TRIGGERS (femte steget)</h2></div><pre>Repo: databaskonstruktion-assignment-1-startup
+Visa: <code>database.sql</code> <span class="ln">rad 218-260</span>
+
+Fyra objekt = fyra av lararens typer:
+- <span class="ln">rad 222-228</span>  LOGGOBSERVATION (TRIGGER, AFTER INSERT)
+  * loggning: skriver Operation=&#39;INS&#39;, USER(), NEW.ObsId, NOW()
+    till ObservationLog (<span class="ln">rad 110-117</span>)
+- <span class="ln">rad 232-239</span>  CHECKOBSGRAD (TRIGGER, BEFORE INSERT)
+  * constraint: SIGNAL SQLSTATE &#39;45000&#39; om GradKod utanfor 1-4
+- <span class="ln">rad 243-248</span>  GETAVGSAKERHET (PROCEDURE)
+  * funktion: SELECT AVG(Sakerhet) FROM Observation
+- <span class="ln">rad 252-258</span>  ARKIVERAOBSERVATION (PROCEDURE, IN p_ObsId)
+  * materialisering/flytt i tre steg:
+    <span class="ln">rad 254</span>  DELETE FROM Rapporterat WHERE ObsId = p_ObsId;
+    <span class="ln">rad 255-256</span>  INSERT INTO ARKIVERADObservation
+                 SELECT * FROM Observation WHERE ObsId = p_ObsId;
+    <span class="ln">rad 257</span>  DELETE FROM Observation WHERE ObsId = p_ObsId;
+  * Rapportarat raderas forst sa att FK inte blockerar flytten
+
+Anvands i applikationerna:
+- PHP: <span class="ln">rad 85</span> CALL ARKIVERAOBSERVATION(?), <span class="ln">rad 161</span> CALL GETAVGSAKERHET()
+- .NET: <code>ObservationModel.cs</code> <span class="ln">rad 96</span> CALL ARKIVERAOBSERVATION(@OBSID),
+  <code>PersonModel.cs</code> <span class="ln">rad 33</span> CALL GETAVGSAKERHET()
+
+Sag sa har:
+- &quot;Trigger kor automatiskt vid INSERT; procedur anropas med CALL.&quot;
+- Loggning och constraint kan inte glommas eller kringgas av appen
+- Samma procedur anvands av bade PHP och .NET (= logiken pa ett stalle)
+- Kravet: minst 4 objekt, minst 1 trigger + 1 procedur och minst
+  2 typer (har: funktion, constraint, loggning, flytt = 4 typer)
+</pre></section>
+<section class='card A' id='s10'><div class='head'><span class='badge A'>A1</span><h2>A1 - APPLIKATIONSSTRUKTUR (PHP / .NET)</h2></div><pre>PHP-repo: databaskonstruktion-assignment-2-startup
+Fil: <code>PHPApplikation.php</code> (sjalv-refererande, allt i en fil)
+- <span class="ln">rad 17-112</span>  PHP overst: koppling (<span class="ln">rad 18</span>), queries, POST-hantering
+- <span class="ln">rad 49-76</span>   INSERT, <span class="ln">rad 78-95</span> arkivering, <span class="ln">rad 96-111</span> UPDATE
+- <span class="ln">rad 114-281</span>  HTML: formul&#228;r och tabeller
+- Formul&#228;ren postar till samma fil: <span class="ln">rad 116</span>, 123, 216 m.fl.
+- Ingen modell/controller - PHP-kod och HTML i samma dokument
+
+.NET-repo: databaskonstruktion-assignment-3-startup
+- <code>Program.cs</code> <span class="ln">rad 8</span>  UsePathBase, <span class="ln">rad 18</span> UseStaticFiles, <span class="ln">rad 24</span> route
+- Controllers/  HomeController, ObservationController, PersonController
+- Models/       ObservationModel, PersonModel
+- Views/        Home, Observation, Person
+- Formul&#228;ren anvander @Url.Action(...) till controller-action
+
+Sag sa har:
+- &quot;PHP-varianten ar sjalv-refererande: samma fil visar sidan och
+  hanterar POST. .NET-varianten ar MVC med separata lager.&quot;
+</pre></section>
+<section class='card A' id='s11'><div class='head'><span class='badge A'>A2</span><h2>A2 - ENKLA TABELLER (utan joins)</h2></div><pre>PHP: <code>PHPApplikation.php</code>
+- <span class="ln">rad 25-37</span>  SELECT PersonId, Namn, Kodnamn FROM Person (ev. filtrerad)
+- <span class="ln">rad 140-156</span> html-tabell: foreach ($stmt as $row) -&gt; &lt;tr&gt;&lt;td&gt;
+- <span class="ln">rad 158-166</span> medelsakerhet via procedur GETAVGSAKERHET (<span class="ln">rad 161</span>)
+
+.NET:
+- <code>Models/PersonModel.cs</code> <span class="ln">rad 19-27</span>  GetAllPersons: SELECT * FROM Person
+- <code>Views/Person/Index.cshtml</code> <span class="ln">rad 14-31</span>  html-tabell (Columns -&gt; th,
+  Rows -&gt; tr/td)
+- <code>Models/PersonModel.cs</code> <span class="ln">rad 29-37</span>  GetAvgSakerhet: CALL GETAVGSAKERHET()
+- <code>Views/Person/Index.cshtml</code> <span class="ln">rad 34-51</span>  tabell med medelsakerhet
+
+Sag sa har:
+- &quot;Enkel tabell = data fran en tabell, ingen join, hela resultatet
+  skrivs ut i en html-tabell.&quot;
+- Data hamtas antingen med SQL eller med procedur (visa bada)
+- Kolumnrubriker byggs fran DataTable.Columns, rader fran Rows
+</pre></section>
+<section class='card A' id='s12'><div class='head'><span class='badge A'>A3</span><h2>A3 - KOMPLEXA TABELLER (joins + nastlad tabell)</h2></div><pre>PHP: <code>PHPApplikation.php</code> <span class="ln">rad 168-214</span>
+- <span class="ln">rad 183</span>  SQL med LEFT JOIN Rapporterat + LEFT JOIN Person + JOIN Plats
+- <span class="ln">rad 182</span>  $prevObs = &quot;NONE&quot; (jamforelsevariabel)
+- <span class="ln">rad 186</span>  ny yttre rad nar ObsId andras
+- <span class="ln">rad 190-199</span>  en rad per observation + &lt;td&gt;&lt;table&gt; for vittnen
+- <span class="ln">rad 201-207</span>  en inre rad per vittne/person
+- <span class="ln">rad 208</span>  prev uppdateras, <span class="ln">rad 210-212</span> stanger sista tabellen
+
+.NET: <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 20-55</span>
+- modell: <code>ObservationModel.cs</code> <span class="ln">rad 19-27</span> (JOIN Plats, GradBeskrivning,
+  Agent)
+- <span class="ln">rad 26</span>  prev-variabel, <span class="ln">rad 28</span> yttre loop, <span class="ln">rad 31</span> ny rad per IncidentId
+- <span class="ln">rad 35-50</span> inre loop: observationer for samma incident
+- <span class="ln">rad 39-48</span> nastlad &lt;table&gt; med ObsId/Datum/Sakerhet/Grad/Handlaggare
+- <span class="ln">rad 46</span>  Arkivera-lank per observation
+
+Sag sa har:
+- &quot;Komplex tabell = data fran flera tabeller via join, presenterad
+  som nastlad tabell: en yttre rad per incident/observation och en
+  inre tabell med detaljrader.&quot;
+- Jamforelsevariabeln (prev) gor att vi bara skriver ny yttre rad nar
+  gruppen andras.
+</pre></section>
+<section class='card A' id='s13'><div class='head'><span class='badge A'>A4</span><h2>A4 - SOKNING / LANKNING / DROPDOWN</h2></div><pre>PHP: <code>PHPApplikation.php</code>
+- Sok person: formul&#228;r <span class="ln">rad 115-119</span> -&gt; query <span class="ln">rad 25-37</span> (LIKE) -&gt;
+  tabell <span class="ln">rad 140-156</span>
+- Filtrera pa kodnamn: dropdown <span class="ln">rad 122-137</span> -&gt; query <span class="ln">rad 24-35</span>
+- Dropdown-listor fran databasen: <span class="ln">rad 39-42</span>
+  * ny_grad <span class="ln">rad 222-232</span>, ny_plats <span class="ln">rad 233-240</span>, ny_handlaggare <span class="ln">rad 241-254</span>
+  * arkiv_obsid <span class="ln">rad 255-268</span>, upd_obsid <span class="ln">rad 269-279</span>
+
+.NET:
+- Sok observation: formul&#228;r <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 6-18</span>
+  -&gt; <code>ObservationController.cs</code> <span class="ln">rad 26-30</span> -&gt; <code>ObservationModel.cs</code>
+  <span class="ln">rad 101-110</span> (WHERE PlatsKod = @PLATSKOD) -&gt; svarssida
+  <code>Views/Observation/SearchObservations.cshtml</code> <span class="ln">rad 5-23</span>
+- Sok person: formul&#228;r <code>Views/Person/Index.cshtml</code> <span class="ln">rad 5-12</span> -&gt;
+  <code>PersonController.cs</code> <span class="ln">rad 25-29</span> -&gt; <code>PersonModel.cs</code> <span class="ln">rad 39-47</span>
+  (WHERE Namn LIKE @NAME) -&gt; <code>Views/Person/SearchPersons.cshtml</code> <span class="ln">rad 5-23</span>
+- Dropdowns: Plats <span class="ln">rad 9-17</span> och 73-83 (ViewBag.AllPlats),
+  Handlaggare <span class="ln">rad 84-101</span> (ViewBag.AllHandlaggare),
+  observationer till update <span class="ln">rad 108-116</span> (ViewBag.ObsTable)
+- Lankning: Arkivera-lank <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 46</span> -&gt;
+  <code>ObservationController.cs</code> <span class="ln">rad 52-56</span> -&gt; <code>ObservationModel.cs</code> <span class="ln">rad 92-99</span>
+
+Sag sa har:
+- &quot;Formularet postar till en action; actionen filtrerar i modellen
+  och skickar resultatet till en svarssida.&quot;
+- Dropdowns ar &lt;select&gt; som byggs med foreach over DataTable.Rows, sa
+  alla varden kommer fran databasen (inga hardkodade listor).
+</pre></section>
+<section class='card A' id='s14'><div class='head'><span class='badge A'>A5</span><h2>A5 - INSERT / UPDATE / PROCEDUR (minst 3 stallen)</h2></div><pre>PHP: <code>PHPApplikation.php</code>
+- INSERT: <span class="ln">rad 69-70</span> (prepared statement med 9 parametrar)
+  formul&#228;r fran <span class="ln">rad 216</span>, validering <span class="ln">rad 59-66</span>
+- PROCEDUR: <span class="ln">rad 85</span> CALL ARKIVERAOBSERVATION(?) (arkivering)
+- UPDATE: <span class="ln">rad 105</span> UPDATE Observation SET Sakerhet = ? WHERE ObsId = ?
+
+.NET:
+- INSERT: <code>Models/ObservationModel.cs</code> <span class="ln">rad 49-79</span>
+  validering <span class="ln">rad 51-64</span>, parameteriserad INSERT <span class="ln">rad 68-78</span>
+  controller: <code>ObservationController.cs</code> <span class="ln">rad 32-44</span>
+- PROCEDUR: <code>Models/ObservationModel.cs</code> <span class="ln">rad 92-99</span>
+  CALL ARKIVERAOBSERVATION(@OBSID)
+  controller: <code>ObservationController.cs</code> <span class="ln">rad 52-56</span>
+- UPDATE: <code>Models/ObservationModel.cs</code> <span class="ln">rad 81-90</span>
+  UPDATE Observation SET Sakerhet = @SAKERHET WHERE ObsId = @OBSID
+  controller: <code>ObservationController.cs</code> <span class="ln">rad 46-50</span>
+
+Sag sa har:
+- &quot;Kravet: minst tre stallen och minst ett via procedur. Vi har
+  INSERT, UPDATE och arkivering via procedur i bada applikationerna.&quot;
+- Prepared statements/parametrar (?, AddWithValue) skyddar mot
+  SQL-injektion och skoter typning.
+- Efter POST g&#246;rs RedirectToAction till Index (undviker dubbelpost).
+</pre></section>
+<section class='card X' id='s15'><div class='head'><h2>PERSONLIG FRAGA - VALJ 2-3 ATT PRATA OM</h2></div><pre>1. Loggtriggern LOGGOBSERVATION (<code>database.sql</code> <span class="ln">rad 222-228</span>)
+   - Automatisk revisionslogg i ObservationLog, kan inte glommas
+2. CHECKOBSGRAD (<span class="ln">rad 232-239</span>)
+   - Databasen stoppar ogiltig grad aven om appen har bugg
+3. ARKIVERAOBSERVATION (<span class="ln">rad 252-258</span>)
+   - Flytt aktiv -&gt; arkiv i en procedur, anvands av bade PHP och .NET
+4. Nastlad tabell med prev-variabel (PHP <span class="ln">rad 182-212</span>, .NET <span class="ln">rad 26-52</span>)
+   - Grupperar detaljrader under ratt huvudrad
+5. Dropdowns fran databasen + validering/TempData
+   - Alla listor kommer fran Plats/Agent/Person; fel visas snyggt
+</pre></section>
+<section class='card X' id='s16'><div class='head'><h2>SNABB HITTA-KOD-TABELL</h2></div><pre>DATABAS (<code>database.sql</code>):
+  Relationer/tabeller         <span class="ln">rad 9-117</span>
+  Datatyper                   <span class="ln">rad 9-117</span> (kolumndefinitionerna)
+  Constraints                 <span class="ln">rad 15</span>, 17, 19, 27-28, 34-35, 41 (UNIQUE),
+                              63-70, 84-91
+  Denormalisering             <span class="ln">rad 22-29</span> (horisontell), 38-50 (koder),
+                              52-71 (merge+kod), 73-92 (vertikal)
+  Index                       <span class="ln">rad 173-177</span>
+  Rattigheter                 <span class="ln">rad 180-214</span>
+  Triggers                    <span class="ln">rad 222-239</span>
+  Procedurer                  <span class="ln">rad 243-260</span>
+
+PHP (<code>PHPApplikation.php</code>):
+  Koppling/query                <span class="ln">rad 17-42</span>
+  INSERT                        <span class="ln">rad 49-76</span> (SQL <span class="ln">rad 69</span>)
+  Arkivering (procedur)         <span class="ln">rad 78-95</span> (CALL <span class="ln">rad 85</span>)
+  UPDATE                        <span class="ln">rad 96-111</span> (SQL <span class="ln">rad 105</span>)
+  Sok/filter                    <span class="ln">rad 115-137</span>
+  Enkel tabell                  <span class="ln">rad 140-156</span>
+  Medelsakerhet (procedur)      <span class="ln">rad 158-166</span> (CALL <span class="ln">rad 161</span>)
+  Komplex/nastlad tabell        <span class="ln">rad 168-214</span>
+  Formular/dropdowns            <span class="ln">rad 216-281</span>
+
+.NET:
+  Routing/PathBase              <code>Program.cs</code> <span class="ln">rad 8</span> och 24
+  Anslutning                    <code>appsettings.json</code> <span class="ln">rad 9</span>
+  ObservationController         <code>Controllers/ObservationController.cs</code> <span class="ln">rad 18-56</span>
+  PersonController              <code>Controllers/PersonController.cs</code> <span class="ln">rad 18-29</span>
+  ObservationModel              <code>Models/ObservationModel.cs</code> <span class="ln">rad 11-110</span>
+  PersonModel                   <code>Models/PersonModel.cs</code> <span class="ln">rad 11-47</span>
+  Startsida/lankar              <code>Views/Home/Index.cshtml</code> <span class="ln">rad 6-7</span>
+  Sok obs (formular+svar)       <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 6-18</span>,
+                                <code>Views/Observation/SearchObservations.cshtml</code>
+  Insert/update/arkiv (vy)      <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 46-117</span>
+  Komplex/nastlad tabell        <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 20-55</span>
+  Person (enkel tabell)         <code>Views/Person/Index.cshtml</code> <span class="ln">rad 14-51</span>
+  Person-sok (svar)             <code>Views/Person/SearchPersons.cshtml</code>
+  Back-lankar                   <code>Views/Observation/Index.cshtml</code> <span class="ln">rad 118</span>,
+                                <code>Views/Person/Index.cshtml</code> <span class="ln">rad 52</span>
+</pre></section>
+<section class='card X' id='s17'><div class='head'><h2>CHECKLISTA INNAN REDOVISNINGEN</h2></div><pre>[ ] Alla andringar committade och pushade (annars visar git annan kod!)
+[ ] Bada applikationerna fungerar pa wwwlab.webug.se
+[ ] PHP: insert, arkivering, update, sok/filter, dropdowns, tabeller
+[ ] .NET: insert, arkivering, update, sokning, dropdowns, lankar
+[ ] Du kan hitta varje fil ovan pa git utan editor (Ctrl+F)
+[ ] Legitimation med, var pa plats i tid till din slot
+
+TIPS: Borja varje svar med &quot;Jag visar fil X, rad Y&quot; -&gt; vad koden gor
+-&gt; varfor den ar gjord sa -&gt; koppla till det du visar i appen.</pre></section>
+</main>
+<a id="top" href="#main">Till toppen</a>
+<script>
+const q=document.getElementById('q'),count=document.getElementById('count');
+const cards=[...document.querySelectorAll('.card')],chips=[...document.querySelectorAll('.chip')];
+function apply(){
+  const v=q.value.trim().toLowerCase();let shown=0;
+  cards.forEach(c=>{const hit=!v||c.textContent.toLowerCase().includes(v);c.classList.toggle('hide',!hit);if(hit)shown++;});
+  chips.forEach(ch=>{const t=document.querySelector(ch.getAttribute('href'));ch.style.display=(!v||(t&&t.textContent.toLowerCase().includes(v)))?'':'none';});
+  count.textContent=shown+' av '+cards.length+' avsnitt';
+}
+q.addEventListener('input',apply);
+document.addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement!==q){e.preventDefault();q.focus();}if(e.key==='Escape'){q.value='';apply();q.blur();}});
+const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){chips.forEach(c=>c.classList.toggle('active',c.getAttribute('href')==='#'+e.target.id));}});},{rootMargin:'-30% 0px -60% 0px'});
+cards.forEach(c=>obs.observe(c));
+apply();
+</script></body></html>

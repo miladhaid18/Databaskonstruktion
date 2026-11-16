@@ -1,0 +1,52 @@
+@{
+    ViewBag.Title = "Index";
+}
+<h2>Sok person</h2>
+<form method="post" action="@Url.Action("SearchPersons", "Person")">
+    <label>
+        Namn:
+        <input type="text" name="name" value="" placeholder="Personnamn" />
+    </label>
+    <input type="submit" value="Search" />
+</form>
+<br />
+<h2>Personer</h2>
+<table border="1">
+    <tr>
+        @foreach (var dataColumn in ViewBag.PersonTable.Columns)
+        {
+            <th>@dataColumn.ColumnName</th>
+        }
+    </tr>
+    @foreach (var personRow in ViewBag.PersonTable.Rows)
+    {
+        <tr>
+        @for (int i = 0; i < ViewBag.PersonTable.Columns.Count; ++i)
+        {
+            <td>@personRow[i]</td>
+        }
+        </tr>
+    }
+</table>
+<br />
+
+<h2>Medelsakerhet</h2>
+<table border="1">
+    <tr>
+        @foreach (var dataColumn in ViewBag.AvgSakerhet.Columns)
+        {
+            <th>@dataColumn.ColumnName</th>
+        }
+    </tr>
+    @foreach (var avgRow in ViewBag.AvgSakerhet.Rows)
+    {
+        <tr>
+        @for (int i = 0; i < ViewBag.AvgSakerhet.Columns.Count; ++i)
+        {
+            <td>@avgRow[i]</td>
+        }
+        </tr>
+    }
+</table>
+<br />
+<a href="@Url.Content("~/")">Link back to home</a>

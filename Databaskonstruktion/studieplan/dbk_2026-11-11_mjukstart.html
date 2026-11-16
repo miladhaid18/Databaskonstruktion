@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<title>Databaskonstruktion – mjukstart</title>
+<style>
+  @page { size: A4; margin: 15mm 15mm 14mm 15mm; }
+  * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  html { background: #0d1117; }
+  body { font-family: "Segoe UI", Calibri, Arial, sans-serif; font-size: 10.4pt; line-height: 1.42; color: #e6edf3; background: #0d1117; margin: 0; }
+  .topline { font-size: 8.8pt; color: #8b949e; letter-spacing: .4px; margin-bottom: 4px; }
+  .tag { display: inline-block; background: #1f6feb; color: #fff; padding: 1px 7px; border-radius: 3px; font-size: 8.2pt; margin-right: 6px; }
+  h1 { font-size: 20pt; color: #79c0ff; margin: 4px 0 4px; line-height: 1.15; }
+  .lead { font-size: 10.6pt; color: #c9d1d9; margin: 0 0 10px; }
+  h2 { font-size: 13.2pt; color: #79c0ff; border-bottom: 2px solid #1f6feb; padding-bottom: 2px; margin: 16px 0 8px; }
+  h3 { font-size: 10.8pt; color: #a5d6ff; margin: 10px 0 4px; }
+  p { margin: 5px 0; }
+  .box { border: 1.4px solid #1f6feb; background: #161b22; padding: 8px 11px; border-radius: 6px; margin: 8px 0 12px; color: #e6edf3; }
+  .box.warn { border-color: #d29922; background: #2d1a10; color: #ffd7b0; }
+  .box.green { border-color: #3fb950; background: #0f2a1a; color: #d7f5e0; }
+  table { border-collapse: collapse; width: 100%; margin: 6px 0 10px; }
+  th { background: #1f3a5f; color: #e6edf3; text-align: left; font-size: 9.4pt; }
+  th, td { border: 1px solid #30363d; padding: 5px 7px; vertical-align: top; }
+  td { font-size: 9.5pt; }
+  ul, ol { margin: 4px 0 6px 18px; padding: 0; }
+  li { margin: 2px 0; }
+  .cols { display: flex; gap: 12px; }
+  .cols > div { flex: 1; }
+  .card { border: 1px solid #30363d; border-radius: 6px; padding: 8px 10px; background: #161b22; break-inside: avoid; page-break-inside: avoid; }
+  .card h3 { margin-top: 0; }
+  .cols { break-inside: avoid; page-break-inside: avoid; }
+  h2 { break-after: avoid; page-break-after: avoid; }
+  .q { margin: 13px 0 10px; page-break-inside: avoid; }
+  .qnum { display: inline-block; background: #1f6feb; color: #fff; width: 20px; height: 20px; border-radius: 50%; text-align: center; font-weight: 600; font-size: 9.5pt; line-height: 20px; margin-right: 5px; }
+  .alt { margin: 2px 0 2px 26px; }
+  .alt b { color: #79c0ff; }
+  .mot { border-bottom: 1px solid #30363d; height: 20px; margin: 7px 0 0 26px; }
+  .small { font-size: 8.8pt; color: #8b949e; }
+  .facit { page-break-before: always; }
+  .answer { color: #3fb950; font-weight: 700; }
+  .pagebreak { page-break-before: always; }
+  .checkline { margin: 5px 0; }
+  .emptyrow td { height: 24px; }
+  .footer { position: fixed; bottom: 4mm; left: 0; right: 0; text-align: center; font-size: 7.8pt; color: #8b949e; }
+  .stop { border: 2px dashed #d29922; background: #2d1a10; padding: 8px 10px; border-radius: 6px; text-align: center; font-weight: 600; color: #ffd7b0; margin: 10px 0; }
+  code { background: #161b22; color: #ffa657; padding: 1px 3px; border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<div class="topline"><span class="tag">IT429G</span> Databaskonstruktion · Omtenta fredag 18 december 2026 · 30 min/dag</div>
+<h1>Mjukstart: så pluggar du inför omtentan</h1>
+<p class="lead">37 dagar, 30 minuter per dag. Fokus: aktiv återkallelse, kontrasttabeller och kodfel. Inget långt case – varje begrepp får högst en mening som exempel.</p>
+
+<div class="box">
+  <strong>Poängmodellen (nytt format):</strong> 10 frågor × max 2 p = 20 p. <strong>G = 12 p</strong>, <strong>VG = 16 p</strong>.
+  Fråga 1–7 har ett korrekt alternativ; fråga 8–10 kan ha flera. 1 p för rätt alternativ + 1 p för korrekt motivering (30–50 ord).
+  <strong>Minst ett fel i alternativen = 0 p</strong>, även om motiveringen är rätt.
+</div>
+
+<h2>1. Tio tekniker vi använder</h2>
+<table>
+  <tr><th style="width:23%">Teknik</th><th style="width:44%">Så gör du</th><th>Varför det fungerar</th></tr>
+  <tr><td><strong>Aktiv återkallelse</strong></td><td>Svara på frågor <em>innan</em> du läser om. Varje pass: först svara, sedan rätta.</td><td>Minnet stärks av att plocka fram information, inte av att läsa om.</td></tr>
+  <tr><td><strong>Spaced repetition</strong></td><td>Repetera efter 1, 3, 7 och 14 dagar. 5 min feldagbok varje dag.</td><td>Motverkar glömska med minimal tidsinsats.</td></tr>
+  <tr><td><strong>Elaborativt ifrågasättande</strong></td><td>För varje påstående: Varför? När gäller det inte? Vilket är motexemplet?</td><td>Bygger förståelse och dödar ”nästan rätt”.</td></tr>
+  <tr><td><strong>Kontrasttabeller</strong></td><td>Ställ begrepp mot varandra: vertikal/horisontell, SP/trigger, GET/POST, session/hidden, DataTable/void.</td><td>Tentans distraktorer är oftast ombytta begrepp.</td></tr>
+  <tr><td><strong>Distraktoranalys</strong></td><td>Bedöm varje alternativ som sant eller falskt och motivera varför. Stryk ”alltid/aldrig/100 %”.</td><td>Tränar exakt det tentan mäter.</td></tr>
+  <tr><td><strong>Worked example → fadning</strong></td><td>Se ett löst kodfel → lös ett med ledtråd → lös ett själv.</td><td>Effektivast för kodfelsfrågor (Q10-typen).</td></tr>
+  <tr><td><strong>Felanalys</strong></td><td>Feldagbok: kunskapslucka / felläsning / distraktor / motivationsfel / ordgräns.</td><td>Du slutar göra samma fel om och om igen.</td></tr>
+  <tr><td><strong>Motiveringsmall</strong></td><td>”X är rätt eftersom [definition]. I caset [1 mening]. Y är fel eftersom [orsak].” 30–50 ord.</td><td>Ger båda poängen: alternativ + motivering.</td></tr>
+  <tr><td><strong>Teach-back</strong></td><td>Förklara begreppet högt på två meningar som för en klasskompis.</td><td>Avslöjar kunskapsluckor direkt.</td></tr>
+  <tr><td><strong>Interleaving</strong></td><td>Blanda områden i veckoquiz och provpass i stället för att nöta ett område i taget.</td><td>Tränar att välja rätt kunskap, inte bara repetition.</td></tr>
+</table>
+
+<div class="pagebreak"></div>
+<h2>2. Så lär du dig varje del</h2>
+<div class="cols">
+  <div class="card">
+    <h3>Databasimplementation</h3>
+    <ul>
+      <li>Bygg en kontrasttabell: merge / vertikal / horisontell / kodifiering → <em>vad delas, varför, case-exempel, nackdel, nyckelpåverkan</em>.</li>
+      <li>Skriv DDL ur minnet: exakt 12 siffror = <strong>CHAR(12)</strong> + <span style="white-space:nowrap"><strong>CHECK (custno REGEXP '^[0-9]{12}$')</strong></span> + <strong>NOT NULL</strong> (INT(12) räcker inte).</li>
+      <li>Felchecklista SQL: WHERE saknas, FK-ordning, CHECK-syntax, NULL, fel datatyp.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>PHP</h3>
+    <ul>
+      <li>Rita dataflödet: formulär → GET/POST → <strong>$_POST</strong> → PDO prepare/bind/execute → fetch → HTML.</li>
+      <li>Prediktera output innan du kör koden; rätta sedan.</li>
+      <li>Felchecklista: <strong>$POST vs $_POST</strong>, platshållare vs bind, WHERE, citattecken, execute-parametrar.</li>
+    </ul>
+  </div>
+</div>
+<div class="cols" style="margin-top:8px">
+  <div class="card">
+    <h3>MVC / C#</h3>
+    <ul>
+      <li>Rita flödet: route → controller → modell → MySQL → DataTable → ViewBag → vy.</li>
+      <li>Trace:a en sökning: <strong>SearchCustomers("J")</strong> → %J% → Johan, Börje, Jessica.</li>
+      <li>Felchecklista: parameternamn, %-wildcards, <strong>= vs LIKE</strong>, AddWithValue, DataTable vs void, open/close.</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Motiveringar &amp; multi-select</h3>
+    <ul>
+      <li>Mall: definition + case-exempel + varför andra är fel. Skriv 30–50 ord och räkna orden.</li>
+      <li>Multi-select: bedöm varje alternativ separat som sant/falskt. Välj bara det du kan försvara.</li>
+      <li>Minst ett fel = 0 p. Hellre två säkra än tre osäkra.</li>
+    </ul>
+  </div>
+</div>
+
+<h2>3. Dagens mjuka start (15 min)</h2>
+<div class="box green">
+  <ol>
+    <li><strong>5 min:</strong> läs igenom detta blad (du är här nu).</li>
+    <li><strong>8 min:</strong> svara på de fem frågorna nedan utan hjälpmedel. Bara ringa in alternativ – ingen motivering i dag.</li>
+    <li><strong>2 min:</strong> fyll i feldagboken på sista sidan och bestäm en fast tid för dina 30 minuter.</li>
+  </ol>
+  <span class="small">Detta är bara kalibrering – inte ett prov. Facit ligger efter en tydlig stopp-sida.</span>
+</div>
+
+<h2>4. Fem lätta frågor</h2>
+
+<div class="q">
+  <p><span class="qnum">1</span><strong>Vad innebär merge?</strong></p>
+  <div class="alt"><b>a)</b> Delar upp en tabell i två tabeller med samma primärnyckel.</div>
+  <div class="alt"><b>b)</b> Slår ihop två relaterade tabeller (1:1 eller 1:N) för att undvika JOIN-frågor.</div>
+  <div class="alt"><b>c)</b> Ersätter återkommande textsträngar med numeriska koder.</div>
+  <div class="alt"><b>d)</b> Delar upp rader i aktiva och arkiverade tabeller.</div>
+  <div class="alt"><b>e)</b> Skapar ett index för snabbare sökningar.</div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">2</span><strong>Vad är en primärnyckel (PK)?</strong></p>
+  <div class="alt"><b>a)</b> En kolumn som får vara NULL.</div>
+  <div class="alt"><b>b)</b> En främmande nyckel från en annan tabell.</div>
+  <div class="alt"><b>c)</b> Ett index som bara används för sortering.</div>
+  <div class="alt"><b>d)</b> En kolumn (eller kombination av kolumner) som unikt identifierar varje rad.</div>
+  <div class="alt"><b>e)</b> En kolumn som alltid är en textsträng.</div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">3</span><strong>Vilken superglobal innehåller data från ett POST-formulär?</strong></p>
+  <div class="alt"><b>a)</b> $_GET</div>
+  <div class="alt"><b>b)</b> $_SESSION</div>
+  <div class="alt"><b>c)</b> $_SERVER</div>
+  <div class="alt"><b>d)</b> $POST</div>
+  <div class="alt"><b>e)</b> $_POST</div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">4</span><strong>Varför använder man prepared statements i PHP?</strong></p>
+  <div class="alt"><b>a)</b> De gör frågan långsammare men snyggare.</div>
+  <div class="alt"><b>b)</b> De ersätter behovet av en databas.</div>
+  <div class="alt"><b>c)</b> De skickar fråga och värden separat, så att input behandlas som data och inte som SQL-kod.</div>
+  <div class="alt"><b>d)</b> De gör att man inte behöver WHERE.</div>
+  <div class="alt"><b>e)</b> De fungerar bara i C#.</div>
+</div>
+
+<div class="q">
+  <p><span class="qnum">5</span><strong>Vad har vyn (View) för ansvar i MVC?</strong></p>
+  <div class="alt"><b>a)</b> Renderar HTML utifrån data som controllern skickar.</div>
+  <div class="alt"><b>b)</b> Frågar databasen direkt.</div>
+  <div class="alt"><b>c)</b> Tar emot requesten och anropar modellen.</div>
+  <div class="alt"><b>d)</b> Lagrar data i databasen.</div>
+  <div class="alt"><b>e)</b> Är alltid en del av modellen.</div>
+</div>
+
+<div class="facit">
+  <div class="stop">STOPP – vänd inte hit förrän du svarat på alla fem frågor.</div>
+  <h2>Facit – mjukstart</h2>
+  <table>
+    <tr><th style="width:8%">Fråga</th><th style="width:10%">Svar</th><th>Förklaring</th></tr>
+    <tr><td>1</td><td class="answer">b</td><td>Merge slår ihop två relaterade tabeller (1:1/1:N) och eliminerar JOIN-frågor. Priset är ökad redundans. a är vertikal split, c är kodifiering, d är horisontell split.</td></tr>
+    <tr><td>2</td><td class="answer">d</td><td>Primärnyckeln unikt identifierar varje rad och får inte vara NULL. b beskriver en främmande nyckel (FK).</td></tr>
+    <tr><td>3</td><td class="answer">e</td><td>POST-data ligger i <strong>$_POST</strong>. <strong>$POST</strong> (utan understreck) är en klassisk fälla och existerar inte som superglobal.</td></tr>
+    <tr><td>4</td><td class="answer">c</td><td>Prepared statements skickar SQL-struktur och värden separat. Användarinput tolkas då som data, vilket förhindrar SQL-injection. Det gäller inte ”100 %” i alla sammanhang – t.ex. kan man inte parametrisera kolumnnamn.</td></tr>
+    <tr><td>5</td><td class="answer">a</td><td>Vyn renderar HTML. c är controllerns uppgift; modellen sköter data och databasåtkomst.</td></tr>
+  </table>
+
+  <div class="box">
+    <strong>Så tolkar du resultatet (bara kalibrering):</strong>
+    <ul>
+      <li><strong>5 rätt:</strong> stark start – vi går direkt på djupet.</li>
+      <li><strong>3–4 rätt:</strong> bra – planen passar dig som den är.</li>
+      <li><strong>0–2 rätt:</strong> helt normalt efter ett U – vi börjar från grunden med korta steg.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="pagebreak">
+  <h2>Feldagbok</h2>
+  <p>Fyll i efter varje pass. Kategorier: <strong>K</strong> = kunskapslucka, <strong>L</strong> = felläsning, <strong>D</strong> = distraktor, <strong>M</strong> = motivationsfel, <strong>O</strong> = ordgräns.</p>
+  <table>
+    <tr><th style="width:14%">Datum</th><th style="width:20%">Område</th><th style="width:30%">Vad gick fel?</th><th style="width:10%">Kategori</th><th>Åtgärd till nästa gång</th></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr class="emptyrow"><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+
+  <div class="box" style="margin-top:14px">
+    <p><strong>Min fasta pluggtid:</strong> ______________________ (t.ex. 19:00–19:30)</p>
+    <p><strong>Min plats:</strong> ______________________</p>
+    <p><strong>Datum för omtenta:</strong> fredag 18 december 2026</p>
+    <p><strong>Nästa pass:</strong> torsdag 12 november – diagnostest, 10 frågor i nya formatet (30 min).</p>
+  </div>
+
+  <div class="box warn">
+    <strong>Påminnelse:</strong> Du behöver inte läsa hela caset. Varje begrepp räcker med en mikromening, t.ex. ”merge: Spel + Utgivare”. Det är så tentan prövar förståelsen.
+  </div>
+</div>
+
+</body>
+</html>
