@@ -38,7 +38,7 @@ CREATE TABLE Handlaggare(
 /* KODTABELL 1: Uppslagstabell för platser (Kodifiering 1) */
 CREATE TABLE Plats(
   PlatsKod INTEGER NOT NULL,
-  PlatsNamn VARCHAR(100) NOT NULL,
+  PlatsNamn VARCHAR(100) NOT NULL UNIQUE,
   PRIMARY KEY (PlatsKod)
 ) ENGINE=INNODB;
 
@@ -106,10 +106,10 @@ CREATE TABLE Rapporterat(
   FOREIGN KEY (ObsId) REFERENCES Observation(ObsId)
 ) ENGINE=INNODB;
 
-/* LOGGTABELL för trigger LOGGOBSERVATION */
+/* LOGGTABELL: lagrar loggraden fran triggern LOGGOBSERVATION */
 CREATE TABLE ObservationLog(
   LogId INTEGER NOT NULL AUTO_INCREMENT,
-  Operation CHAR(3) NOT NULL,
+  Operation VARCHAR(10) NOT NULL,
   Anvandare VARCHAR(100) NOT NULL,
   ObsId INTEGER NOT NULL,
   Tidpunkt DATETIME NOT NULL,
@@ -181,16 +181,37 @@ CREATE INDEX PERSONNAMN ON Person(Namn ASC) USING BTREE;
 -- =================================================================
 
 -- Skapa en användare för handläggarnas applikation
-CREATE USER IF NOT EXISTS 'handlaggare\_app'@'%' IDENTIFIED BY '<REDACTED>';
+CREATE USER IF NOT EXISTS 'handlaggare_app'@'localhost' IDENTIFIED BY '<REDACTED>';
 
--- 1\. Ger först rättigheter på tabellen Agent till handläggarappen
-GRANT ALL ON a25milha.Agent TO 'handlaggare\_app'@'%';
+-- Ger rätt att köra procedurer i databasen
+GRANT EXECUTE ON a25milha.* TO 'handlaggare_app'@'localhost';
 
--- 2\. Ger läs- och skrivrättigheter på tabellen Observation 
-GRANT SELECT, INSERT ON a25milha.Observation TO 'handlaggare\_app'@'%';
+-- Ger läsrättighet till kodtabellen för grader
+GRANT SELECT ON a25milha.GradBeskrivning TO 'handlaggare_app'@'localhost';
 
--- 3\. Återkallar rättigheten att radera i tabellen Agent för handläggare 
-REVOKE DELETE ON a25milha.Agent FROM 'handlaggare\_app'@'%';
+-- Ger läsrättighet till arkiverade observationer
+GRANT SELECT ON a25milha.ARKIVERADObservation TO 'handlaggare_app'@'localhost';
+
+-- Ger läsrättighet till handläggarregistret
+GRANT SELECT ON a25milha.Handlaggare TO 'handlaggare_app'@'localhost';
+
+-- Ger läsrättighet till kodtabellen för platser
+GRANT SELECT ON a25milha.Plats TO 'handlaggare_app'@'localhost';
+
+-- Ger läs- och raderingsrätt till kopplingstabellen rapporterat
+GRANT SELECT, DELETE ON a25milha.Rapporterat TO 'handlaggare_app'@'localhost';
+
+-- Ger läsrättighet till vittnesregistret
+GRANT SELECT ON a25milha.Person TO 'handlaggare_app'@'localhost';
+
+-- Ger läsrättighet till loggtabellen
+GRANT SELECT ON a25milha.ObservationLog TO 'handlaggare_app'@'localhost';
+
+-- Ger läsrättighet till agentregistret
+GRANT SELECT ON a25milha.Agent TO 'handlaggare_app'@'localhost';
+
+-- Ger fulla rättigheter på aktiva observationer (sök, registrera, ändra, arkivera)
+GRANT SELECT, INSERT, UPDATE, DELETE ON a25milha.Observation TO 'handlaggare_app'@'localhost';
 
 -- =================================================================
 -- PUNKT 13: PROCEDURER OCH TRIGGERS (2 TRIGGERS + 2 PROCEDURER)
@@ -230,6 +251,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE ARKIVERAOBSERVATION(IN p_ObsId INTEGER)
 BEGIN
+  DELETE FROM Rapporterat WHERE ObsId = p_ObsId;
   INSERT INTO ARKIVERADObservation
   SELECT * FROM Observation WHERE ObsId = p_ObsId;
   DELETE FROM Observation WHERE ObsId = p_ObsId;

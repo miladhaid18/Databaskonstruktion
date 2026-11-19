@@ -32,6 +32,7 @@ Här samlas alla verksamhetskrav och begränsningar från uppgiftsspecifikatione
 ## Incident
 * En incident identifieras unikt av antingen ett unikt namn eller ett unikt nummer.
 * Platsen (platsbeskrivning/ort) där incidenten inträffade ska lagras.
+* Varje platsnamn är unikt i kodtabellen Plats.
 * Incidenten måste inträffa i en region.
 * Det ska gå att beräkna ett medelvärde på alla tillhörande observationers grad.
 * Varje incident måste vara kopplad till den specifika handläggare som rapporterade den.
@@ -54,19 +55,27 @@ Här samlas alla verksamhetskrav och begränsningar från uppgiftsspecifikatione
 * Personer utan kodnamn eller som lämnat falska/inga namn antas vara mindre trovärdiga.
 
 # Relations
-Här översätts ER-diagrammet till logiska relationer med understrukna primärnycklar och genomstrukna främmande nycklar.
+Här översätts ER-diagrammet till logiska relationer med understrukna primärnycklar och genomstrukna främmande nycklar, efter denormaliseringen nedan.
 
-**Agent**(<ins>AgentNamn, AgentNr</ins>, Fornamn, Efternamn, Lon, Kommentar)
+**Agent**(<ins>AgentNamn, AgentNr</ins>, Fornamn, Efternamn, Lon)
+
+**AgentKommentar**(<ins>~AgentNamn, AgentNr~</ins>, Kommentar)
 
 **Handlaggare**(<ins>~AgentNamn, AgentNr~</ins>)
 
-**Incident**(<ins>IncidentId</ins>, Namn, Plats, ~RapportorNamn, RapportorNr~)
+**Plats**(<ins>PlatsKod</ins>, PlatsNamn)
 
-**Observation**(<ins>ObsId</ins>, Datum, Grad, Sakerhet, ~IncidentId~, ~RegistreradAvNamn, RegistreradAvNr~)
+**GradBeskrivning**(<ins>GradKod</ins>, Beskrivning)
+
+**Observation**(<ins>ObsId</ins>, Datum, GradKod, Sakerhet, IncidentId, IncidentNamn, ~PlatsKod~, ~RegistreradAvNamn, RegistreradAvNr~)
+
+**ARKIVERADObservation**(<ins>ObsId</ins>, Datum, GradKod, Sakerhet, IncidentId, IncidentNamn, ~PlatsKod~, ~RegistreradAvNamn, RegistreradAvNr~)
 
 **Person**(<ins>PersonId</ins>, Namn, Kodnamn)
 
 **Rapporterat**(<ins>~PersonId~,~ObsId~</ins>)
+
+**ObservationLog**(<ins>LogId</ins>, Operation, Anvandare, ObsId, Tidpunkt)
 
 4. Fysisk Databasdesign
 
@@ -93,10 +102,12 @@ Indexering
 
 
 Rättigheter (Access Control)
-* Användarkonto: `'handlaggare_app'@'%'`.
-* `GRANT SELECT, INSERT ON a25milha.Observation` tillåter handläggare att söka samt registrera nya larm.
+* Användarkonto: `'handlaggare_app'@'localhost'` med lösenord.
+* `GRANT EXECUTE ON a25milha.*` ger rätt att köra procedurerna `GETAVGSAKERHET` och `ARKIVERAOBSERVATION`.
 * `GRANT SELECT ON a25milha.Person` ger läsrättighet till vittnesregistret.
-* `REVOKE DELETE ON a25milha.Agent` förhindrar handläggarappen från att radera agenter ur systemet.
+* `GRANT SELECT, INSERT, UPDATE, DELETE ON a25milha.Observation` tillåter handläggare att söka, registrera, ändra och arkivera larm.
+* `GRANT SELECT, DELETE ON a25milha.Rapporterat` tillåter borttag av kopplingar vid mörkläggning.
+* `GRANT SELECT` på `Agent`, `Handlaggare`, `Plats`, `GradBeskrivning`, `ARKIVERADObservation` och `ObservationLog` ger läsrättighet till register och kodtabeller.
 
 
 5. Beskrivning av Procedurer & Triggers
